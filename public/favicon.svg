@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="108" fill="#292524"/>
+  <g transform="translate(128, 96)">
+    <!-- Pot body -->
+    <path d="M40 160 C40 160 32 280 128 280 C224 280 216 160 216 160" fill="#d6d3d1" stroke="#a8a29e" stroke-width="4"/>
+    <!-- Pot rim -->
+    <ellipse cx="128" cy="160" rx="96" ry="16" fill="#e7e5e4" stroke="#a8a29e" stroke-width="4"/>
+    <!-- Pot handles -->
+    <path d="M32 180 C16 180 8 192 16 200 C24 208 32 200 32 192" stroke="#a8a29e" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M224 180 C240 180 248 192 240 200 C232 208 224 200 224 192" stroke="#a8a29e" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <!-- Steam lines -->
+    <path d="M96 120 C96 100 112 100 112 80" stroke="#d6d3d1" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.6"/>
+    <path d="M128 110 C128 90 144 90 144 70" stroke="#d6d3d1" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8"/>
+    <path d="M160 120 C160 100 176 100 176 80" stroke="#d6d3d1" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.6"/>
+    <!-- Spoon -->
+    <path d="M180 140 L220 60" stroke="#a8a29e" stroke-width="8" stroke-linecap="round"/>
+    <ellipse cx="226" cy="50" rx="14" ry="20" fill="#d6d3d1" stroke="#a8a29e" stroke-width="4" transform="rotate(-25, 226, 50)"/>
+  </g>
+</svg>

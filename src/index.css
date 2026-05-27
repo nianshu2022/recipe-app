@@ -1,0 +1,185 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Warm, premium color palette - inspired by natural food tones */
+  --color-stone-50: #faf9f7;
+  --color-stone-100: #f5f3ef;
+  --color-stone-200: #e8e4de;
+  --color-stone-300: #d4cec4;
+  --color-stone-400: #a8a08e;
+  --color-stone-500: #8a8270;
+  --color-stone-600: #6b6355;
+  --color-stone-700: #524c40;
+  --color-stone-800: #3a352d;
+  --color-stone-900: #252220;
+
+  /* Accent - warm terracotta */
+  --color-accent-50: #fdf4f0;
+  --color-accent-100: #fbe6dc;
+  --color-accent-200: #f5c4ad;
+  --color-accent-300: #eda07d;
+  --color-accent-400: #e47a4e;
+  --color-accent-500: #c9583a;
+  --color-accent-600: #a8432d;
+  --color-accent-700: #873525;
+  --color-accent-800: #6b2b1f;
+
+  /* Semantic colors - light mode */
+  --color-bg: #faf9f7;
+  --color-bg-card: #ffffff;
+  --color-bg-elevated: #ffffff;
+  --color-bg-subtle: #f5f3ef;
+  --color-text: #252220;
+  --color-text-secondary: #6b6355;
+  --color-text-muted: #a8a08e;
+  --color-border: #e8e4de;
+  --color-border-subtle: #f5f3ef;
+
+  /* Accent */
+  --color-primary: #c9583a;
+  --color-primary-light: #e47a4e;
+  --color-primary-dark: #a8432d;
+
+  /* Status */
+  --color-success: #5a7a54;
+  --color-warning: #c49a3c;
+  --color-danger: #c44b4b;
+
+  /* Shadows - warm toned */
+  --shadow-xs: 0 1px 2px rgba(37, 34, 32, 0.04);
+  --shadow-sm: 0 2px 8px rgba(37, 34, 32, 0.06);
+  --shadow-md: 0 4px 16px rgba(37, 34, 32, 0.08);
+  --shadow-lg: 0 8px 32px rgba(37, 34, 32, 0.10);
+  --shadow-xl: 0 16px 48px rgba(37, 34, 32, 0.12);
+
+  /* Border radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Typography */
+  --font-display: 'Playfair Display', 'Noto Serif SC', Georgia, serif;
+  --font-sans: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+}
+
+/* Dark mode overrides */
+.dark {
+  --color-stone-50: #1a1918;
+  --color-stone-100: #222120;
+  --color-stone-200: #2e2d2b;
+  --color-stone-300: #3d3b38;
+  --color-stone-400: #575450;
+  --color-stone-500: #7a7670;
+  --color-stone-600: #a09a90;
+  --color-stone-700: #c5bfb5;
+  --color-stone-800: #e0dbd3;
+  --color-stone-900: #f0ede8;
+
+  --color-bg: #141312;
+  --color-bg-card: #1e1d1c;
+  --color-bg-elevated: #262524;
+  --color-bg-subtle: #1e1d1c;
+  --color-text: #f0ede8;
+  --color-text-secondary: #a09a90;
+  --color-text-muted: #575450;
+  --color-border: #2e2d2b;
+  --color-border-subtle: #222120;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+/* Base styles */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  min-height: 100%;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-stone-300);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-stone-400);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-accent-200);
+  color: var(--color-accent-800);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Smooth transitions for interactive elements */
+button, a, input, select, textarea {
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+/* Placeholder styling */
+::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Image defaults */
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}

@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(pnpm create *)",
+      "Bash(npm create *)",
+      "Bash(cd /tmp && npm create vite@latest recipe-app-temp -- --template react-ts 2>&1)",
+      "Read(//d/tmp/**)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh repo *)",
+      "Bash(curl -sL https://raw.githubusercontent.com/nextlevelbuilder/ui-ux-pro-max-skill/main/README.md)",
+      "Bash(uipro init *)",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"recipe cooking app\" --design-system -f markdown -p \"菜谱助手\")",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"minimalist elegant premium lifestyle mobile app\" --design-system -f markdown -p \"菜谱助手\")",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"minimalism premium elegant clean\" --domain style)",
+      "Bash(npx wrangler *)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git config *)"
+    ]
+  }
+}
