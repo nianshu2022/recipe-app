@@ -172,6 +172,13 @@ button, a, input, select, textarea {
   transition: all var(--duration-fast) var(--ease-out);
 }
 
+/* Prevent iOS Safari from auto-zooming when focusing inputs (font-size must be >= 16px) */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Placeholder styling */
 ::placeholder {
   color: var(--color-text-muted);

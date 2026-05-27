@@ -66,7 +66,7 @@ export function DataManagementPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-3">
+      <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-center gap-3 bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
         <Link
           to="/settings"
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"

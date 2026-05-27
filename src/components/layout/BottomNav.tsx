@@ -1,5 +1,7 @@
+import { useRef, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { UtensilsCrossed, CalendarDays, Refrigerator, CalendarRange, User } from 'lucide-react'
+import { useUIStore } from '@/stores/uiStore'
 
 const navItems = [
   { to: '/', icon: UtensilsCrossed, label: '菜谱库' },
@@ -10,8 +12,23 @@ const navItems = [
 ]
 
 export function BottomNav() {
+  const modalOpen = useUIStore((s) => s.modalOpen)
+  const navRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (navRef.current) {
+      if (modalOpen) {
+        navRef.current.style.backdropFilter = 'none'
+        navRef.current.style.backgroundColor = 'white'
+      } else {
+        navRef.current.style.backdropFilter = ''
+        navRef.current.style.backgroundColor = ''
+      }
+    }
+  }, [modalOpen])
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-stone-200/60 bg-white/80 backdrop-blur-xl">
+    <nav ref={navRef} className="fixed bottom-0 left-0 right-0 z-50 border-t border-stone-200/60 bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-2xl items-center justify-around px-2 py-2">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
