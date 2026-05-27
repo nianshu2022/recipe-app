@@ -71,7 +71,7 @@ export async function exportRecipeAsImage(recipe: Recipe): Promise<void> {
     </div>
 
     <div style="text-align: center; padding-top: 16px; border-top: 1px solid #e8e4de;">
-      <p style="font-size: 11px; color: #a8a08e; margin: 0;">菜谱助手 · 记录你的拿手好菜</p>
+      <p style="font-size: 11px; color: #a8a08e; margin: 0;">知味 · 知味者，方知生活</p>
     </div>
   `
 

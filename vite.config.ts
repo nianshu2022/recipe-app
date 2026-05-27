@@ -10,11 +10,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
-        name: '菜谱助手',
-        short_name: '菜谱',
-        description: '你的私人菜谱管理工具',
+        name: '知味',
+        short_name: '知味',
+        description: '知味者，方知生活',
         theme_color: '#fafaf9',
         background_color: '#fafaf9',
         display: 'standalone',

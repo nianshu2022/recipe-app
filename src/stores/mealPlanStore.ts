@@ -19,7 +19,9 @@ interface MealPlanState {
   loading: boolean
 
   loadCurrentWeek: () => Promise<void>
-  setMeal: (dayIndex: number, slot: MealSlot, recipeId: string | undefined) => Promise<void>
+  setMeal: (dayIndex: number, slot: MealSlot, recipeId: string) => Promise<void>
+  setMeals: (dayIndex: number, slot: MealSlot, recipeIds: string[]) => Promise<void>
+  removeMeal: (dayIndex: number, slot: MealSlot, recipeId: string) => Promise<void>
   clearPlan: () => Promise<void>
   getWeekDates: () => Date[]
   getSlotLabel: (slot: MealSlot) => string
@@ -71,7 +73,47 @@ export const useMealPlanStore = create<MealPlanState>((set, get) => ({
     if (!plan) return
 
     const days = [...plan.days]
-    days[dayIndex] = { ...days[dayIndex], [slot]: recipeId }
+    const current = days[dayIndex][slot] ?? []
+    if (current.includes(recipeId)) return
+    days[dayIndex] = { ...days[dayIndex], [slot]: [...current, recipeId] }
+
+    const updated = {
+      ...plan,
+      days,
+      updatedAt: new Date().toISOString(),
+      syncStatus: 'pending' as const,
+    }
+    await db.putMealPlan(updated)
+    set({ currentPlan: updated })
+  },
+
+  setMeals: async (dayIndex, slot, recipeIds) => {
+    const plan = get().currentPlan
+    if (!plan || recipeIds.length === 0) return
+
+    const days = [...plan.days]
+    const current = days[dayIndex][slot] ?? []
+    const newIds = recipeIds.filter((id) => !current.includes(id))
+    if (newIds.length === 0) return
+    days[dayIndex] = { ...days[dayIndex], [slot]: [...current, ...newIds] }
+
+    const updated = {
+      ...plan,
+      days,
+      updatedAt: new Date().toISOString(),
+      syncStatus: 'pending' as const,
+    }
+    await db.putMealPlan(updated)
+    set({ currentPlan: updated })
+  },
+
+  removeMeal: async (dayIndex, slot, recipeId) => {
+    const plan = get().currentPlan
+    if (!plan) return
+
+    const days = [...plan.days]
+    const current = days[dayIndex][slot] ?? []
+    days[dayIndex] = { ...days[dayIndex], [slot]: current.filter((id) => id !== recipeId) }
 
     const updated = {
       ...plan,

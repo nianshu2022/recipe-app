@@ -1,14 +1,11 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  Search, Plus, Clock, ChefHat, Flame, Leaf, Soup, Wheat, IceCreamCone, CupSoda,
+  Search, Plus, Dice5, Clock, ChefHat, Flame, Leaf, Soup, Wheat, IceCreamCone, CupSoda,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { seedSampleRecipes } from '@/utils/sampleRecipes'
-import {
-  scenes, getTimeScene, getSceneRecommendations, getSeasonalRecommendations, getQuickRecipes,
-  type Scene,
-} from '@/utils/recommendations'
+import { BrandLoading } from '@/components/ui/BrandLoading'
 import type { Category, Difficulty } from '@/types'
 
 const categoryIcons: Record<Category, typeof ChefHat> = {
@@ -46,10 +43,8 @@ export function HomePage() {
     setDifficultyFilter,
     loadRecipes,
     filteredRecipes,
-    recipes: allRecipes,
   } = useRecipeStore()
 
-  const [activeScene, setActiveScene] = useState<Scene>(getTimeScene())
   const [searchParams] = useSearchParams()
 
   useEffect(() => {
@@ -71,40 +66,32 @@ export function HomePage() {
   const recipes = filteredRecipes()
   const categories = Object.entries(categoryLabels) as [Category, string][]
 
-  // Recommendations
-  const sceneRecipes = useMemo(
-    () => getSceneRecommendations(allRecipes, activeScene, 4),
-    [allRecipes, activeScene]
-  )
-  const seasonalRecipes = useMemo(
-    () => getSeasonalRecommendations(allRecipes, 4),
-    [allRecipes]
-  )
-  const quickRecipes = useMemo(
-    () => getQuickRecipes(allRecipes, 4),
-    [allRecipes]
-  )
-
-  const showRecommendations = !searchQuery && !categoryFilter && allRecipes.length > 0
-
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-end justify-between bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
         <div>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--color-text)]">
-            菜谱库
+            寻味
           </h1>
           <p className="mt-1 text-sm text-[var(--color-text-muted)]">
             {recipes.length > 0 ? `${recipes.length} 道拿手菜` : '记录你的拿手好菜'}
           </p>
         </div>
-        <Link
-          to="/recipe/new"
-          className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
-        >
-          <Plus size={20} strokeWidth={2.2} />
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            to="/blind-box"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
+          >
+            <Dice5 size={20} />
+          </Link>
+          <Link
+            to="/recipe/new"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
+          >
+            <Plus size={20} strokeWidth={2.2} />
+          </Link>
+        </div>
       </div>
 
       {/* Search */}
@@ -118,112 +105,6 @@ export function HomePage() {
           className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] py-3 pl-11 pr-4 text-sm text-[var(--color-text)] shadow-xs outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-300)] focus:shadow-sm focus:ring-2 focus:ring-[var(--color-border-subtle)]"
         />
       </div>
-
-      {/* Scene selector - only show when not filtering */}
-      {showRecommendations && (
-        <div className="space-y-3">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
-            今日推荐
-          </h2>
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {scenes.map(({ id, label, emoji }) => (
-              <button
-                key={id}
-                onClick={() => setActiveScene(id)}
-                className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                  activeScene === id
-                    ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                    : 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
-                }`}
-              >
-                <span>{emoji}</span>
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Scene recommendations */}
-      {showRecommendations && sceneRecipes.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-[var(--color-text)]">
-              {scenes.find(s => s.id === activeScene)?.emoji} {scenes.find(s => s.id === activeScene)?.label}推荐
-            </h3>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {sceneRecipes.map((recipe) => {
-              const CategoryIcon = categoryIcons[recipe.category]
-              return (
-                <Link
-                  key={recipe.id}
-                  to={`/recipe/${recipe.id}`}
-                  className="group overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
-                >
-                  <div className="flex h-24 items-center justify-center bg-gradient-to-br from-[var(--color-accent-50)] to-[var(--color-bg-subtle)]">
-                    <CategoryIcon size={32} className="text-[var(--color-accent-300)]" />
-                  </div>
-                  <div className="p-3">
-                    <h4 className="truncate text-sm font-medium text-[var(--color-text)]">{recipe.name}</h4>
-                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                      {recipe.duration}分钟 · {recipe.difficulty === 'easy' ? '简单' : recipe.difficulty === 'medium' ? '中等' : '困难'}
-                    </p>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Quick recipes */}
-      {showRecommendations && quickRecipes.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-[var(--color-text)]">⚡ 快手菜（30分钟内）</h3>
-          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
-            {quickRecipes.map((recipe) => (
-              <Link
-                key={recipe.id}
-                to={`/recipe/${recipe.id}`}
-                className="flex shrink-0 items-center gap-3 rounded-2xl bg-[var(--color-bg-card)] p-3 shadow-xs transition-all duration-200 hover:shadow-md"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-bg-subtle)]">
-                  <Clock size={20} className="text-[var(--color-text-muted)]" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-[var(--color-text)]">{recipe.name}</p>
-                  <p className="text-xs text-[var(--color-text-muted)]">{recipe.duration}分钟</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Seasonal recommendations */}
-      {showRecommendations && seasonalRecipes.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-[var(--color-text)]">🍂 时令推荐</h3>
-          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
-            {seasonalRecipes.map((recipe) => (
-              <Link
-                key={recipe.id}
-                to={`/recipe/${recipe.id}`}
-                className="flex shrink-0 items-center gap-3 rounded-2xl bg-[var(--color-bg-card)] p-3 shadow-xs transition-all duration-200 hover:shadow-md"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-accent-50)]">
-                  <Leaf size={20} className="text-[var(--color-accent-400)]" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-[var(--color-text)]">{recipe.name}</p>
-                  <p className="text-xs text-[var(--color-text-muted)]">{recipe.tags[0]}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Category filters */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
@@ -275,20 +156,22 @@ export function HomePage() {
 
       {/* Recipe list */}
       {loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse rounded-2xl bg-[var(--color-bg-card)] p-4 shadow-xs">
-              <div className="flex gap-4">
-                <div className="h-20 w-20 rounded-xl bg-[var(--color-bg-subtle)]" />
-                <div className="flex-1 space-y-3 py-1">
-                  <div className="h-4 w-32 rounded bg-[var(--color-bg-subtle)]" />
-                  <div className="h-3 w-48 rounded bg-[var(--color-bg-subtle)]" />
-                  <div className="h-3 w-24 rounded bg-[var(--color-bg-subtle)]" />
+        <BrandLoading>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse rounded-2xl bg-[var(--color-bg-card)] p-4 shadow-xs">
+                <div className="flex gap-4">
+                  <div className="h-20 w-20 rounded-xl bg-[var(--color-bg-subtle)]" />
+                  <div className="flex-1 space-y-3 py-1">
+                    <div className="h-4 w-32 rounded bg-[var(--color-bg-subtle)]" />
+                    <div className="h-3 w-48 rounded bg-[var(--color-bg-subtle)]" />
+                    <div className="h-3 w-24 rounded bg-[var(--color-bg-subtle)]" />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </BrandLoading>
       ) : recipes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20">
           <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--color-bg-subtle)]">
@@ -323,9 +206,13 @@ export function HomePage() {
                 className="group block overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]"
               >
                 <div className="flex gap-4 p-4">
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-bg-subtle)] to-[var(--color-bg)]">
-                    <CategoryIcon size={28} className="text-[var(--color-text-muted)]" />
-                  </div>
+                  {recipe.coverImage ? (
+                    <img src={recipe.coverImage} alt={recipe.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+                  ) : (
+                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-bg-subtle)] to-[var(--color-bg)]">
+                      <CategoryIcon size={28} className="text-[var(--color-text-muted)]" />
+                    </div>
+                  )}
                   <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
                     <div>
                       <h3 className="truncate text-base font-semibold text-[var(--color-text)] transition-colors duration-200 group-hover:text-[var(--color-primary)]">

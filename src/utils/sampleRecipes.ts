@@ -6,6 +6,7 @@ const sampleRecipes: Omit<Recipe, 'id' | 'syncStatus' | 'createdAt' | 'updatedAt
   {
     userId: 'local',
     name: '番茄炒蛋',
+    coverImage: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop',
     category: 'hot-dish',
     tags: ['家常菜', '快手菜', '下饭菜'],
     difficulty: 'easy',
@@ -30,6 +31,7 @@ const sampleRecipes: Omit<Recipe, 'id' | 'syncStatus' | 'createdAt' | 'updatedAt
   {
     userId: 'local',
     name: '可乐鸡翅',
+    coverImage: 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=800&h=600&fit=crop',
     category: 'hot-dish',
     tags: ['家常菜', '硬菜', '下饭菜'],
     difficulty: 'easy',
@@ -54,6 +56,7 @@ const sampleRecipes: Omit<Recipe, 'id' | 'syncStatus' | 'createdAt' | 'updatedAt
   {
     userId: 'local',
     name: '麻婆豆腐',
+    coverImage: 'https://images.unsplash.com/photo-1582452919408-aca4fa44d5c4?w=800&h=600&fit=crop',
     category: 'hot-dish',
     tags: ['家常菜', '下饭菜', '川菜'],
     difficulty: 'medium',
@@ -79,6 +82,7 @@ const sampleRecipes: Omit<Recipe, 'id' | 'syncStatus' | 'createdAt' | 'updatedAt
   {
     userId: 'local',
     name: '蒜蓉西兰花',
+    coverImage: 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&h=600&fit=crop',
     category: 'hot-dish',
     tags: ['快手菜', '减脂餐', '素菜'],
     difficulty: 'easy',
@@ -101,6 +105,7 @@ const sampleRecipes: Omit<Recipe, 'id' | 'syncStatus' | 'createdAt' | 'updatedAt
   {
     userId: 'local',
     name: '紫菜蛋花汤',
+    coverImage: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&h=600&fit=crop',
     category: 'soup',
     tags: ['快手菜', '汤羹', '家常菜'],
     difficulty: 'easy',

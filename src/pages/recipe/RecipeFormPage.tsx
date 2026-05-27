@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Plus, Trash2, ImagePlus, X } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, ImagePlus, X, Check } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
 import type { Category, Difficulty, Ingredient, Step } from '@/types'
 import { generateId } from '@/utils/id'
@@ -139,16 +139,26 @@ export function RecipeFormPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link
-          to={isEditing ? `/recipe/${id}` : '/'}
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
+      <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-center justify-between bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <Link
+            to={isEditing ? `/recipe/${id}` : '/'}
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
+          >
+            <ArrowLeft size={18} className="text-[var(--color-text-secondary)]" />
+          </Link>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--color-text)]">
+            {isEditing ? '编辑菜谱' : '新建菜谱'}
+          </h1>
+        </div>
+        <button
+          onClick={handleSubmit}
+          disabled={!name.trim()}
+          className="flex h-9 items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:hover:scale-100"
         >
-          <ArrowLeft size={18} className="text-stone-600" />
-        </Link>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-stone-900">
-          {isEditing ? '编辑菜谱' : '新建菜谱'}
-        </h1>
+          <Check size={16} strokeWidth={2.5} />
+          {isEditing ? '更新' : '保存'}
+        </button>
       </div>
 
       {/* Basic info */}
@@ -354,15 +364,6 @@ export function RecipeFormPage() {
           ))}
         </div>
       </div>
-
-      {/* Submit */}
-      <button
-        onClick={handleSubmit}
-        disabled={!name.trim()}
-        className="w-full rounded-2xl bg-stone-900 py-4 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none disabled:hover:scale-100"
-      >
-        {isEditing ? '更新菜谱' : '保存菜谱'}
-      </button>
     </div>
   )
 }

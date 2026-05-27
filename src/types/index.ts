@@ -81,10 +81,10 @@ export interface Menu {
 }
 
 export interface DayPlan {
-  breakfast?: string
-  lunch?: string
-  dinner?: string
-  snack?: string
+  breakfast?: string[]
+  lunch?: string[]
+  dinner?: string[]
+  snack?: string[]
 }
 
 export interface MealPlan {

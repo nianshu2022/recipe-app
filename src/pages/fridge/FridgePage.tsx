@@ -1,27 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Refrigerator, Plus, Trash2, X, AlertTriangle, Clock, Minus, Lightbulb,
+  Refrigerator, Plus, Trash2, X, AlertTriangle, Clock, Pencil,
 } from 'lucide-react'
 import { useFridgeStore } from '@/stores/fridgeStore'
 import { useRecipeStore } from '@/stores/recipeStore'
+import { useUIStore } from '@/stores/uiStore'
+import { BrandLoading } from '@/components/ui/BrandLoading'
 import { UNIT_OPTIONS } from '@/constants/units'
-
-const quickItems = [
-  { name: '鸡蛋', unit: '个', amount: 10, category: '蛋奶', expiryDays: 14 },
-  { name: '牛奶', unit: '盒', amount: 1, category: '蛋奶', expiryDays: 7 },
-  { name: '鸡胸肉', unit: 'g', amount: 500, category: '肉类', expiryDays: 3 },
-  { name: '番茄', unit: '个', amount: 4, category: '蔬菜', expiryDays: 5 },
-  { name: '土豆', unit: '个', amount: 3, category: '蔬菜', expiryDays: 14 },
-  { name: '豆腐', unit: '块', amount: 1, category: '豆制品', expiryDays: 3 },
-  { name: '虾仁', unit: 'g', amount: 300, category: '海鲜', expiryDays: 2 },
-  { name: '生菜', unit: '棵', amount: 1, category: '蔬菜', expiryDays: 3 },
-]
 
 export function FridgePage() {
   const {
     items, loading, categoryFilter, loadItems, addItem, removeItem,
-    consumeItem, setCategoryFilter, getExpiringSoon, getExpired,
+    updateItem, setCategoryFilter, getExpiringSoon, getExpired,
     getFilteredItems, getCategoryCounts, getRecommendations,
   } = useFridgeStore()
   const { recipes, loadRecipes } = useRecipeStore()
@@ -30,7 +21,15 @@ export function FridgePage() {
   const [newName, setNewName] = useState('')
   const [newAmount, setNewAmount] = useState('')
   const [newUnit, setNewUnit] = useState('')
-  const [showQuick, setShowQuick] = useState(false)
+  const [newExpiryDays, setNewExpiryDays] = useState('')
+  const [newPurchaseDate, setNewPurchaseDate] = useState(new Date().toISOString().split('T')[0])
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const setModalOpen = useUIStore((s) => s.setModalOpen)
+
+  useEffect(() => {
+    setModalOpen(showAdd || editingId !== null)
+    return () => setModalOpen(false)
+  }, [showAdd, editingId, setModalOpen])
 
   useEffect(() => {
     loadItems()
@@ -39,16 +38,51 @@ export function FridgePage() {
 
   const handleAdd = async () => {
     if (!newName.trim()) return
-    await addItem(newName.trim(), Number(newAmount) || 0, newUnit.trim())
+    const days = newExpiryDays ? Number(newExpiryDays) : undefined
+    await addItem(newName.trim(), Number(newAmount) || 0, newUnit.trim(), undefined, days, newPurchaseDate)
     setNewName('')
     setNewAmount('')
     setNewUnit('')
+    setNewExpiryDays('')
+    setNewPurchaseDate(new Date().toISOString().split('T')[0])
     setShowAdd(false)
   }
 
-  const handleQuickAdd = async (item: typeof quickItems[0]) => {
-    await addItem(item.name, item.amount, item.unit, item.category, item.expiryDays)
-    setShowQuick(false)
+  const openEdit = (item: typeof items[0]) => {
+    setEditingId(item.id)
+    setNewName(item.name)
+    setNewAmount(String(item.amount || ''))
+    setNewUnit(item.unit)
+    setNewPurchaseDate(new Date(item.purchaseDate).toISOString().split('T')[0])
+    if (item.expiryDate) {
+      const diff = Math.ceil((new Date(item.expiryDate).getTime() - Date.now()) / 86400000)
+      setNewExpiryDays(diff > 0 ? String(diff) : '')
+    } else {
+      setNewExpiryDays('')
+    }
+  }
+
+  const closeEdit = () => {
+    setEditingId(null)
+    setNewName('')
+    setNewAmount('')
+    setNewUnit('')
+    setNewExpiryDays('')
+    setNewPurchaseDate(new Date().toISOString().split('T')[0])
+  }
+
+  const handleEdit = async () => {
+    if (!editingId || !newName.trim()) return
+    const days = newExpiryDays ? Number(newExpiryDays) : undefined
+    const pDate = new Date(newPurchaseDate)
+    await updateItem(editingId, {
+      name: newName.trim(),
+      amount: Number(newAmount) || 0,
+      unit: newUnit.trim(),
+      purchaseDate: pDate.toISOString(),
+      expiryDate: days ? new Date(pDate.getTime() + days * 86400000).toISOString() : undefined,
+    })
+    closeEdit()
   }
 
   const expiringSoon = getExpiringSoon()
@@ -71,97 +105,168 @@ export function FridgePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-end justify-between">
+      <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-end justify-between bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
         <div>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-stone-900">
-            冰箱食材
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--color-text)]">
+            鲜存清单
           </h1>
-          <p className="mt-1 text-sm text-stone-400">
+          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
             {items.length > 0 ? `${items.length} 种食材` : '管理你的食材库存'}
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => { setShowQuick(!showQuick); setShowAdd(false) }}
-            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-stone-600 shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
-          >
-            <Lightbulb size={18} />
-          </button>
-          <button
-            onClick={() => { setShowAdd(!showAdd); setShowQuick(false) }}
-            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-stone-900 text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
-          >
-            <Plus size={20} strokeWidth={2.2} />
-          </button>
-        </div>
+        <button
+          onClick={() => setShowAdd(true)}
+          className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
+        >
+          <Plus size={20} strokeWidth={2.2} />
+        </button>
       </div>
 
-      {/* Quick add panel */}
-      {showQuick && (
-        <div className="rounded-2xl bg-white p-5 shadow-md">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-stone-800">快速录入</h3>
-            <button onClick={() => setShowQuick(false)} className="rounded-lg p-1 text-stone-400 hover:bg-stone-100">
-              <X size={16} />
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {quickItems.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => handleQuickAdd(item)}
-                className="rounded-full bg-stone-50 px-3.5 py-2 text-sm font-medium text-stone-600 transition-all duration-200 hover:bg-stone-100 active:scale-95"
-              >
-                {item.name} {item.amount}{item.unit}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Manual add panel */}
+      {/* Add modal */}
       {showAdd && (
-        <div className="rounded-2xl bg-white p-5 shadow-md">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-stone-800">添加食材</h3>
-            <button onClick={() => { setShowAdd(false); setNewName(''); setNewAmount(''); setNewUnit('') }} className="rounded-lg p-1 text-stone-400 hover:bg-stone-100">
-              <X size={16} />
-            </button>
-          </div>
-          <div className="flex gap-2">
+        <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => { setShowAdd(false); setNewName(''); setNewAmount(''); setNewUnit(''); setNewExpiryDays(''); setNewPurchaseDate(new Date().toISOString().split('T')[0]) }}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div
+            className="relative w-full max-w-2xl rounded-t-3xl bg-[var(--color-bg-card)] p-5 pb-24 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-base font-semibold text-[var(--color-text)]">添加食材</h3>
+              <button onClick={() => { setShowAdd(false); setNewName(''); setNewAmount(''); setNewUnit(''); setNewExpiryDays(''); setNewPurchaseDate(new Date().toISOString().split('T')[0]) }} className="rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]">
+                <X size={18} />
+              </button>
+            </div>
             <input
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="食材名称"
               autoFocus
-              className="flex-1 rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm outline-none transition-all duration-200 placeholder:text-stone-400 focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
+              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-400)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
             />
-            <input
-              type="number"
-              value={newAmount}
-              onChange={(e) => setNewAmount(e.target.value)}
-              placeholder="数量"
-              className="w-20 rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm outline-none transition-all duration-200 placeholder:text-stone-400 focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
-            />
-            <select
-              value={newUnit}
-              onChange={(e) => setNewUnit(e.target.value)}
-              className="w-16 appearance-none rounded-xl border border-stone-200 bg-white px-1 py-2.5 text-sm outline-none transition-all duration-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <input
+                type="number"
+                value={newAmount}
+                onChange={(e) => setNewAmount(e.target.value)}
+                placeholder="数量"
+                className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-3 text-sm text-[var(--color-text)] outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-400)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
+              />
+              <select
+                value={newUnit}
+                onChange={(e) => setNewUnit(e.target.value)}
+                className="appearance-none rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-3 text-sm text-[var(--color-text)] outline-none transition-all duration-200 focus:border-[var(--color-stone-400)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
+              >
+                <option value="">单位</option>
+                {UNIT_OPTIONS.map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+              </select>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <div>
+                <label className="mb-1 block text-xs text-[var(--color-text-muted)]">购买日期</label>
+                <input
+                  type="date"
+                  value={newPurchaseDate}
+                  onChange={(e) => setNewPurchaseDate(e.target.value)}
+                  className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 text-sm text-[var(--color-text)] outline-none transition-all duration-200 focus:border-[var(--color-stone-400)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-[var(--color-text-muted)]">保质期(天)</label>
+                <input
+                  type="number"
+                  value={newExpiryDays}
+                  onChange={(e) => setNewExpiryDays(e.target.value)}
+                  placeholder="选填"
+                  min={1}
+                  className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 text-sm text-[var(--color-text)] outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-400)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
+                />
+              </div>
+            </div>
+            <button
+              onClick={handleAdd}
+              disabled={!newName.trim()}
+              className="mt-4 w-full rounded-2xl bg-[var(--color-primary)] py-3.5 text-sm font-semibold text-white shadow-md transition-all duration-200 active:scale-[0.98] disabled:opacity-40"
             >
-              <option value="">单位</option>
-              {UNIT_OPTIONS.map((u) => (
-                <option key={u} value={u}>{u}</option>
-              ))}
-            </select>
+              添加
+            </button>
           </div>
-          <button
-            onClick={handleAdd}
-            disabled={!newName.trim()}
-            className="mt-3 w-full rounded-xl bg-stone-900 py-2.5 text-sm font-medium text-white transition-all duration-200 active:scale-[0.98] disabled:opacity-40"
+        </div>
+      )}
+
+      {/* Edit modal */}
+      {editingId && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={closeEdit}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div
+            className="relative w-full max-w-2xl rounded-t-3xl bg-[var(--color-bg-card)] p-5 pb-24 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
           >
-            添加
-          </button>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-base font-semibold text-[var(--color-text)]">编辑食材</h3>
+              <button onClick={closeEdit} className="rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]">
+                <X size={18} />
+              </button>
+            </div>
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="食材名称"
+              autoFocus
+              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-400)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
+            />
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <input
+                type="number"
+                value={newAmount}
+                onChange={(e) => setNewAmount(e.target.value)}
+                placeholder="数量"
+                className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-3 text-sm text-[var(--color-text)] outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-400)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
+              />
+              <select
+                value={newUnit}
+                onChange={(e) => setNewUnit(e.target.value)}
+                className="appearance-none rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-3 text-sm text-[var(--color-text)] outline-none transition-all duration-200 focus:border-[var(--color-stone-400)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
+              >
+                <option value="">单位</option>
+                {UNIT_OPTIONS.map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+              </select>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <div>
+                <label className="mb-1 block text-xs text-[var(--color-text-muted)]">购买日期</label>
+                <input
+                  type="date"
+                  value={newPurchaseDate}
+                  onChange={(e) => setNewPurchaseDate(e.target.value)}
+                  className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 text-sm text-[var(--color-text)] outline-none transition-all duration-200 focus:border-[var(--color-stone-400)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-[var(--color-text-muted)]">保质期(天)</label>
+                <input
+                  type="number"
+                  value={newExpiryDays}
+                  onChange={(e) => setNewExpiryDays(e.target.value)}
+                  placeholder="选填"
+                  min={1}
+                  className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 text-sm text-[var(--color-text)] outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-400)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
+                />
+              </div>
+            </div>
+            <button
+              onClick={handleEdit}
+              disabled={!newName.trim()}
+              className="mt-4 w-full rounded-2xl bg-[var(--color-primary)] py-3.5 text-sm font-semibold text-white shadow-md transition-all duration-200 active:scale-[0.98] disabled:opacity-40"
+            >
+              保存
+            </button>
+          </div>
         </div>
       )}
 
@@ -246,19 +351,21 @@ export function FridgePage() {
 
       {/* Item list */}
       {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse rounded-2xl bg-white p-4 shadow-xs">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-stone-100" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-3.5 w-24 rounded bg-stone-100" />
-                  <div className="h-3 w-16 rounded bg-stone-100" />
+        <BrandLoading>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse rounded-2xl bg-white p-4 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-stone-100" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3.5 w-24 rounded bg-stone-100" />
+                    <div className="h-3 w-16 rounded bg-stone-100" />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </BrandLoading>
       ) : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16">
           <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-stone-100">
@@ -291,23 +398,22 @@ export function FridgePage() {
                   </div>
                   <p className="text-xs text-stone-400">
                     {item.amount > 0 ? `${item.amount}${item.unit}` : ''}
+                    {` · ${new Date(item.purchaseDate).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}录入`}
                     {item.expiryDate && ` · ${formatExpiry(item.expiryDate)}`}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                  {item.amount > 0 && (
-                    <button
-                      onClick={() => consumeItem(item.id, 1)}
-                      className="rounded-lg p-1.5 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
-                      title="消耗一份"
-                    >
-                      <Minus size={14} />
-                    </button>
-                  )}
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => openEdit(item)}
+                    className="rounded-lg p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-secondary)]"
+                    title="编辑"
+                  >
+                    <Pencil size={14} />
+                  </button>
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="rounded-lg p-1.5 text-stone-400 transition-colors hover:bg-red-50 hover:text-red-500"
-                    title="移除"
+                    className="rounded-lg p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-red-50 hover:text-red-500"
+                    title="删除"
                   >
                     <Trash2 size={14} />
                   </button>

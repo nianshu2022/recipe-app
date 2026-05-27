@@ -12,6 +12,7 @@ import { CollectionPage } from '@/pages/collection/CollectionPage'
 import { ShoppingListPage } from '@/pages/shopping/ShoppingListPage'
 import { LoginPage } from '@/pages/settings/LoginPage'
 import { DataManagementPage } from '@/pages/settings/DataManagementPage'
+import { BlindBoxPage } from '@/pages/blind-box/BlindBoxPage'
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/settings/data" element={<DataManagementPage />} />
           <Route path="/collection" element={<CollectionPage />} />
           <Route path="/shopping" element={<ShoppingListPage />} />
+          <Route path="/blind-box" element={<BlindBoxPage />} />
         </Route>
         <Route path="/cooking/:id" element={<CookingPage />} />
       </Routes>

@@ -21,7 +21,7 @@ interface FridgeState {
   categoryFilter: string | null
 
   loadItems: () => Promise<void>
-  addItem: (name: string, amount: number, unit: string, category?: string, expiryDays?: number) => Promise<void>
+  addItem: (name: string, amount: number, unit: string, category?: string, expiryDays?: number, purchaseDate?: string) => Promise<void>
   updateItem: (id: string, updates: Partial<FridgeItem>) => Promise<void>
   removeItem: (id: string) => Promise<void>
   consumeItem: (id: string, amount?: number) => Promise<void>
@@ -56,8 +56,9 @@ export const useFridgeStore = create<FridgeState>((set, get) => ({
     }
   },
 
-  addItem: async (name, amount, unit, category, expiryDays) => {
+  addItem: async (name, amount, unit, category, expiryDays, purchaseDate) => {
     const now = new Date()
+    const pDate = purchaseDate ? new Date(purchaseDate) : now
     const item: FridgeItem = {
       id: generateId(),
       userId: 'local',
@@ -65,9 +66,9 @@ export const useFridgeStore = create<FridgeState>((set, get) => ({
       amount,
       unit,
       category: category ?? guessCategory(name),
-      purchaseDate: now.toISOString(),
+      purchaseDate: pDate.toISOString(),
       expiryDate: expiryDays
-        ? new Date(now.getTime() + expiryDays * 86400000).toISOString()
+        ? new Date(pDate.getTime() + expiryDays * 86400000).toISOString()
         : undefined,
       syncStatus: 'pending',
       createdAt: now.toISOString(),
