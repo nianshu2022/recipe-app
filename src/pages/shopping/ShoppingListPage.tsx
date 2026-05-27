@@ -8,8 +8,8 @@ import type { ShoppingItem } from '@/types'
 
 export function ShoppingListPage() {
   const {
-    lists, loadLists, toggleItem, addItem, removeItem,
-    clearChecked, deleteList,
+    lists, currentListId, loadLists, toggleItem, addItem, removeItem,
+    clearChecked, deleteList, setCurrentList,
   } = useShoppingStore()
 
   const [showAdd, setShowAdd] = useState(false)
@@ -20,7 +20,7 @@ export function ShoppingListPage() {
     loadLists()
   }, [loadLists])
 
-  const list = lists[0] ?? null
+  const list = lists.find((l) => l.id === currentListId) ?? lists[0] ?? null
 
   const handleAdd = async () => {
     if (!list || !newName.trim()) return
@@ -99,6 +99,21 @@ export function ShoppingListPage() {
             {checkedCount}/{totalCount} 已购
           </p>
         </div>
+
+        {/* List selector when multiple lists exist */}
+        {lists.length > 1 && (
+          <select
+            value={list?.id ?? ''}
+            onChange={(e) => setCurrentList(e.target.value)}
+            className="rounded-lg border border-stone-200 bg-white px-2 py-1.5 text-xs text-stone-600 outline-none"
+          >
+            {lists.map((l, i) => (
+              <option key={l.id} value={l.id}>
+                清单 {i + 1} ({l.items.length}项)
+              </option>
+            ))}
+          </select>
+        )}
         <div className="flex gap-2">
           {checkedCount > 0 && (
             <button

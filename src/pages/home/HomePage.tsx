@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   Search, Plus, Clock, ChefHat, Flame, Leaf, Soup, Wheat, IceCreamCone, CupSoda,
 } from 'lucide-react'
@@ -40,38 +40,32 @@ export function HomePage() {
     loading,
     searchQuery,
     categoryFilter,
+    difficultyFilter,
     setSearchQuery,
     setCategoryFilter,
+    setDifficultyFilter,
     loadRecipes,
     filteredRecipes,
     recipes: allRecipes,
   } = useRecipeStore()
 
   const [activeScene, setActiveScene] = useState<Scene>(getTimeScene())
-  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('onboarding_done'))
+  const [searchParams] = useSearchParams()
 
   useEffect(() => {
     loadRecipes()
   }, [loadRecipes])
 
-  // 如果已有菜谱数据，自动隐藏引导卡片
   useEffect(() => {
-    if (allRecipes.length > 0 && showOnboarding) {
-      setShowOnboarding(false)
-      localStorage.setItem('onboarding_done', '1')
+    const q = searchParams.get('q')
+    if (q && !searchQuery) {
+      setSearchQuery(q)
     }
-  }, [allRecipes, showOnboarding])
+  }, [searchParams, searchQuery, setSearchQuery])
 
   const handleImportSamples = async () => {
     await seedSampleRecipes()
     await loadRecipes()
-    localStorage.setItem('onboarding_done', '1')
-    setShowOnboarding(false)
-  }
-
-  const handleStartBlank = () => {
-    localStorage.setItem('onboarding_done', '1')
-    setShowOnboarding(false)
   }
 
   const recipes = filteredRecipes()
@@ -96,7 +90,7 @@ export function HomePage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-end justify-between">
+      <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-end justify-between bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
         <div>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--color-text)]">
             菜谱库
@@ -231,33 +225,6 @@ export function HomePage() {
         </div>
       )}
 
-      {/* Onboarding */}
-      {showOnboarding && (
-        <div className="rounded-2xl bg-gradient-to-br from-[var(--color-accent-50)] to-[var(--color-bg-subtle)] p-6 shadow-xs">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/80">
-            <ChefHat size={32} className="text-[var(--color-accent-500)]" />
-          </div>
-          <h3 className="text-lg font-semibold text-[var(--color-text)]">欢迎使用菜谱助手</h3>
-          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-            数据存在本地浏览器，登录后可多设备同步
-          </p>
-          <div className="mt-4 flex flex-col gap-2">
-            <button
-              onClick={handleImportSamples}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] py-3 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
-            >
-              导入示例菜谱
-            </button>
-            <button
-              onClick={handleStartBlank}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/80 py-3 text-sm font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:bg-white active:scale-[0.98]"
-            >
-              从空白开始
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Category filters */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
         <button
@@ -289,6 +256,23 @@ export function HomePage() {
         })}
       </div>
 
+      {/* Difficulty filters */}
+      <div className="flex gap-2">
+        {Object.entries(difficultyConfig).map(([value, config]) => (
+          <button
+            key={value}
+            onClick={() => setDifficultyFilter(difficultyFilter === value ? null : value as Difficulty)}
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+              difficultyFilter === value
+                ? 'bg-[var(--color-primary)] text-white shadow-sm'
+                : 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
+            }`}
+          >
+            {config.label}
+          </button>
+        ))}
+      </div>
+
       {/* Recipe list */}
       {loading ? (
         <div className="space-y-4">
@@ -312,12 +296,20 @@ export function HomePage() {
           </div>
           <h3 className="mb-2 text-lg font-medium text-[var(--color-text)]">还没有菜谱</h3>
           <p className="mb-8 text-sm text-[var(--color-text-muted)]">快来创建你的第一道拿手菜吧</p>
-          <Link
-            to="/recipe/new"
-            className="rounded-2xl bg-[var(--color-primary)] px-8 py-3 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
-          >
-            创建菜谱
-          </Link>
+          <div className="flex gap-3">
+            <Link
+              to="/recipe/new"
+              className="rounded-2xl bg-[var(--color-primary)] px-8 py-3 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
+            >
+              创建菜谱
+            </Link>
+            <button
+              onClick={handleImportSamples}
+              className="rounded-2xl bg-[var(--color-bg-card)] px-8 py-3 text-sm font-medium text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
+            >
+              导入示例菜谱
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">

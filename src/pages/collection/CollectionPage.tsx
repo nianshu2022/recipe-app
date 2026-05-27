@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Plus, FolderHeart, ChevronRight, Trash2, X,
 } from 'lucide-react'
@@ -7,6 +7,7 @@ import { useCollectionStore } from '@/stores/collectionStore'
 import { useRecipeStore } from '@/stores/recipeStore'
 
 export function CollectionPage() {
+  const navigate = useNavigate()
   const { collections, loadCollections, addCollection, deleteCollection } = useCollectionStore()
   const { recipes, loadRecipes } = useRecipeStore()
   const [showCreate, setShowCreate] = useState(false)
@@ -29,12 +30,12 @@ export function CollectionPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link
-          to="/settings"
+        <button
+          onClick={() => navigate(-1)}
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
         >
           <ArrowLeft size={18} className="text-stone-600" />
-        </Link>
+        </button>
         <div className="flex-1">
           <h1 className="font-display text-2xl font-semibold tracking-tight text-stone-900">
             我的收藏夹

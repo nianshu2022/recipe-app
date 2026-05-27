@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, ImagePlus, X } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
 import type { Category, Difficulty, Ingredient, Step } from '@/types'
 import { generateId } from '@/utils/id'
+import { UNIT_OPTIONS } from '@/constants/units'
 
 const categories: { value: Category; label: string }[] = [
   { value: 'cold-dish', label: '凉菜' },
@@ -35,6 +36,7 @@ export function RecipeFormPage() {
   const [duration, setDuration] = useState(30)
   const [servings, setServings] = useState(2)
   const [tags, setTags] = useState('')
+  const [coverImage, setCoverImage] = useState<string | undefined>()
   const [ingredients, setIngredients] = useState<Ingredient[]>([
     { id: generateId(), name: '', amount: 0, unit: '', type: 'main', scalable: true },
   ])
@@ -54,6 +56,7 @@ export function RecipeFormPage() {
         setDuration(recipe.duration)
         setServings(recipe.servings)
         setTags(recipe.tags.join(', '))
+        setCoverImage(recipe.coverImage)
         setIngredients(recipe.ingredients.length > 0 ? recipe.ingredients : [{ id: generateId(), name: '', amount: 0, unit: '', type: 'main', scalable: true }])
         setSteps(recipe.steps.length > 0 ? recipe.steps : [{ order: 1, description: '' }])
       }
@@ -96,6 +99,14 @@ export function RecipeFormPage() {
     setSteps(steps.map((s, i) => (i === index ? { ...s, [field]: value } : s)))
   }
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => setCoverImage(reader.result as string)
+    reader.readAsDataURL(file)
+  }
+
   const handleSubmit = async () => {
     if (!name.trim()) return
     const validIngredients = ingredients.filter((i) => i.name.trim())
@@ -112,6 +123,7 @@ export function RecipeFormPage() {
       difficulty,
       duration,
       servings,
+      coverImage,
       ingredients: validIngredients,
       steps: validSteps,
     }
@@ -216,6 +228,27 @@ export function RecipeFormPage() {
             className={inputCls}
           />
         </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-stone-700">封面图</label>
+          {coverImage ? (
+            <div className="relative overflow-hidden rounded-xl">
+              <img src={coverImage} alt="封面预览" className="h-48 w-full object-cover" />
+              <button
+                onClick={() => setCoverImage(undefined)}
+                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          ) : (
+            <label className="flex h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-stone-200 transition-colors hover:border-stone-300 hover:bg-stone-50">
+              <ImagePlus size={24} className="text-stone-400" />
+              <span className="text-xs text-stone-400">点击上传图片</span>
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+            </label>
+          )}
+        </div>
       </div>
 
       {/* Ingredients */}
@@ -247,13 +280,16 @@ export function RecipeFormPage() {
                 placeholder="用量"
                 className="w-16 rounded-xl border border-stone-200 bg-white px-2 py-2.5 text-sm text-stone-800 shadow-xs outline-none transition-all duration-200 placeholder:text-stone-400 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 sm:w-20"
               />
-              <input
-                type="text"
+              <select
                 value={ing.unit}
                 onChange={(e) => updateIngredient(ing.id, 'unit', e.target.value)}
-                placeholder="单位"
-                className="w-12 rounded-xl border border-stone-200 bg-white px-2 py-2.5 text-sm text-stone-800 shadow-xs outline-none transition-all duration-200 placeholder:text-stone-400 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 sm:w-16"
-              />
+                className="w-14 appearance-none rounded-xl border border-stone-200 bg-white px-1 py-2.5 text-sm text-stone-800 shadow-xs outline-none transition-all duration-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 sm:w-16"
+              >
+                <option value="">单位</option>
+                {UNIT_OPTIONS.map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+              </select>
               <button
                 onClick={() => removeIngredient(ing.id)}
                 className="shrink-0 rounded-lg p-1.5 text-stone-400 transition-colors hover:bg-red-50 hover:text-red-500"

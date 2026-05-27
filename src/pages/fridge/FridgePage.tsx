@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Refrigerator, Plus, Trash2, X, AlertTriangle, Clock, Minus, Lightbulb,
 } from 'lucide-react'
 import { useFridgeStore } from '@/stores/fridgeStore'
+import { useRecipeStore } from '@/stores/recipeStore'
+import { UNIT_OPTIONS } from '@/constants/units'
 
 const quickItems = [
   { name: '鸡蛋', unit: '个', amount: 10, category: '蛋奶', expiryDays: 14 },
@@ -21,6 +24,7 @@ export function FridgePage() {
     consumeItem, setCategoryFilter, getExpiringSoon, getExpired,
     getFilteredItems, getCategoryCounts, getRecommendations,
   } = useFridgeStore()
+  const { recipes, loadRecipes } = useRecipeStore()
 
   const [showAdd, setShowAdd] = useState(false)
   const [newName, setNewName] = useState('')
@@ -30,7 +34,8 @@ export function FridgePage() {
 
   useEffect(() => {
     loadItems()
-  }, [loadItems])
+    loadRecipes()
+  }, [loadItems, loadRecipes])
 
   const handleAdd = async () => {
     if (!newName.trim()) return
@@ -139,13 +144,16 @@ export function FridgePage() {
               placeholder="数量"
               className="w-20 rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm outline-none transition-all duration-200 placeholder:text-stone-400 focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
             />
-            <input
-              type="text"
+            <select
               value={newUnit}
               onChange={(e) => setNewUnit(e.target.value)}
-              placeholder="单位"
-              className="w-16 rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm outline-none transition-all duration-200 placeholder:text-stone-400 focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
-            />
+              className="w-16 appearance-none rounded-xl border border-stone-200 bg-white px-1 py-2.5 text-sm outline-none transition-all duration-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
+            >
+              <option value="">单位</option>
+              {UNIT_OPTIONS.map((u) => (
+                <option key={u} value={u}>{u}</option>
+              ))}
+            </select>
           </div>
           <button
             onClick={handleAdd}
@@ -184,11 +192,29 @@ export function FridgePage() {
         <div className="rounded-2xl bg-white p-4 shadow-xs">
           <p className="mb-2 text-xs font-medium uppercase tracking-wider text-stone-400">根据现有食材推荐</p>
           <div className="flex flex-wrap gap-2">
-            {recommendations.map((r) => (
-              <span key={r} className="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700">
-                {r}
-              </span>
-            ))}
+            {recommendations.map((r) => {
+              const matched = recipes.find((recipe) => recipe.name.includes(r) || r.includes(recipe.name))
+              if (matched) {
+                return (
+                  <Link
+                    key={r}
+                    to={`/recipe/${matched.id}`}
+                    className="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+                  >
+                    {r}
+                  </Link>
+                )
+              }
+              return (
+                <Link
+                  key={r}
+                  to={`/?q=${encodeURIComponent(r)}`}
+                  className="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+                >
+                  {r}
+                </Link>
+              )
+            })}
           </div>
         </div>
       )}

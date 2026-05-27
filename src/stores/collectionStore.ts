@@ -1,11 +1,10 @@
 import { create } from 'zustand'
-import type { Collection, Menu } from '@/types'
+import type { Collection } from '@/types'
 import { db } from '@/db'
 import { generateId } from '@/utils/id'
 
 interface CollectionState {
   collections: Collection[]
-  menus: Menu[]
   loading: boolean
 
   // Collection actions
@@ -15,20 +14,12 @@ interface CollectionState {
   deleteCollection: (id: string) => Promise<void>
   toggleRecipeInCollection: (collectionId: string, recipeId: string) => Promise<void>
 
-  // Menu actions
-  loadMenus: () => Promise<void>
-  addMenu: (name: string, recipeIds?: string[]) => Promise<Menu>
-  updateMenu: (id: string, updates: Partial<Menu>) => Promise<void>
-  deleteMenu: (id: string) => Promise<void>
-  toggleRecipeInMenu: (menuId: string, recipeId: string) => Promise<void>
-
   // Query
   getCollectionsForRecipe: (recipeId: string) => Collection[]
 }
 
 export const useCollectionStore = create<CollectionState>((set, get) => ({
   collections: [],
-  menus: [],
   loading: false,
 
   loadCollections: async () => {
@@ -85,53 +76,6 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
       ? col.recipeIds.filter((id) => id !== recipeId)
       : [...col.recipeIds, recipeId]
     await get().updateCollection(collectionId, { recipeIds })
-  },
-
-  // Menus
-  loadMenus: async () => {
-    try {
-      const menus = await db.getAllMenus?.() ?? []
-      set({ menus: menus.filter((m) => !m.deletedAt) })
-    } catch {
-      // db.getAllMenus may not exist yet
-    }
-  },
-
-  addMenu: async (name, recipeIds = []) => {
-    const now = new Date().toISOString()
-    const menu: Menu = {
-      id: generateId(),
-      userId: 'local',
-      name,
-      recipeIds,
-      syncStatus: 'pending',
-      createdAt: now,
-      updatedAt: now,
-    }
-    set((s) => ({ menus: [...s.menus, menu] }))
-    return menu
-  },
-
-  updateMenu: async (id, updates) => {
-    set((s) => ({
-      menus: s.menus.map((m) =>
-        m.id === id ? { ...m, ...updates, updatedAt: new Date().toISOString(), syncStatus: 'pending' as const } : m,
-      ),
-    }))
-  },
-
-  deleteMenu: async (id) => {
-    set((s) => ({ menus: s.menus.filter((m) => m.id !== id) }))
-  },
-
-  toggleRecipeInMenu: async (menuId, recipeId) => {
-    const menu = get().menus.find((m) => m.id === menuId)
-    if (!menu) return
-    const has = menu.recipeIds.includes(recipeId)
-    const recipeIds = has
-      ? menu.recipeIds.filter((id) => id !== recipeId)
-      : [...menu.recipeIds, recipeId]
-    await get().updateMenu(menuId, { recipeIds })
   },
 
   getCollectionsForRecipe: (recipeId) => {

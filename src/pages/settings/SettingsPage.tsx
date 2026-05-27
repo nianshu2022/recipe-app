@@ -36,19 +36,17 @@ export function SettingsPage() {
       items: isLoggedIn
         ? [
             { to: '/settings/data', icon: Database, label: '数据管理' },
-            { to: '#', icon: Info, label: '关于' },
           ]
         : [
             { to: '/login', icon: LogIn, label: '登录 / 注册' },
             { to: '/settings/data', icon: Database, label: '数据管理' },
-            { to: '#', icon: Info, label: '关于' },
           ],
     },
   ]
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="sticky top-0 z-40 -mx-5 -mt-6 bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
         <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--color-text)]">
           我的
         </h1>
@@ -140,6 +138,12 @@ export function SettingsPage() {
           退出登录
         </button>
       )}
+
+      {/* About */}
+      <div className="pb-4 pt-2 text-center">
+        <p className="text-xs text-[var(--color-text-muted)]">菜谱助手 v1.0.0</p>
+        <p className="mt-1 text-xs text-[var(--color-text-muted)]">你的私人美食管家</p>
+      </div>
     </div>
   )
 }

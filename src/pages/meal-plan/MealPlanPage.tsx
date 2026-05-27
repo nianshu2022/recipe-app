@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
-import { X, Eraser } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { X, Eraser, ShoppingCart } from 'lucide-react'
 import { useMealPlanStore, type MealSlot } from '@/stores/mealPlanStore'
 import { useRecipeStore } from '@/stores/recipeStore'
+import { useShoppingStore } from '@/stores/shoppingStore'
+import { useUIStore } from '@/stores/uiStore'
 
 const slots: MealSlot[] = ['breakfast', 'lunch', 'dinner', 'snack']
 const slotColors: Record<MealSlot, string> = {
@@ -15,8 +18,16 @@ export function MealPlanPage() {
   const { currentPlan, loading, loadCurrentWeek, setMeal, clearPlan, getWeekDates, getSlotLabel, getDayLabel } =
     useMealPlanStore()
   const { recipes, loadRecipes } = useRecipeStore()
+  const { generateFromRecipes } = useShoppingStore()
+  const navigate = useNavigate()
 
   const [selecting, setSelecting] = useState<{ day: number; slot: MealSlot } | null>(null)
+  const setModalOpen = useUIStore((s) => s.setModalOpen)
+
+  useEffect(() => {
+    setModalOpen(selecting !== null)
+    return () => setModalOpen(false)
+  }, [selecting, setModalOpen])
 
   useEffect(() => {
     loadCurrentWeek()
@@ -31,6 +42,16 @@ export function MealPlanPage() {
     if (!selecting) return
     setMeal(selecting.day, selecting.slot, recipeId)
     setSelecting(null)
+  }
+
+  const handleGenerateShopping = async () => {
+    if (!currentPlan) return
+    const recipeIds = currentPlan.days.flatMap((day) =>
+      slots.map((s) => day[s]).filter((id): id is string => !!id)
+    )
+    if (recipeIds.length === 0) return
+    await generateFromRecipes(recipeIds)
+    navigate('/shopping')
   }
 
   const handleClear = (day: number, slot: MealSlot) => {
@@ -62,13 +83,22 @@ export function MealPlanPage() {
           </p>
         </div>
         {plannedCount > 0 && (
-          <button
-            onClick={clearPlan}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-stone-500 shadow-xs transition-all duration-200 hover:bg-red-50 hover:text-red-500 active:scale-95"
-            title="清空计划"
-          >
-            <Eraser size={18} />
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleGenerateShopping}
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-stone-500 shadow-xs transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-600 active:scale-95"
+              title="生成购物清单"
+            >
+              <ShoppingCart size={18} />
+            </button>
+            <button
+              onClick={clearPlan}
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-stone-500 shadow-xs transition-all duration-200 hover:bg-red-50 hover:text-red-500 active:scale-95"
+              title="清空计划"
+            >
+              <Eraser size={18} />
+            </button>
+          </div>
         )}
       </div>
 
@@ -160,7 +190,7 @@ export function MealPlanPage() {
 
       {/* Recipe picker modal */}
       {selecting && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 backdrop-blur-sm" onClick={() => setSelecting(null)}>
+        <div className="fixed inset-x-0 top-0 z-[60] flex items-end justify-center bg-black/30 backdrop-blur-sm" style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom))' }} onClick={() => setSelecting(null)}>
           <div
             className="max-h-[60vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-white p-6"
             onClick={(e) => e.stopPropagation()}

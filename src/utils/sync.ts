@@ -182,6 +182,38 @@ export async function pushChanges(): Promise<void> {
     }))
   }
 
+  const cookingRecords = (await db.getAllCookingRecords()).filter((r) => r.syncStatus === 'pending')
+  if (cookingRecords.length > 0) {
+    changes.cooking_records = cookingRecords.map((r) => ({
+      action: r.deletedAt ? 'delete' : 'upsert',
+      data: mapClientToServer('cooking_records', r),
+    }))
+  }
+
+  const shoppingLists = (await db.getAllShoppingLists()).filter((l) => l.syncStatus === 'pending')
+  if (shoppingLists.length > 0) {
+    changes.shopping_lists = shoppingLists.map((l) => ({
+      action: l.deletedAt ? 'delete' : 'upsert',
+      data: mapClientToServer('shopping_lists', l),
+    }))
+  }
+
+  const fridgeItems = (await db.getAllFridgeItems()).filter((i) => i.syncStatus === 'pending')
+  if (fridgeItems.length > 0) {
+    changes.fridge_items = fridgeItems.map((i) => ({
+      action: i.deletedAt ? 'delete' : 'upsert',
+      data: mapClientToServer('fridge_items', i),
+    }))
+  }
+
+  const mealPlans = (await db.getAllMealPlans()).filter((p) => p.syncStatus === 'pending')
+  if (mealPlans.length > 0) {
+    changes.meal_plans = mealPlans.map((p) => ({
+      action: p.deletedAt ? 'delete' : 'upsert',
+      data: mapClientToServer('meal_plans', p),
+    }))
+  }
+
   if (Object.keys(changes).length === 0) return
 
   let res = await apiFetch('/api/sync', {
@@ -207,6 +239,18 @@ export async function pushChanges(): Promise<void> {
   }
   for (const col of collections) {
     await db.putCollection({ ...col, syncStatus: 'synced' })
+  }
+  for (const record of cookingRecords) {
+    await db.putCookingRecord({ ...record, syncStatus: 'synced' })
+  }
+  for (const list of shoppingLists) {
+    await db.putShoppingList({ ...list, syncStatus: 'synced' })
+  }
+  for (const item of fridgeItems) {
+    await db.putFridgeItem({ ...item, syncStatus: 'synced' })
+  }
+  for (const plan of mealPlans) {
+    await db.putMealPlan({ ...plan, syncStatus: 'synced' })
   }
 }
 

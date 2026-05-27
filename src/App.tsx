@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { HomePage } from '@/pages/home/HomePage'
@@ -12,8 +13,15 @@ import { CollectionPage } from '@/pages/collection/CollectionPage'
 import { ShoppingListPage } from '@/pages/shopping/ShoppingListPage'
 import { LoginPage } from '@/pages/settings/LoginPage'
 import { DataManagementPage } from '@/pages/settings/DataManagementPage'
+import { WelcomePage } from '@/pages/WelcomePage'
 
 export default function App() {
+  const [welcomed, setWelcomed] = useState(() => !!localStorage.getItem('welcomed'))
+
+  if (!welcomed) {
+    return <WelcomePage onComplete={() => setWelcomed(true)} />
+  }
+
   return (
     <BrowserRouter>
       <Routes>
