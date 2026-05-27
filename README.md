@@ -1,73 +1,77 @@
-# React + TypeScript + Vite
+# 菜谱助手
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+一款私人美食管家 PWA 应用，帮你记录拿手好菜、智能推荐菜谱、生成购物清单。
 
-Currently, two official plugins are available:
+## 功能特性
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **菜谱管理** - 创建、编辑、删除菜谱，支持分类、标签、难度、时长等信息
+- **智能推荐** - 根据时间段（早中晚餐、下午茶、夜宵）智能推荐菜谱
+- **做菜引导** - 分步骤引导做菜，支持计时器和语音控制
+- **购物清单** - 根据菜谱自动生成购物清单
+- **周餐计划** - 规划一周的餐食安排
+- **冰箱管理** - 记录冰箱里的食材，避免浪费
+- **做菜日历** - 记录做菜历史
+- **收藏夹** - 收藏喜欢的菜谱
+- **数据同步** - 登录后支持多设备数据同步
+- **PWA 支持** - 可安装到桌面，离线使用
 
-## React Compiler
+## 技术栈
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **前端**: React 19 + TypeScript + Tailwind CSS
+- **状态管理**: Zustand
+- **路由**: React Router v7
+- **本地存储**: IndexedDB (idb)
+- **后端**: Cloudflare Workers
+- **构建工具**: Vite
+- **PWA**: vite-plugin-pwa
 
-## Expanding the ESLint configuration
+## 开发
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# 安装依赖
+npm install
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# 启动开发服务器
+npm run build
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# 构建生产版本
+npm run build
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 预览生产版本
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 部署
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+项目已部署到 Cloudflare Pages：
+- 主域名: https://recipe-app-8is.pages.dev
+- 自定义域名: https://recipe.nianshu2022.cn
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+推送到 GitHub main 分支会自动部署。
+
+## 项目结构
+
 ```
+src/
+├── components/     # 公共组件
+│   └── layout/     # 布局组件
+├── hooks/          # 自定义 hooks
+├── pages/          # 页面组件
+│   ├── home/       # 首页
+│   ├── recipe/     # 菜谱相关
+│   ├── cooking/    # 做菜引导
+│   ├── calendar/   # 做菜日历
+│   ├── fridge/     # 冰箱管理
+│   ├── meal-plan/  # 周餐计划
+│   ├── shopping/   # 购物清单
+│   ├── collection/ # 收藏夹
+│   └── settings/   # 设置
+├── stores/         # Zustand 状态管理
+├── utils/          # 工具函数
+├── types/          # TypeScript 类型定义
+└── db/             # IndexedDB 数据库
+```
+
+## License
+
+MIT
