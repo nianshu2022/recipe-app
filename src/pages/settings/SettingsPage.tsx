@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  ChevronRight, Heart, ShoppingCart, ChefHat, Moon, Sun, Monitor, Database, LogIn, LogOut, RefreshCw,
+  ChevronRight, Heart, ShoppingCart, ChefHat, Moon, Sun, Monitor, Database, LogIn, LogOut, RefreshCw, Download, Share, Plus,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
+import { usePwaInstall } from '@/components/PwaInstallPrompt'
 
 export function SettingsPage() {
   const { isLoggedIn, user, logout, syncNow } = useAuthStore()
   const { theme, setTheme } = useThemeStore()
+  const { canInstall, isIOSDevice, standalone, install } = usePwaInstall()
   const [syncing, setSyncing] = useState(false)
+  const [installed, setInstalled] = useState(false)
 
   const handleSync = async () => {
     setSyncing(true)
@@ -101,6 +104,48 @@ export function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Install PWA */}
+      {canInstall && !standalone && !installed && (
+        <div className="space-y-3">
+          <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+            安装应用
+          </h2>
+          <div className="rounded-2xl bg-[var(--color-bg-card)] p-5 shadow-xs">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-accent-50)]">
+                <Download size={20} className="text-[var(--color-accent-500)]" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-[var(--color-text)]">安装「菜谱助手」到桌面</p>
+                <p className="text-xs text-[var(--color-text-muted)]">添加到主屏幕，随时离线使用</p>
+              </div>
+            </div>
+            {isIOSDevice ? (
+              <div className="space-y-2.5 text-sm text-[var(--color-text-secondary)]">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-bg-subtle)] text-xs font-medium">1</span>
+                  <span>点击底部 <Share size={14} className="inline text-[var(--color-primary)]" /> 共享按钮</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-bg-subtle)] text-xs font-medium">2</span>
+                  <span>选择「添加到主屏幕」<Plus size={14} className="inline" /></span>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={async () => {
+                  const ok = await install()
+                  if (ok) setInstalled(true)
+                }}
+                className="w-full rounded-xl bg-[var(--color-primary)] py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90"
+              >
+                一键安装
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Menu groups */}
       {menuGroups.map((group) => (
