@@ -24,7 +24,9 @@ export function CookingPage() {
   const [timerSeconds, setTimerSeconds] = useState(0)
   const [timerRunning, setTimerRunning] = useState(false)
   const [timerTotal, setTimerTotal] = useState(0)
+  const [alarmActive, setAlarmActive] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const alarmRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const handleVoiceCommand = useCallback((transcript: string) => {
     if (!recipe) return
@@ -37,7 +39,7 @@ export function CookingPage() {
         const timer = steps[currentStep]?.timer
         if (timer) startTimer(timer * 60)
       },
-      '暂停|停止': () => setTimerRunning(false),
+      '暂停|停止|关闭': () => { setTimerRunning(false); stopAlarm() },
       '继续': () => setTimerRunning(true),
       '重复|再说一遍': () => {
         const utterance = new SpeechSynthesisUtterance(steps[currentStep]?.description)
@@ -45,12 +47,52 @@ export function CookingPage() {
         speechSynthesis.speak(utterance)
       },
     })
-  }, [recipe, currentStep])
+  }, [recipe, currentStep, stopAlarm])
 
   const { isListening } = useVoiceControl({
     enabled: voiceEnabled && !completed,
     onCommand: handleVoiceCommand,
   })
+
+  // Play a single beep pattern using Web Audio API
+  const playBeepPattern = useCallback(() => {
+    try {
+      const ctx = new AudioContext()
+      const playBeep = (freq: number, startTime: number, duration: number) => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.frequency.value = freq
+        osc.type = 'sine'
+        gain.gain.setValueAtTime(0.5, startTime)
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration)
+        osc.start(startTime)
+        osc.stop(startTime + duration)
+      }
+      const now = ctx.currentTime
+      playBeep(880, now, 0.2)
+      playBeep(880, now + 0.25, 0.2)
+      playBeep(1320, now + 0.5, 0.4)
+    } catch { /* AudioContext not supported */ }
+  }, [])
+
+  const stopAlarm = useCallback(() => {
+    setAlarmActive(false)
+    if (alarmRef.current) {
+      clearInterval(alarmRef.current)
+      alarmRef.current = null
+    }
+  }, [])
+
+  // Start looping alarm when timer finishes
+  const startAlarm = useCallback(() => {
+    setAlarmActive(true)
+    playBeepPattern()
+    alarmRef.current = setInterval(() => {
+      playBeepPattern()
+    }, 1500)
+  }, [playBeepPattern])
 
   // Timer functions
   const startTimer = (seconds: number) => {
@@ -59,35 +101,40 @@ export function CookingPage() {
     setTimerRunning(true)
   }
 
-  const toggleTimer = () => setTimerRunning(!timerRunning)
+  const toggleTimer = () => {
+    if (alarmActive) stopAlarm()
+    setTimerRunning(!timerRunning)
+  }
   const resetTimer = () => {
+    stopAlarm()
     setTimerRunning(false)
     setTimerSeconds(timerTotal)
   }
 
   useEffect(() => {
-    if (timerRunning) {
-      timerRef.current = setInterval(() => {
-        setTimerSeconds((s) => {
-          if (s <= 1) {
-            setTimerRunning(false)
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification('计时结束', { body: '步骤计时已完成！' })
-            }
-            return 0
+    if (!timerRunning) return
+    const id = setInterval(() => {
+      setTimerSeconds((s) => {
+        if (s <= 1) {
+          clearInterval(id)
+          setTimerRunning(false)
+          startAlarm()
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('计时结束', { body: '步骤计时已完成！' })
           }
-          return s - 1
-        })
-      }, 1000)
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
-    }
+          return 0
+        }
+        return s - 1
+      })
+    }, 1000)
+    timerRef.current = id
+    return () => clearInterval(id)
   }, [timerRunning])
 
   // Prepare timer when step changes (don't auto-start)
   useEffect(() => {
     if (recipe && !completed) {
+      stopAlarm()
       const stepTimer = recipe.steps[currentStep]?.timer
       if (stepTimer) {
         setTimerTotal(stepTimer * 60)
@@ -100,6 +147,13 @@ export function CookingPage() {
       }
     }
   }, [currentStep, recipe, completed])
+
+  // Cleanup alarm on unmount
+  useEffect(() => {
+    return () => {
+      if (alarmRef.current) clearInterval(alarmRef.current)
+    }
+  }, [])
 
   // Fullscreen
   useEffect(() => {
@@ -278,18 +332,29 @@ export function CookingPage() {
               />
             </div>
             <div className="flex items-center justify-center gap-2">
-              <button
-                onClick={toggleTimer}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-900 text-white shadow-md transition-all duration-200 active:scale-95"
-              >
-                {timerRunning ? <Pause size={16} /> : <Play size={16} fill="currentColor" />}
-              </button>
-              <button
-                onClick={resetTimer}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-stone-500 shadow-xs transition-all duration-200 hover:bg-stone-50 active:scale-95"
-              >
-                <RotateCcw size={16} />
-              </button>
+              {alarmActive ? (
+                <button
+                  onClick={stopAlarm}
+                  className="animate-pulse flex h-12 items-center justify-center rounded-xl bg-red-500 px-8 text-base font-semibold text-white shadow-lg transition-all duration-200 active:scale-95"
+                >
+                  关闭铃声
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={toggleTimer}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-900 text-white shadow-md transition-all duration-200 active:scale-95"
+                  >
+                    {timerRunning ? <Pause size={16} /> : <Play size={16} fill="currentColor" />}
+                  </button>
+                  <button
+                    onClick={resetTimer}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-stone-500 shadow-xs transition-all duration-200 hover:bg-stone-50 active:scale-95"
+                  >
+                    <RotateCcw size={16} />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}

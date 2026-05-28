@@ -53,6 +53,7 @@ interface ShoppingState {
   loadLists: () => Promise<void>
   generateFromRecipe: (recipeId: string, servings?: number) => Promise<ShoppingList | null>
   generateFromRecipes: (recipeIds: string[]) => Promise<ShoppingList | null>
+  generateFromRecipesWithIngredients: (recipeIds: string[], recipes: { id: string; ingredients: { name: string; amount: number; unit: string }[] }[]) => Promise<ShoppingList | null>
   toggleItem: (listId: string, itemId: string) => Promise<void>
   addItem: (listId: string, name: string, amount?: number, unit?: string) => Promise<void>
   removeItem: (listId: string, itemId: string) => Promise<void>
@@ -85,16 +86,19 @@ export const useShoppingStore = create<ShoppingState>((set, get) => ({
     if (!recipe) return null
 
     // Scale ingredients if target servings specified
+    let ingredientsToUse = recipe.ingredients
     if (targetServings && targetServings !== recipe.servings) {
-      scaleIngredients(recipe.ingredients, recipe.servings, targetServings)
+      ingredientsToUse = scaleIngredients(recipe.ingredients, recipe.servings, targetServings)
     }
 
-    return get().generateFromRecipes([recipeId])
+    return get().generateFromRecipesWithIngredients([recipeId], [{ ...recipe, ingredients: ingredientsToUse }])
   },
 
   generateFromRecipes: async (recipeIds) => {
-    const recipes = await db.getAllRecipes()
-    const matchedRecipes = recipes.filter((r) => recipeIds.includes(r.id))
+    return get().generateFromRecipesWithIngredients(recipeIds, (await db.getAllRecipes()).filter((r) => recipeIds.includes(r.id)))
+  },
+
+  generateFromRecipesWithIngredients: async (recipeIds, matchedRecipes) => {
     if (matchedRecipes.length === 0) return null
 
     // Merge all ingredients

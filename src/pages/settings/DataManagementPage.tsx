@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Download, Upload, Trash2, CheckCircle } from 'lucide-react'
 import { exportData, downloadBackup, importData } from '@/utils/backup'
@@ -15,9 +15,9 @@ export function DataManagementPage() {
   } | null>(null)
 
   // Load stats on mount
-  useState(() => {
+  useEffect(() => {
     loadStats()
-  })
+  }, [])
 
   async function loadStats() {
     const recipes = await db.getAllRecipes()

@@ -5,6 +5,7 @@ import { useRecipeStore } from '@/stores/recipeStore'
 import { useCollectionStore } from '@/stores/collectionStore'
 import { useShoppingStore } from '@/stores/shoppingStore'
 import { estimateNutrition, getCalorieLevel, getMacroPercentages } from '@/utils/nutrition'
+import { getAllRecipes } from '@/data/chineseRecipes'
 import { scaleIngredients, formatAmount } from '@/utils/scaling'
 import { Icon } from '@/components/Icon'
 import './detail.scss'
@@ -27,7 +28,12 @@ export default function RecipeDetailPage() {
   const [loading, setLoading] = useState(true)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  const recipe = useMemo(() => recipes.find((r) => r.id === recipeId), [recipes, recipeId])
+  const recipe = useMemo(() => {
+    const found = recipes.find((r) => r.id === recipeId)
+    if (found) return found
+    // 回退：查找内置菜谱
+    return getAllRecipes().find((r) => r.id === recipeId) ?? null
+  }, [recipes, recipeId])
 
   useEffect(() => {
     Promise.all([loadRecipes(), loadCollections()]).then(() => setLoading(false))

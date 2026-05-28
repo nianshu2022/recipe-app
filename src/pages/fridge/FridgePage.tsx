@@ -137,10 +137,13 @@ export function FridgePage() {
     }
 
     // 本地没有则调用 API
-    const { data, error } = await fetchOpenFoodFacts(newName.trim())
+    const { data } = await fetchOpenFoodFacts(newName.trim())
     setOffLoading(false)
-    setOffResults(data)
-    if (error) setOffError(error)
+    if (data.length > 0) {
+      setOffResults(data)
+    } else {
+      setOffError('未找到匹配的食材，试试其他关键词')
+    }
   }
 
   const pickOffResult = (r: OffResult) => {

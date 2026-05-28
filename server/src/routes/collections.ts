@@ -1,12 +1,6 @@
 import type { Env } from '../index'
 import type { User } from '../middleware/auth'
-
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-  })
-}
+import { jsonResponse } from '../utils/response'
 
 export async function handleCollections(
   request: Request,
@@ -24,24 +18,40 @@ export async function handleCollections(
     )
       .bind(user.id)
       .all()
-    return json(results)
+    return jsonResponse(results, 200, request)
   }
 
   // POST /api/collections
   if (request.method === 'POST' && !id) {
-    const body = await request.json<{ id: string; name: string; recipe_ids?: string[] }>()
+    let body: { id?: string; name?: string; recipe_ids?: string[] } = {}
+    try {
+      body = await request.json()
+    } catch {
+      return jsonResponse({ error: 'Invalid JSON body' }, 400, request)
+    }
+
+    if (!body.id || !body.name) {
+      return jsonResponse({ error: 'Missing required collection fields' }, 400, request)
+    }
+
     const now = new Date().toISOString()
     await env.DB.prepare(
       'INSERT INTO collections (id, user_id, name, recipe_ids, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
     )
       .bind(body.id, user.id, body.name, JSON.stringify(body.recipe_ids ?? []), now, now)
       .run()
-    return json({ id: body.id, created_at: now }, 201)
+    return jsonResponse({ id: body.id, created_at: now }, 201, request)
   }
 
   // PUT /api/collections/:id
   if (request.method === 'PUT' && id) {
-    const body = await request.json<{ name?: string; recipe_ids?: string[] }>()
+    let body: { name?: string; recipe_ids?: string[] } = {}
+    try {
+      body = await request.json()
+    } catch {
+      return jsonResponse({ error: 'Invalid JSON body' }, 400, request)
+    }
+
     const now = new Date().toISOString()
     const sets: string[] = ['updated_at = ?']
     const params: unknown[] = [now]
@@ -51,7 +61,7 @@ export async function handleCollections(
     await env.DB.prepare(`UPDATE collections SET ${sets.join(', ')} WHERE id = ? AND user_id = ?`)
       .bind(...params)
       .run()
-    return json({ id, updated_at: now })
+    return jsonResponse({ id, updated_at: now }, 200, request)
   }
 
   // DELETE /api/collections/:id
@@ -60,8 +70,8 @@ export async function handleCollections(
     await env.DB.prepare('UPDATE collections SET deleted_at = ?, updated_at = ? WHERE id = ? AND user_id = ?')
       .bind(now, now, id, user.id)
       .run()
-    return json({ id, deleted_at: now })
+    return jsonResponse({ id, deleted_at: now }, 200, request)
   }
 
-  return json({ error: 'Method not allowed' }, 405)
+  return jsonResponse({ error: 'Method not allowed' }, 405, request)
 }

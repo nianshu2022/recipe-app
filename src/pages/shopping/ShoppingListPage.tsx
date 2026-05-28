@@ -242,7 +242,9 @@ export function ShoppingListPage() {
 
       {/* Delete list */}
       <button
-        onClick={() => deleteList(list.id)}
+        onClick={() => {
+          if (confirm('确定要删除这个购物清单吗？')) deleteList(list.id)
+        }}
         className="w-full rounded-xl py-3 text-center text-sm font-medium text-stone-400 transition-colors hover:text-red-500"
       >
         删除清单

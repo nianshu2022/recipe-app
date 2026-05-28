@@ -123,7 +123,21 @@ export async function register(email: string, password: string, nickname?: strin
   }
 }
 
-export function logout() {
+export async function logout(): Promise<void> {
+  const refreshToken = Taro.getStorageSync('refresh_token')
+  if (refreshToken) {
+    try {
+      await Taro.request({
+        url: `${getBaseUrl()}/api/auth/logout`,
+        method: 'POST',
+        data: { refreshToken },
+        header: { 'Content-Type': 'application/json' },
+        timeout: 10000,
+      })
+    } catch (e) {
+      console.error('Failed to notify server of logout', e)
+    }
+  }
   Taro.removeStorageSync('access_token')
   Taro.removeStorageSync('refresh_token')
   Taro.removeStorageSync('user')
@@ -288,6 +302,7 @@ export async function fullSync(): Promise<void> {
 function mapServerToClient(_table: string, record: Record<string, unknown>): Record<string, unknown> {
   const mapped: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(record)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue
     const camelKey = key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())
     if (
       typeof value === 'string' &&

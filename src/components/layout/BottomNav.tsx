@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { NavLink, Link } from 'react-router-dom'
-import { UtensilsCrossed, Refrigerator, CalendarRange, User, Sparkles } from 'lucide-react'
+import { UtensilsCrossed, Compass, CalendarRange, User, Sparkles } from 'lucide-react'
 import { useUIStore } from '@/stores/uiStore'
 
 const leftItems = [
@@ -8,7 +8,7 @@ const leftItems = [
   { to: '/meal-plan', icon: CalendarRange, label: '七日味' },
 ]
 const rightItems = [
-  { to: '/fridge', icon: Refrigerator, label: '食材簿' },
+  { to: '/discover', icon: Compass, label: '觅食' },
   { to: '/settings', icon: User, label: '小窝' },
 ]
 

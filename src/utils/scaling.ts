@@ -9,6 +9,7 @@ export function scaleIngredient(
     return ingredient
   }
 
+  if (originalServings <= 0) return ingredient
   const ratio = targetServings / originalServings
   const newAmount = Math.round(ingredient.amount * ratio * 100) / 100
 

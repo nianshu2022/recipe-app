@@ -38,18 +38,33 @@ export async function signJWT(payload: Record<string, unknown>, secret: string, 
   return `${header}.${body}.${signature}`
 }
 
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false
+  }
+  let result = 0
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  }
+  return result === 0
+}
+
 export async function verifyJWT(token: string, secret: string): Promise<Record<string, unknown> | null> {
-  const parts = token.split('.')
-  if (parts.length !== 3) return null
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
 
-  const [header, body, signature] = parts
-  const expectedSig = await hmacSign(`${header}.${body}`, secret)
-  if (signature !== expectedSig) return null
+    const [header, body, signature] = parts
+    const expectedSig = await hmacSign(`${header}.${body}`, secret)
+    if (!timingSafeEqual(signature, expectedSig)) return null
 
-  const payload = JSON.parse(base64UrlDecode(body))
-  if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null
+    const payload = JSON.parse(base64UrlDecode(body))
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null
 
-  return payload
+    return payload
+  } catch {
+    return null
+  }
 }
 
 export async function authenticate(request: Request, env: Env): Promise<User | null> {

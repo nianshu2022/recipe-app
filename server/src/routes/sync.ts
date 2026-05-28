@@ -1,12 +1,6 @@
 import type { Env } from '../index'
 import type { User } from '../middleware/auth'
-
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-  })
-}
+import { jsonResponse } from '../utils/response'
 
 const tables = [
   { table: 'recipes', idCol: 'id' },
@@ -17,6 +11,29 @@ const tables = [
   { table: 'fridge_items', idCol: 'id' },
   { table: 'cooking_records', idCol: 'id' },
 ]
+
+// Whitelisted columns per table for SQL safety
+const allowedColumns: Record<string, Set<string>> = {
+  recipes: new Set(['id', 'user_id', 'name', 'category', 'tags', 'difficulty', 'duration', 'servings', 'cover_image', 'ingredients', 'steps', 'deleted_at', 'created_at', 'updated_at']),
+  collections: new Set(['id', 'user_id', 'name', 'recipe_ids', 'deleted_at', 'created_at', 'updated_at']),
+  menus: new Set(['id', 'user_id', 'name', 'recipe_ids', 'deleted_at', 'created_at', 'updated_at']),
+  meal_plans: new Set(['id', 'user_id', 'week_start', 'days', 'deleted_at', 'created_at', 'updated_at']),
+  shopping_lists: new Set(['id', 'user_id', 'source_recipe_ids', 'items', 'deleted_at', 'created_at', 'updated_at']),
+  fridge_items: new Set(['id', 'user_id', 'name', 'category', 'amount', 'unit', 'expiry_date', 'image_url', 'barcode', 'deleted_at', 'created_at', 'updated_at']),
+  cooking_records: new Set(['id', 'user_id', 'recipe_id', 'recipe_name', 'date', 'servings', 'deleted_at', 'created_at', 'updated_at']),
+}
+
+function sanitizeColumns(table: string, data: Record<string, unknown>): Record<string, unknown> {
+  const allowed = allowedColumns[table]
+  if (!allowed) return data
+  const sanitized: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(data)) {
+    if (allowed.has(key)) {
+      sanitized[key] = value
+    }
+  }
+  return sanitized
+}
 
 export async function handleSync(request: Request, env: Env, user: User): Promise<Response> {
   // GET /api/sync?since=timestamp — incremental pull
@@ -36,14 +53,23 @@ export async function handleSync(request: Request, env: Env, user: User): Promis
       }
     }
 
-    return json({ changes, timestamp: new Date().toISOString() })
+    return jsonResponse({ changes, timestamp: new Date().toISOString() }, 200, request)
   }
 
   // POST /api/sync — batch push
   if (request.method === 'POST') {
-    const body = await request.json<{
-      changes: Record<string, { action: 'upsert' | 'delete'; data: Record<string, unknown> }[]>
-    }>()
+    let body: {
+      changes?: Record<string, { action: 'upsert' | 'delete'; data: Record<string, unknown> }[]>
+    } = {}
+    try {
+      body = await request.json()
+    } catch {
+      return jsonResponse({ error: 'Invalid JSON body' }, 400, request)
+    }
+
+    if (!body.changes || typeof body.changes !== 'object') {
+      return jsonResponse({ error: 'Changes payload required' }, 400, request)
+    }
 
     const results: Record<string, number> = {}
 
@@ -53,7 +79,7 @@ export async function handleSync(request: Request, env: Env, user: User): Promis
 
       let count = 0
       for (const op of ops) {
-        const data = { ...op.data, user_id: user.id }
+        const data = sanitizeColumns(table, { ...op.data, user_id: user.id })
 
         if (op.action === 'delete') {
           await env.DB.prepare(
@@ -71,20 +97,30 @@ export async function handleSync(request: Request, env: Env, user: User): Promis
             .map((c) => `${c} = excluded.${c}`)
             .join(', ')
 
-          await env.DB.prepare(
-            `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})
-             ON CONFLICT(id) DO UPDATE SET ${updates}, updated_at = datetime('now')`,
-          )
-            .bind(...values)
-            .run()
+          if (updates.length > 0) {
+            await env.DB.prepare(
+              `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})
+               ON CONFLICT(id) DO UPDATE SET ${updates}, updated_at = datetime('now')
+               WHERE ${table}.user_id = excluded.user_id`,
+            )
+              .bind(...values)
+              .run()
+          } else {
+            await env.DB.prepare(
+              `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})
+               ON CONFLICT(id) DO NOTHING`,
+            )
+              .bind(...values)
+              .run()
+          }
         }
         count++
       }
       results[table] = count
     }
 
-    return json({ synced: results, timestamp: new Date().toISOString() })
+    return jsonResponse({ synced: results, timestamp: new Date().toISOString() }, 200, request)
   }
 
-  return json({ error: 'Method not allowed' }, 405)
+  return jsonResponse({ error: 'Method not allowed' }, 405, request)
 }

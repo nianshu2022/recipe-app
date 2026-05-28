@@ -95,7 +95,19 @@ export async function register(email: string, password: string, nickname?: strin
   return true
 }
 
-export function logout() {
+export async function logout(): Promise<void> {
+  const refreshToken = localStorage.getItem('refresh_token')
+  if (refreshToken) {
+    try {
+      await fetch(`${getBaseUrl()}/api/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      })
+    } catch (e) {
+      console.error('Failed to notify server of logout', e)
+    }
+  }
   localStorage.removeItem('access_token')
   localStorage.removeItem('refresh_token')
   localStorage.removeItem('user')
@@ -131,11 +143,15 @@ export async function pullChanges(): Promise<void> {
   const data: SyncResponse = await res.json()
 
   // Apply changes to IndexedDB
+  const validTables = new Set(['recipes', 'collections', 'cooking_records', 'shopping_lists', 'fridge_items', 'meal_plans'])
   for (const [table, records] of Object.entries(data.changes)) {
+    if (!validTables.has(table)) continue
+    if (!Array.isArray(records)) continue
     for (const record of records) {
+      if (typeof record !== 'object' || record === null) continue
       const r = record as Record<string, unknown>
-      // Map server column names to client field names
       const mapped = mapServerToClient(table, r)
+      if (!mapped.id || typeof mapped.id !== 'string') continue
       switch (table) {
         case 'recipes':
           await db.putRecipe(mapped as never)
@@ -263,6 +279,8 @@ export async function fullSync(): Promise<void> {
 function mapServerToClient(_table: string, record: Record<string, unknown>): Record<string, unknown> {
   const mapped: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(record)) {
+    // Skip prototype pollution vectors
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue
     const camelKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
     // Parse JSON fields
     if (typeof value === 'string' && (key === 'tags' || key === 'ingredients' || key === 'steps' || key === 'nutrition' || key === 'recipe_ids' || key === 'source_recipe_ids' || key === 'items' || key === 'days')) {

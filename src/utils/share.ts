@@ -4,8 +4,13 @@ import { formatAmount } from './scaling'
 
 const difficultyLabels = { easy: '简单', medium: '中等', hard: '困难' }
 
+function escapeHtml(str: string): string {
+  const div = document.createElement('div')
+  div.textContent = str
+  return div.innerHTML
+}
+
 export async function exportRecipeAsImage(recipe: Recipe): Promise<void> {
-  // Create a temporary div with the share card
   const container = document.createElement('div')
   container.style.cssText = `
     position: fixed; left: -9999px; top: 0;
@@ -17,7 +22,7 @@ export async function exportRecipeAsImage(recipe: Recipe): Promise<void> {
   container.innerHTML = `
     <div style="margin-bottom: 24px;">
       <h1 style="font-size: 28px; font-weight: 700; margin: 0 0 8px; color: #252220;">
-        ${recipe.name}
+        ${escapeHtml(recipe.name)}
       </h1>
       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <span style="background: #f5f3ef; padding: 4px 12px; border-radius: 999px; font-size: 12px; color: #6b6355;">
@@ -41,8 +46,8 @@ export async function exportRecipeAsImage(recipe: Recipe): Promise<void> {
           <div style="display: flex; justify-content: space-between; padding: 10px 16px; ${
             i > 0 ? 'border-top: 1px solid #f5f3ef;' : ''
           }">
-            <span style="font-size: 14px; color: #524c40;">${ing.name}</span>
-            <span style="font-size: 14px; color: #a8a08e;">${formatAmount(ing.amount, ing.unit)}</span>
+            <span style="font-size: 14px; color: #524c40;">${escapeHtml(ing.name)}</span>
+            <span style="font-size: 14px; color: #a8a08e;">${escapeHtml(formatAmount(ing.amount, ing.unit))}</span>
           </div>
         `,
           )
@@ -62,7 +67,7 @@ export async function exportRecipeAsImage(recipe: Recipe): Promise<void> {
                 ${step.order}
               </span>
             </div>
-            <p style="font-size: 14px; line-height: 1.6; color: #6b6355; margin: 0;">${step.description}</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #6b6355; margin: 0;">${escapeHtml(step.description)}</p>
           </div>
         `,
           )

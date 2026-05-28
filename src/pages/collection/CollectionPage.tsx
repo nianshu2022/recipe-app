@@ -111,7 +111,9 @@ export function CollectionPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <button
-                    onClick={() => deleteCollection(col.id)}
+                    onClick={() => {
+                      if (confirm('确定要删除这个收藏夹吗？')) deleteCollection(col.id)
+                    }}
                     className="rounded-lg p-1.5 text-stone-300 opacity-0 transition-all duration-200 hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
                   >
                     <Trash2 size={14} />

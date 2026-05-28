@@ -8,6 +8,7 @@ import { useCollectionStore } from '@/stores/collectionStore'
 import { useShoppingStore } from '@/stores/shoppingStore'
 import { exportRecipeAsImage } from '@/utils/share'
 import { estimateNutrition, getCalorieLevel, getMacroPercentages } from '@/utils/nutrition'
+import { getAllRecipes } from '@/data/chineseRecipes'
 import { scaleIngredients, formatAmount } from '@/utils/scaling'
 import type { Recipe } from '@/types'
 
@@ -53,6 +54,13 @@ export function RecipeDetailPage() {
     if (found) {
       setRecipe(found)
       setServings(found.servings)
+      return
+    }
+    // 回退：查找内置菜谱
+    const builtIn = getAllRecipes().find((r) => r.id === id)
+    if (builtIn) {
+      setRecipe(builtIn)
+      setServings(builtIn.servings)
     }
   }, [recipes, id])
 

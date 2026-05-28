@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { X, Camera, RefreshCw } from 'lucide-react'
 
@@ -14,6 +14,18 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
   const [error, setError] = useState<string | null>(null)
   const [isStarting, setIsStarting] = useState(true)
   const hasCalledOnScan = useRef(false)
+  const onScanRef = useRef(onScan)
+
+  useEffect(() => {
+    onScanRef.current = onScan
+  }, [onScan])
+
+  const handleScanResult = useCallback((decodedText: string) => {
+    if (hasCalledOnScan.current) return
+    hasCalledOnScan.current = true
+    scannerRef.current?.stop().catch(() => {})
+    onScanRef.current(decodedText)
+  }, [])
 
   useEffect(() => {
     const container = document.getElementById(SCANNER_ELEMENT_ID)
@@ -44,12 +56,7 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
             qrbox: { width: 250, height: 150 },
             aspectRatio: 1.777,
           },
-          (decodedText) => {
-            if (hasCalledOnScan.current) return
-            hasCalledOnScan.current = true
-            scanner.stop().catch(() => {})
-            onScan(decodedText)
-          },
+          handleScanResult,
           () => {},
         )
         setIsStarting(false)
@@ -73,7 +80,7 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
         scannerRef.current.stop().catch(() => {})
       }
     }
-  }, [onScan])
+  }, [handleScanResult])
 
   const handleRetry = () => {
     setError(null)
@@ -84,12 +91,7 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
       scannerRef.current.start(
         { facingMode: 'environment' },
         { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.777 },
-        (decodedText) => {
-          if (hasCalledOnScan.current) return
-          hasCalledOnScan.current = true
-          scannerRef.current?.stop().catch(() => {})
-          onScan(decodedText)
-        },
+        handleScanResult,
         () => {},
       ).then(() => setIsStarting(false))
         .catch((err) => {
@@ -112,8 +114,8 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
         <div className="w-10" />
       </div>
 
-      <div className="relative flex flex-1 items-center justify-center">
-        <div id={SCANNER_ELEMENT_ID} className="absolute inset-0" />
+      <div className="relative flex-1">
+        <div id={SCANNER_ELEMENT_ID} className="absolute inset-0 h-full w-full" />
 
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="relative h-[150px] w-[250px]">

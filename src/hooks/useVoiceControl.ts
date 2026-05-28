@@ -49,6 +49,12 @@ export function useVoiceControl({ onCommand, enabled = false, lang = 'zh-CN' }: 
   const [isListening, setIsListening] = useState(false)
   const [lastCommand, setLastCommand] = useState('')
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
+  const onCommandRef = useRef(onCommand)
+
+  // Keep callback ref current without triggering effect re-run
+  useEffect(() => {
+    onCommandRef.current = onCommand
+  }, [onCommand])
 
   useEffect(() => {
     if (!enabled) return
@@ -69,20 +75,18 @@ export function useVoiceControl({ onCommand, enabled = false, lang = 'zh-CN' }: 
       if (last.isFinal) {
         const transcript = last[0].transcript.trim().toLowerCase()
         setLastCommand(transcript)
-        onCommand?.(transcript)
+        onCommandRef.current?.(transcript)
       }
     }
 
     recognition.onstart = () => setIsListening(true)
     recognition.onend = () => {
       setIsListening(false)
-      // Auto-restart if still enabled
-      if (enabled) {
-        try {
-          recognition.start()
-        } catch {
-          // ignore
-        }
+      // Auto-restart if still enabled (check via ref to avoid stale closure)
+      try {
+        recognition.start()
+      } catch {
+        // ignore
       }
     }
     recognition.onerror = (e) => {
@@ -99,10 +103,12 @@ export function useVoiceControl({ onCommand, enabled = false, lang = 'zh-CN' }: 
     }
 
     return () => {
+      recognition.onend = null
       recognition.stop()
       recognitionRef.current = null
+      setIsListening(false)
     }
-  }, [enabled, lang, onCommand])
+  }, [enabled, lang])
 
   return { isListening, lastCommand }
 }

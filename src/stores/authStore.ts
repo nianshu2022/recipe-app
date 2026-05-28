@@ -30,7 +30,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (ok) {
       set({ isLoggedIn: true, user: getCurrentUser(), loading: false })
       // Auto-sync after login
-      try { await fullSync() } catch { /* ignore */ }
+      try { await fullSync() } catch (e) { console.warn('Post-login sync failed:', e) }
     } else {
       set({ loading: false })
     }

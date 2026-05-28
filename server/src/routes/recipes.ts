@@ -1,12 +1,6 @@
 import type { Env } from '../index'
 import type { User } from '../middleware/auth'
-
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-  })
-}
+import { jsonResponse } from '../utils/response'
 
 export async function handleRecipes(
   request: Request,
@@ -30,7 +24,7 @@ export async function handleRecipes(
     query += ' ORDER BY updated_at DESC'
 
     const { results } = await env.DB.prepare(query).bind(...params).all()
-    return json(results)
+    return jsonResponse(results, 200, request)
   }
 
   // GET /api/recipes/:id
@@ -38,46 +32,14 @@ export async function handleRecipes(
     const recipe = await env.DB.prepare('SELECT * FROM recipes WHERE id = ? AND user_id = ?')
       .bind(id, user.id)
       .first()
-    if (!recipe) return json({ error: 'Not found' }, 404)
-    return json(recipe)
+    if (!recipe) return jsonResponse({ error: 'Not found' }, 404, request)
+    return jsonResponse(recipe, 200, request)
   }
 
   // POST /api/recipes
   if (request.method === 'POST' && !id) {
-    const body = await request.json<{
-      id: string
-      name: string
-      category: string
-      tags: string[]
-      difficulty: string
-      duration: number
-      servings: number
-      ingredients: unknown[]
-      steps: unknown[]
-      nutrition?: unknown
-      cover_image?: string
-    }>()
-
-    const now = new Date().toISOString()
-    await env.DB.prepare(
-      `INSERT INTO recipes (id, user_id, name, category, tags, difficulty, duration, servings, ingredients, steps, nutrition, cover_image, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-      .bind(
-        body.id, user.id, body.name, body.category,
-        JSON.stringify(body.tags), body.difficulty, body.duration, body.servings,
-        JSON.stringify(body.ingredients), JSON.stringify(body.steps),
-        body.nutrition ? JSON.stringify(body.nutrition) : null,
-        body.cover_image ?? null, now, now,
-      )
-      .run()
-
-    return json({ id: body.id, created_at: now }, 201)
-  }
-
-  // PUT /api/recipes/:id
-  if (request.method === 'PUT' && id) {
-    const body = await request.json<{
+    let body: {
+      id?: string
       name?: string
       category?: string
       tags?: string[]
@@ -88,7 +50,53 @@ export async function handleRecipes(
       steps?: unknown[]
       nutrition?: unknown
       cover_image?: string
-    }>()
+    } = {}
+    try {
+      body = await request.json()
+    } catch {
+      return jsonResponse({ error: 'Invalid JSON body' }, 400, request)
+    }
+
+    if (!body.id || !body.name || !body.category) {
+      return jsonResponse({ error: 'Missing required recipe fields' }, 400, request)
+    }
+
+    const now = new Date().toISOString()
+    await env.DB.prepare(
+      `INSERT INTO recipes (id, user_id, name, category, tags, difficulty, duration, servings, ingredients, steps, nutrition, cover_image, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(
+        body.id, user.id, body.name, body.category,
+        JSON.stringify(body.tags ?? []), body.difficulty ?? 'easy', body.duration ?? 30, body.servings ?? 2,
+        JSON.stringify(body.ingredients ?? []), JSON.stringify(body.steps ?? []),
+        body.nutrition ? JSON.stringify(body.nutrition) : null,
+        body.cover_image ?? null, now, now,
+      )
+      .run()
+
+    return jsonResponse({ id: body.id, created_at: now }, 201, request)
+  }
+
+  // PUT /api/recipes/:id
+  if (request.method === 'PUT' && id) {
+    let body: {
+      name?: string
+      category?: string
+      tags?: string[]
+      difficulty?: string
+      duration?: number
+      servings?: number
+      ingredients?: unknown[]
+      steps?: unknown[]
+      nutrition?: unknown
+      cover_image?: string
+    } = {}
+    try {
+      body = await request.json()
+    } catch {
+      return jsonResponse({ error: 'Invalid JSON body' }, 400, request)
+    }
 
     const now = new Date().toISOString()
     const sets: string[] = ['updated_at = ?']
@@ -112,7 +120,7 @@ export async function handleRecipes(
       .bind(...params)
       .run()
 
-    return json({ id, updated_at: now })
+    return jsonResponse({ id, updated_at: now }, 200, request)
   }
 
   // DELETE /api/recipes/:id
@@ -121,8 +129,8 @@ export async function handleRecipes(
     await env.DB.prepare('UPDATE recipes SET deleted_at = ?, updated_at = ? WHERE id = ? AND user_id = ?')
       .bind(now, now, id, user.id)
       .run()
-    return json({ id, deleted_at: now })
+    return jsonResponse({ id, deleted_at: now }, 200, request)
   }
 
-  return json({ error: 'Method not allowed' }, 405)
+  return jsonResponse({ error: 'Method not allowed' }, 405, request)
 }

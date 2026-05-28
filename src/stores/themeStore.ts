@@ -24,18 +24,18 @@ export const useThemeStore = create<ThemeState>((set) => {
   const saved = (localStorage.getItem('theme') as Theme) || 'system'
   const resolved = resolveTheme(saved)
 
-  // Apply on init
   applyTheme(resolved)
 
-  // Listen for system theme changes
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  const mql = window.matchMedia('(prefers-color-scheme: dark)')
+  const onChange = () => {
     const current = useThemeStore.getState().theme
     if (current === 'system') {
       const r = getSystemTheme()
       applyTheme(r)
       useThemeStore.setState({ resolved: r })
     }
-  })
+  }
+  mql.addEventListener('change', onChange)
 
   return {
     theme: saved,

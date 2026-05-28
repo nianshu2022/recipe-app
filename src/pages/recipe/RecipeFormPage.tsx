@@ -102,6 +102,11 @@ export function RecipeFormPage() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    if (!file.type.startsWith('image/')) return
+    if (file.size > 5 * 1024 * 1024) {
+      alert('图片大小不能超过 5MB')
+      return
+    }
     const reader = new FileReader()
     reader.onload = () => setCoverImage(reader.result as string)
     reader.readAsDataURL(file)
@@ -213,6 +218,7 @@ export function RecipeFormPage() {
               value={duration}
               onChange={(e) => setDuration(Number(e.target.value))}
               min={1}
+              max={1440}
               className={inputCls}
             />
           </div>
@@ -223,6 +229,7 @@ export function RecipeFormPage() {
               value={servings}
               onChange={(e) => setServings(Number(e.target.value))}
               min={1}
+              max={100}
               className={inputCls}
             />
           </div>
