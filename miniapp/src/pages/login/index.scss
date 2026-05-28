@@ -1,0 +1,101 @@
+@import '../../styles/variables.scss';
+@import '../../styles/mixins.scss';
+
+.login-page {
+  min-height: 100vh;
+  background: $color-bg;
+  @include page-padding;
+}
+
+.login-header {
+  padding-top: $space-5;
+  margin-bottom: $space-6;
+}
+
+.login-back {
+  @include back-button;
+}
+
+.login-back-icon {
+  font-size: $font-size-xl;
+  color: $color-text;
+  font-weight: 600;
+}
+
+.login-title-section {
+  margin-bottom: $space-8;
+}
+
+.login-app-name {
+  font-size: $font-size-3xl;
+  font-weight: 700;
+  color: $color-primary;
+  display: block;
+  margin-bottom: $space-2;
+}
+
+.login-subtitle {
+  font-size: $font-size-xl;
+  color: $color-text-secondary;
+  display: block;
+}
+
+.login-form {
+  @include card;
+  padding: $space-5;
+}
+
+.form-field {
+  margin-bottom: $space-4;
+}
+
+.form-label {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $color-text-secondary;
+  margin-bottom: $space-2;
+  display: block;
+}
+
+.form-input {
+  @include input-field;
+  background: $color-bg-subtle;
+}
+
+.form-error {
+  padding: $space-2 $space-3;
+  background: $color-danger-bg;
+  border-radius: $radius-md;
+  margin-bottom: $space-4;
+}
+
+.form-error-text {
+  font-size: $font-size-sm;
+  color: $color-danger;
+}
+
+.submit-btn {
+  @include btn-primary;
+  margin-bottom: $space-4;
+
+  &.loading {
+    opacity: 0.6;
+  }
+}
+
+.submit-btn-text {
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: $color-bg-card;
+}
+
+.toggle-mode {
+  @include flex-center;
+  padding: $space-2;
+  @include interactive;
+}
+
+.toggle-mode-text {
+  font-size: $font-size-sm;
+  color: $color-primary;
+}

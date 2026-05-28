@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { Recipe, Category, Difficulty } from '@/types'
 import { db } from '@/db'
 import { generateId } from '@/utils/id'
+import { useMealPlanStore } from './mealPlanStore'
 
 interface RecipeState {
   recipes: Recipe[]
@@ -82,6 +83,7 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
       updatedAt: new Date().toISOString(),
     }
     await db.putRecipe(deleted)
+    await useMealPlanStore.getState().removeRecipeFromPlan(id)
     set((state) => ({
       recipes: state.recipes.filter((r) => r.id !== id),
     }))

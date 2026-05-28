@@ -23,6 +23,8 @@ interface MealPlanState {
   setMeals: (dayIndex: number, slot: MealSlot, recipeIds: string[]) => Promise<void>
   removeMeal: (dayIndex: number, slot: MealSlot, recipeId: string) => Promise<void>
   clearPlan: () => Promise<void>
+  removeRecipeFromPlan: (recipeId: string) => Promise<void>
+  cleanupStaleRecipes: (validIds: Set<string>) => Promise<void>
   getWeekDates: () => Date[]
   getSlotLabel: (slot: MealSlot) => string
   getDayLabel: (index: number) => string
@@ -66,6 +68,33 @@ export const useMealPlanStore = create<MealPlanState>((set, get) => ({
       console.error('Failed to load meal plan:', e)
       set({ loading: false })
     }
+  },
+
+  cleanupStaleRecipes: async (validIds: Set<string>) => {
+    const plan = get().currentPlan
+    if (!plan) return
+    let changed = false
+    const days = plan.days.map((day) => {
+      const updated: typeof day = {}
+      for (const slot of ['breakfast', 'lunch', 'dinner', 'snack'] as const) {
+        const arr = day[slot]
+        if (arr) {
+          const filtered = arr.filter((id) => validIds.has(id))
+          if (filtered.length !== arr.length) changed = true
+          if (filtered.length > 0) updated[slot] = filtered
+        }
+      }
+      return updated
+    })
+    if (!changed) return
+    const updated = {
+      ...plan,
+      days,
+      updatedAt: new Date().toISOString(),
+      syncStatus: 'pending' as const,
+    }
+    await db.putMealPlan(updated)
+    set({ currentPlan: updated })
   },
 
   setMeal: async (dayIndex, slot, recipeId) => {
@@ -131,6 +160,31 @@ export const useMealPlanStore = create<MealPlanState>((set, get) => ({
     const updated = {
       ...plan,
       days: Array.from({ length: 7 }, () => ({})),
+      updatedAt: new Date().toISOString(),
+      syncStatus: 'pending' as const,
+    }
+    await db.putMealPlan(updated)
+    set({ currentPlan: updated })
+  },
+
+  removeRecipeFromPlan: async (recipeId) => {
+    const plan = get().currentPlan
+    if (!plan) return
+    const days = plan.days.map((day) => {
+      const updated: typeof day = {}
+      for (const slot of ['breakfast', 'lunch', 'dinner', 'snack'] as const) {
+        const arr = day[slot]
+        if (arr) {
+          const filtered = arr.filter((id) => id !== recipeId)
+          if (filtered.length > 0) updated[slot] = filtered
+        }
+      }
+      return updated
+    })
+    if (JSON.stringify(days) === JSON.stringify(plan.days)) return
+    const updated = {
+      ...plan,
+      days,
       updatedAt: new Date().toISOString(),
       syncStatus: 'pending' as const,
     }

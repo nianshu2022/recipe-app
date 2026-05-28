@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { NavLink, Link } from 'react-router-dom'
-import { UtensilsCrossed, Refrigerator, CalendarRange, User, Dice5 } from 'lucide-react'
+import { UtensilsCrossed, Refrigerator, CalendarRange, User, Sparkles } from 'lucide-react'
 import { useUIStore } from '@/stores/uiStore'
 
 const leftItems = [
@@ -21,7 +21,7 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: typeof UtensilsC
         `group relative flex flex-col items-center gap-1 rounded-2xl px-4 py-1.5 transition-all duration-200 ${
           isActive
             ? 'text-primary'
-            : 'text-stone-400 hover:text-stone-600'
+            : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'
         }`
       }
     >
@@ -50,7 +50,7 @@ export function BottomNav() {
     if (navRef.current) {
       if (modalOpen) {
         navRef.current.style.backdropFilter = 'none'
-        navRef.current.style.backgroundColor = 'white'
+        navRef.current.style.backgroundColor = 'var(--color-bg-card)'
       } else {
         navRef.current.style.backdropFilter = ''
         navRef.current.style.backgroundColor = ''
@@ -59,18 +59,21 @@ export function BottomNav() {
   }, [modalOpen])
 
   return (
-    <nav ref={navRef} className="fixed bottom-0 left-0 right-0 z-50 border-t border-stone-200/60 bg-white/80 backdrop-blur-xl">
+    <nav ref={navRef} className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)]/60 bg-[var(--color-bg-card)]/80 backdrop-blur-xl transition-colors duration-300">
       <div className="relative mx-auto flex max-w-2xl items-center justify-around px-2 py-2">
         {leftItems.map((item) => (
           <NavItem key={item.to} {...item} />
         ))}
 
-        {/* Center blind box button */}
+        {/* Center button - 味遇 */}
         <Link
           to="/blind-box"
-          className="group relative -mt-6 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent-500)] text-white shadow-lg transition-all duration-200 hover:scale-110 hover:shadow-xl active:scale-95"
+          className="group relative -mt-5 flex flex-col items-center gap-0.5"
         >
-          <Dice5 size={24} strokeWidth={2} />
+          <div className="animate-glow-pulse relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent-500)] text-white transition-all duration-200 hover:scale-110 active:scale-95">
+            <Sparkles size={22} strokeWidth={2} className="relative z-10" />
+          </div>
+          <span className="text-[10px] font-medium tracking-wide text-primary">味遇</span>
         </Link>
 
         {rightItems.map((item) => (

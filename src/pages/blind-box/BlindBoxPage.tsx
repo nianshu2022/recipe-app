@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Package, ChefHat, Flame, Leaf, Soup, Wheat, IceCreamCone, CupSoda,
-  Clock, Users, RotateCcw, ArrowRight, Sparkles,
+  Clock, Users, RotateCcw, ArrowRight, Sparkles, Save,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
+import { getRandomChineseRecipe } from '@/data/chineseRecipes'
 import type { Recipe, Category, Difficulty } from '@/types'
 
 const categoryIcons: Record<Category, typeof ChefHat> = {
@@ -39,12 +40,15 @@ const difficultyColors: Record<Difficulty, string> = {
 }
 
 type Phase = 'idle' | 'shaking' | 'revealed'
+type Source = 'local' | 'recommend'
 
 export function BlindBoxPage() {
   const navigate = useNavigate()
-  const { recipes, loading, loadRecipes } = useRecipeStore()
+  const { recipes, loading, loadRecipes, addRecipe } = useRecipeStore()
   const [phase, setPhase] = useState<Phase>('idle')
   const [result, setResult] = useState<Recipe | null>(null)
+  const [source, setSource] = useState<Source>('local')
+  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     loadRecipes()
@@ -54,6 +58,8 @@ export function BlindBoxPage() {
     if (recipes.length === 0) return
     setPhase('shaking')
     setResult(null)
+    setSource('local')
+    setSaved(false)
 
     setTimeout(() => {
       const picked = recipes[Math.floor(Math.random() * recipes.length)]
@@ -62,29 +68,60 @@ export function BlindBoxPage() {
     }, 850)
   }
 
-  const redraw = () => {
-    setPhase('idle')
+  const drawGlobal = () => {
+    setPhase('shaking')
     setResult(null)
+    setSource('recommend')
+    setSaved(false)
+
+    setTimeout(() => {
+      setResult(getRandomChineseRecipe())
+      setPhase('revealed')
+    }, 850)
+  }
+
+  const redraw = () => {
+    if (source === 'recommend') {
+      drawGlobal()
+    } else {
+      draw()
+    }
+  }
+
+  const handleSave = async () => {
+    if (!result) return
+    const { id, createdAt, updatedAt, syncStatus, ...rest } = result
+    await addRecipe(rest)
+    setSaved(true)
   }
 
   if (loading) {
     return <BrandLoading />
   }
 
-  if (recipes.length === 0) {
+  if (recipes.length === 0 && phase === 'idle') {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--color-bg-subtle)]">
           <Package size={36} className="text-[var(--color-text-muted)]" />
         </div>
         <h3 className="mb-2 text-lg font-medium text-[var(--color-text)]">还没有菜谱</h3>
-        <p className="mb-8 text-sm text-[var(--color-text-muted)]">先去添加几道菜谱吧</p>
-        <button
-          onClick={() => navigate('/recipe/new')}
-          className="rounded-2xl bg-[var(--color-primary)] px-8 py-3 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
-        >
-          创建菜谱
-        </button>
+        <p className="mb-4 text-sm text-[var(--color-text-muted)]">先去添加几道菜谱，或试试随机推荐</p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => navigate('/recipe/new')}
+            className="rounded-2xl bg-[var(--color-primary)] px-8 py-3 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
+          >
+            创建菜谱
+          </button>
+          <button
+            onClick={drawGlobal}
+            className="flex items-center gap-2 rounded-2xl bg-[var(--color-bg-card)] px-6 py-3 text-sm font-medium text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-md active:scale-95"
+          >
+            <Sparkles size={16} />
+            随机推荐
+          </button>
+        </div>
       </div>
     )
   }
@@ -98,8 +135,8 @@ export function BlindBoxPage() {
         </h1>
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           {phase === 'idle' && '让盲盒帮你决定'}
-          {phase === 'shaking' && '正在抽取中...'}
-          {phase === 'revealed' && '盲盒揭晓！'}
+          {phase === 'shaking' && (source === 'recommend' ? '正在随机推荐中...' : '正在抽取中...')}
+          {phase === 'revealed' && (source === 'recommend' ? '随机推荐揭晓！' : '盲盒揭晓！')}
         </p>
       </div>
 
@@ -115,14 +152,22 @@ export function BlindBoxPage() {
               style={{ minHeight: '320px' }}
             >
               <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-[var(--color-primary)]/10">
-                <Package size={48} className="text-[var(--color-primary)]" />
+                {source === 'recommend' ? (
+                  <Sparkles size={48} className="text-[var(--color-primary)]" />
+                ) : (
+                  <Package size={48} className="text-[var(--color-primary)]" />
+                )}
               </div>
               <Sparkles size={20} className="mb-3 text-[var(--color-accent-400)]" />
               <p className="text-base font-medium text-[var(--color-text)]">
-                {phase === 'shaking' ? '摇一摇...' : '点击下方按钮抽取'}
+                {phase === 'shaking'
+                  ? (source === 'recommend' ? '正在挑选中...' : '摇一摇...')
+                  : '点击下方按钮抽取'}
               </p>
               <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                共 {recipes.length} 道菜谱等待被抽中
+                {source === 'recommend'
+                  ? '内置中式菜谱推荐'
+                  : `共 ${recipes.length} 道菜谱等待被抽中`}
               </p>
             </div>
           </div>
@@ -131,17 +176,31 @@ export function BlindBoxPage() {
           {phase === 'revealed' && result && (
             <div className="backface-hidden rotate-y-180 absolute inset-0">
               <div className="flex flex-col rounded-3xl bg-[var(--color-bg-card)] shadow-lg overflow-hidden" style={{ minHeight: '320px' }}>
-                {/* Top gradient */}
-                <div className="flex h-28 items-center justify-center bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent-500)]">
-                  {(() => {
-                    const Icon = categoryIcons[result.category]
-                    return <Icon size={48} className="text-white/80" />
-                  })()}
-                </div>
+                {/* Top - image or gradient */}
+                {result.coverImage ? (
+                  <div className="relative h-28 overflow-hidden">
+                    <img src={result.coverImage} alt={result.name} className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-card)] to-transparent" />
+                  </div>
+                ) : (
+                  <div className="flex h-28 items-center justify-center bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent-500)]">
+                    {(() => {
+                      const Icon = categoryIcons[result.category]
+                      return <Icon size={48} className="text-white/80" />
+                    })()}
+                  </div>
+                )}
 
                 {/* Recipe info */}
                 <div className="flex flex-1 flex-col p-5">
-                  <h2 className="text-xl font-bold text-[var(--color-text)]">{result.name}</h2>
+                  <div className="flex items-start justify-between gap-2">
+                    <h2 className="text-xl font-bold text-[var(--color-text)]">{result.name}</h2>
+                    {source === 'recommend' && (
+                      <span className="shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-600">
+                        推荐
+                      </span>
+                    )}
+                  </div>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${difficultyColors[result.difficulty]}`}>
                       {difficultyLabels[result.difficulty]}
@@ -149,7 +208,7 @@ export function BlindBoxPage() {
                     <span className="rounded-full bg-[var(--color-bg-subtle)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-text-secondary)]">
                       {categoryLabels[result.category]}
                     </span>
-                    {result.tags.slice(0, 2).map((tag) => (
+                    {result.tags.slice(0, 3).map((tag) => (
                       <span key={tag} className="rounded-full bg-[var(--color-bg-subtle)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-text-secondary)]">
                         {tag}
                       </span>
@@ -176,12 +235,22 @@ export function BlindBoxPage() {
       {/* Action buttons */}
       <div className="space-y-3">
         {phase === 'idle' && (
-          <button
-            onClick={draw}
-            className="w-full rounded-2xl bg-[var(--color-primary)] py-4 text-base font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
-          >
-            开始抽取
-          </button>
+          <>
+            <button
+              onClick={draw}
+              className="w-full rounded-2xl bg-[var(--color-primary)] py-4 text-base font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
+            >
+              <Package size={18} className="mr-2 inline" />
+              从我的菜谱抽取
+            </button>
+            <button
+              onClick={drawGlobal}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-bg-card)] py-3.5 text-sm font-medium text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-md active:scale-[0.98]"
+            >
+              <Sparkles size={16} />
+              不知道吃什么？随机推荐
+            </button>
+          </>
         )}
 
         {phase === 'shaking' && (
@@ -190,13 +259,29 @@ export function BlindBoxPage() {
 
         {phase === 'revealed' && result && (
           <>
-            <button
-              onClick={() => navigate(`/recipe/${result.id}`)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] py-4 text-base font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
-            >
-              查看详情
-              <ArrowRight size={18} />
-            </button>
+            {source === 'recommend' && !saved && (
+              <button
+                onClick={handleSave}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-4 text-base font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
+              >
+                <Save size={18} />
+                保存到我的菜谱
+              </button>
+            )}
+            {source === 'recommend' && saved && (
+              <div className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-50 py-4 text-base font-semibold text-emerald-700">
+                已保存
+              </div>
+            )}
+            {source === 'local' && (
+              <button
+                onClick={() => navigate(`/recipe/${result.id}`)}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] py-4 text-base font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
+              >
+                查看详情
+                <ArrowRight size={18} />
+              </button>
+            )}
             <button
               onClick={redraw}
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--color-bg-card)] py-3.5 text-sm font-medium text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-md active:scale-[0.98]"

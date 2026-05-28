@@ -1,0 +1,281 @@
+@import '../../styles/variables.scss';
+@import '../../styles/mixins.scss';
+
+.meal-plan-page {
+  @include page-padding;
+  padding-bottom: 180rpx;
+}
+
+// Header
+.plan-header {
+  @include flex-between;
+  align-items: flex-end;
+  margin-bottom: $space-4;
+}
+
+.plan-header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-title {
+  font-size: $font-size-3xl;
+  font-weight: 600;
+  color: $color-text;
+  letter-spacing: -0.5rpx;
+}
+
+.plan-subtitle {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  margin-top: $space-0-5;
+}
+
+.plan-header-actions {
+  display: flex;
+  gap: $space-1-5;
+}
+
+.plan-action-btn {
+  @include back-button;
+}
+
+// Skeleton
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.skeleton-card {
+  border-radius: $radius-xl;
+  background: $color-bg-card;
+  padding: $space-4;
+  box-shadow: $shadow-sm;
+}
+
+.skeleton-title {
+  width: 128rpx;
+  height: 32rpx;
+  border-radius: $radius-sm;
+  background: $color-bg-subtle;
+  margin-bottom: $space-3;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-1-5;
+}
+
+.skeleton-slot {
+  height: 112rpx;
+  border-radius: $radius-lg;
+  background: $color-bg-subtle;
+}
+
+// Week list
+.week-list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.day-card {
+  border-radius: $radius-xl;
+  background: $color-bg-card;
+  padding: $space-4;
+  box-shadow: $shadow-sm;
+}
+
+.day-card.today {
+  box-shadow: 0 0 0 3rpx rgba($color-primary, 0.15), $shadow-sm;
+}
+
+.day-header {
+  margin-bottom: $space-3;
+}
+
+.day-header-left {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+.day-name {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $color-text;
+}
+
+.day-name.today-text {
+  color: $color-primary;
+}
+
+.day-date {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.today-badge {
+  padding: $space-0-5 $space-2;
+  border-radius: $radius-full;
+  background: $color-primary-bg;
+}
+
+.today-badge-text {
+  font-size: $font-size-xs;
+  font-weight: 500;
+  color: $color-primary;
+}
+
+// Slot grid
+.slot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-1-5;
+}
+
+.slot-card {
+  min-height: 112rpx;
+  border-radius: $radius-lg;
+  padding: $space-2 $space-3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  @include interactive;
+}
+
+.slot-card.empty {
+  border: 2rpx dashed $color-border;
+}
+
+.slot-card.empty:active {
+  background: $color-bg-subtle;
+}
+
+.slot-card.filled {
+  box-shadow: $shadow-sm;
+}
+
+.slot-label {
+  font-size: $font-size-xs;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5rpx;
+  color: $color-text-muted;
+  margin-bottom: $space-0-5;
+}
+
+.slot-recipe {
+  font-size: $font-size-xs;
+  font-weight: 500;
+  @include text-truncate;
+}
+
+.slot-empty {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+// Picker modal
+.picker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $color-overlay;
+  backdrop-filter: blur(8rpx);
+  z-index: $z-overlay;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.picker-sheet {
+  width: 100%;
+  max-height: 60vh;
+  background: $color-bg-card;
+  border-radius: $radius-2xl $radius-2xl 0 0;
+  padding: $space-6;
+  display: flex;
+  flex-direction: column;
+}
+
+.picker-header {
+  @include flex-between;
+  margin-bottom: $space-4;
+}
+
+.picker-title {
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: $color-text;
+}
+
+.picker-close {
+  @include touch-target;
+  border-radius: $radius-sm;
+}
+
+.picker-empty {
+  @include flex-center;
+  padding: $space-8;
+}
+
+.picker-empty-text {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.picker-list {
+  flex: 1;
+  max-height: 480rpx;
+}
+
+.picker-item {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  border-radius: $radius-lg;
+  @include interactive;
+}
+
+.picker-item:active {
+  background: $color-bg-subtle;
+}
+
+.picker-item-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-md;
+  background: $color-bg-subtle;
+  @include flex-center;
+  flex-shrink: 0;
+}
+
+.picker-item-icon-text {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-text-secondary;
+}
+
+.picker-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.picker-item-name {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-text;
+  @include text-truncate;
+}
+
+.picker-item-meta {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin-top: $space-0-5;
+}

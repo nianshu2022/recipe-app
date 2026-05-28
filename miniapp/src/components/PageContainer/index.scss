@@ -1,0 +1,13 @@
+@import '../../styles/variables.scss';
+
+.page-container {
+  min-height: 100vh;
+  background: $color-bg;
+  padding: $space-4;
+  padding-bottom: 180rpx;
+
+  &.no-padding {
+    padding: 0;
+    padding-bottom: 0;
+  }
+}

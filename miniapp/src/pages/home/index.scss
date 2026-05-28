@@ -1,0 +1,488 @@
+@import '../../styles/variables.scss';
+@import '../../styles/mixins.scss';
+
+.home-page {
+  @include page-padding;
+  padding-bottom: 180rpx;
+}
+
+// Sticky Header
+.home-header-sticky {
+  @include sticky-header;
+  margin: -40rpx -40rpx 0;
+  padding: $space-3 $space-5;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.home-header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-title {
+  font-size: $font-size-3xl;
+  font-weight: 600;
+  color: $color-text;
+  letter-spacing: -0.5rpx;
+}
+
+.home-subtitle {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  margin-top: $space-0-5;
+}
+
+.home-add-btn {
+  @include back-button;
+  background: $color-primary;
+  box-shadow: $shadow-md;
+}
+
+.home-add-icon {
+  font-size: $font-size-xl;
+  color: $color-bg-card;
+  font-weight: 300;
+}
+
+// Search
+.search-bar {
+  position: relative;
+  margin-bottom: $space-4;
+}
+
+.search-icon-wrap {
+  position: absolute;
+  left: $space-3;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  @include flex-center;
+}
+
+.search-icon {
+  font-size: $font-size-base;
+}
+
+.search-input {
+  width: 100%;
+  height: $touch-min;
+  background: $color-bg-card;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-xl;
+  padding: 0 $space-4 0 $touch-min;
+  font-size: $font-size-sm;
+  color: $color-text;
+  box-shadow: $shadow-sm;
+}
+
+// Section
+.section {
+  margin-bottom: $space-4;
+}
+
+.section-label {
+  font-size: $font-size-xs;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1rpx;
+  color: $color-text-muted;
+  margin-bottom: $space-2;
+}
+
+.section-title {
+  font-size: $font-size-base;
+  font-weight: 500;
+  color: $color-text;
+  margin-bottom: $space-2;
+}
+
+// Pills
+.pill-scroll {
+  white-space: nowrap;
+  margin-bottom: $space-2;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  padding: $space-2 $space-4;
+  min-height: $touch-min;
+  border-radius: $radius-full;
+  background: $color-bg-card;
+  margin-right: $space-2;
+  flex-shrink: 0;
+  @include interactive;
+}
+
+.pill-active {
+  background: $color-primary;
+  .pill-text { color: $color-bg-card; }
+  .pill-emoji { opacity: 1; }
+}
+
+.pill-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pill-emoji {
+  font-size: $font-size-sm;
+  opacity: 0.8;
+}
+
+.pill-text {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-text-secondary;
+}
+
+// Difficulty filters
+.diff-filters {
+  display: flex;
+  gap: $space-2;
+  margin-bottom: $space-4;
+}
+
+.diff-pill {
+  padding: $space-1-5 $space-3;
+  min-height: $touch-min;
+  border-radius: $radius-full;
+  background: $color-bg-card;
+  flex-shrink: 0;
+  @include interactive;
+}
+
+.diff-pill-active {
+  background: $color-primary;
+  .diff-pill-text { color: $color-bg-card; }
+}
+
+.diff-pill-text {
+  font-size: $font-size-xs;
+  font-weight: 500;
+  color: $color-text-secondary;
+}
+
+// Scene grid (2-column)
+.scene-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-3;
+}
+
+.scene-card {
+  border-radius: $radius-xl;
+  background: $color-bg-card;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  @include interactive;
+}
+
+.scene-card-icon-area {
+  height: 192rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, $color-primary-bg, $color-bg-subtle);
+}
+
+.scene-card-icon {
+  font-size: 64rpx;
+}
+
+.scene-card-body {
+  padding: $space-3;
+}
+
+.scene-card-name {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scene-card-meta {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin-top: $space-0-5;
+}
+
+// Quick/Seasonal cards horizontal scroll
+.card-scroll {
+  white-space: nowrap;
+}
+
+.quick-card {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3;
+  border-radius: $radius-xl;
+  background: $color-bg-card;
+  box-shadow: $shadow-sm;
+  margin-right: $space-3;
+  flex-shrink: 0;
+  @include interactive;
+}
+
+.quick-card-icon-box {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: $radius-lg;
+  background: $color-bg-subtle;
+  @include flex-center;
+  flex-shrink: 0;
+}
+
+.quick-card-icon-box.seasonal {
+  background: $color-primary-bg;
+}
+
+.quick-card-icon {
+  font-size: $font-size-xl;
+}
+
+.quick-card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-card-name {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-text;
+}
+
+.quick-card-meta {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin-top: $space-0-5;
+}
+
+// Skeleton loading
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.skeleton-card {
+  display: flex;
+  gap: $space-4;
+  padding: $space-4;
+  border-radius: $radius-xl;
+  background: $color-bg-card;
+  box-shadow: $shadow-sm;
+}
+
+.skeleton-img {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: $radius-lg;
+  background: $color-bg-subtle;
+  flex-shrink: 0;
+}
+
+.skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding: $space-1 0;
+}
+
+.skeleton-line {
+  height: $space-3;
+  border-radius: $radius-sm;
+  background: $color-bg-subtle;
+}
+
+.skeleton-line-1 { width: 160rpx; }
+.skeleton-line-2 { width: 280rpx; }
+.skeleton-line-3 { width: 120rpx; }
+
+// Empty state
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $space-8 0;
+}
+
+.empty-icon-box {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: $radius-2xl;
+  background: $color-bg-subtle;
+  @include flex-center;
+  margin-bottom: $space-5;
+}
+
+.empty-icon {
+  font-size: 72rpx;
+}
+
+.empty-title {
+  font-size: $font-size-lg;
+  font-weight: 500;
+  color: $color-text;
+  margin-bottom: $space-2;
+}
+
+.empty-desc {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  margin-bottom: $space-6;
+}
+
+.empty-actions {
+  display: flex;
+  gap: $space-3;
+}
+
+.empty-btn-primary {
+  padding: $space-3 $space-6;
+  min-height: $touch-min;
+  border-radius: $radius-xl;
+  background: $color-primary;
+  box-shadow: $shadow-md;
+  @include interactive;
+}
+
+.empty-btn-primary-text {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-bg-card;
+}
+
+.empty-btn-secondary {
+  padding: $space-3 $space-6;
+  min-height: $touch-min;
+  border-radius: $radius-xl;
+  background: $color-bg-card;
+  box-shadow: $shadow-sm;
+  @include interactive;
+}
+
+.empty-btn-secondary-text {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-text-secondary;
+}
+
+// Recipe list
+.recipe-list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.recipe-card {
+  display: flex;
+  gap: $space-4;
+  padding: $space-4;
+  border-radius: $radius-xl;
+  background: $color-bg-card;
+  box-shadow: $shadow-sm;
+  @include interactive;
+}
+
+.recipe-card-icon-box {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: $radius-lg;
+  background: linear-gradient(135deg, $color-bg-subtle, $color-bg);
+  @include flex-center;
+  flex-shrink: 0;
+}
+
+.recipe-card-icon {
+  font-size: $font-size-3xl;
+}
+
+.recipe-card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: $space-0-5 0;
+}
+
+.recipe-card-name {
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: $color-text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recipe-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-1;
+  margin-top: $space-1;
+}
+
+.recipe-card-diff {
+  font-size: $font-size-xs;
+  font-weight: 500;
+  padding: $space-0-5 $space-2;
+  border-radius: $radius-full;
+}
+
+.diff-easy {
+  background: $color-success-bg;
+  color: $color-success;
+}
+
+.diff-medium {
+  background: $color-warning-bg;
+  color: $color-warning;
+}
+
+.diff-hard {
+  background: $color-danger-bg;
+  color: $color-danger;
+}
+
+.recipe-card-tag {
+  font-size: $font-size-xs;
+  font-weight: 500;
+  padding: $space-0-5 $space-2;
+  border-radius: $radius-full;
+  background: $color-bg-subtle;
+  color: $color-text-secondary;
+}
+
+.recipe-card-footer {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  margin-top: $space-1;
+}
+
+.recipe-card-time {
+  display: flex;
+  align-items: center;
+  gap: $space-0-5;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.recipe-card-time-text {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.recipe-card-servings {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}

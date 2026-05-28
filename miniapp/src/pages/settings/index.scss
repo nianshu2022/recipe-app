@@ -1,0 +1,208 @@
+@import '../../styles/variables.scss';
+@import '../../styles/mixins.scss';
+
+.settings-page {
+  @include page-padding;
+  padding-bottom: 180rpx;
+}
+
+// Sticky Header
+.settings-header {
+  @include sticky-header;
+  margin: -$space-5 -$space-4 0;
+  padding: $space-3 $space-5;
+}
+
+.settings-title {
+  font-size: $font-size-3xl;
+  font-weight: 600;
+  color: $color-text;
+  letter-spacing: -0.5rpx;
+}
+
+// Profile Card
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+  @include card;
+  padding: $space-5;
+  margin-bottom: $space-4;
+  margin-top: $space-4;
+}
+
+.profile-avatar {
+  width: $space-8;
+  height: $space-8;
+  border-radius: $radius-xl;
+  background: linear-gradient(135deg, $color-bg-subtle, $color-bg);
+  @include flex-center;
+  flex-shrink: 0;
+}
+
+.profile-avatar-icon {
+  font-size: $space-6;
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-name {
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: $color-text;
+  display: block;
+}
+
+.profile-email {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  margin-top: $space-0-5;
+  display: block;
+}
+
+.sync-btn {
+  @include touch-target;
+  border-radius: $radius-lg;
+  background: $color-bg;
+  box-shadow: $shadow-sm;
+  flex-shrink: 0;
+  @include interactive;
+}
+
+.sync-btn.syncing {
+  opacity: 0.5;
+}
+
+.sync-btn-icon {
+  font-size: $space-4;
+}
+
+// Section
+.section {
+  margin-bottom: $space-4;
+}
+
+.section-label {
+  font-size: $font-size-xs;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1rpx;
+  color: $color-text-muted;
+  margin-bottom: $space-2;
+}
+
+// Theme Card
+.theme-card {
+  display: flex;
+  gap: $space-1;
+  padding: $space-1-5;
+  border-radius: $radius-xl;
+  background: $color-bg-card;
+  box-shadow: $shadow-sm;
+}
+
+.theme-btn {
+  flex: 1;
+  @include flex-center;
+  gap: $space-1;
+  padding: $space-3 0;
+  border-radius: $radius-lg;
+  @include interactive;
+}
+
+.theme-btn.active {
+  background: $color-primary;
+  box-shadow: $shadow-sm;
+  .theme-btn-text { color: $color-bg-card; }
+}
+
+.theme-btn-icon {
+  font-size: $space-3;
+}
+
+.theme-btn-text {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-text-secondary;
+}
+
+// Menu Card
+.menu-card {
+  border-radius: $radius-xl;
+  background: $color-bg-card;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+}
+
+.menu-item {
+  @include flex-between;
+  padding: $space-3 $space-5;
+  @include interactive;
+}
+
+.menu-item.has-border {
+  border-top: 1rpx solid $color-border-light;
+}
+
+.menu-item-left {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+.menu-item-icon {
+  font-size: $space-4;
+}
+
+.menu-item-label {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-text;
+}
+
+.menu-item-arrow {
+  font-size: $space-4;
+  color: $color-text-muted;
+}
+
+// Logout Button
+.logout-btn {
+  @include flex-center;
+  gap: $space-2;
+  padding: $space-3;
+  border-radius: $radius-xl;
+  background: $color-bg-card;
+  box-shadow: $shadow-sm;
+  margin-bottom: $space-4;
+  @include interactive;
+}
+
+.logout-btn-icon {
+  font-size: $space-3;
+}
+
+.logout-btn-text {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-danger;
+}
+
+// Footer
+.footer {
+  text-align: center;
+  padding: $space-4 0;
+}
+
+.footer-text {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.footer-sub {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin-top: $space-0-5;
+}

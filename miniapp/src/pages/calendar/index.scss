@@ -1,0 +1,192 @@
+@import '../../styles/variables.scss';
+@import '../../styles/mixins.scss';
+
+.calendar-page {
+  @include page-padding;
+  padding-bottom: 180rpx;
+}
+
+.stats-row {
+  display: flex;
+  gap: $space-2;
+  margin-bottom: $space-4;
+}
+
+.stats-card {
+  flex: 1;
+  @include card;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  padding: $space-3;
+}
+
+.stats-value {
+  font-size: $font-size-2xl;
+  font-weight: 700;
+  color: $color-primary;
+  margin-bottom: $space-1;
+}
+
+.stats-label {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.month-header {
+  @include flex-between;
+  margin-bottom: $space-3;
+}
+
+.month-arrow {
+  width: $touch-min;
+  height: $touch-min;
+  @include flex-center;
+  @include interactive;
+  border-radius: $radius-full;
+  background: $color-bg-card;
+}
+
+.month-arrow-text {
+  font-size: $font-size-xl;
+  color: $color-text;
+  font-weight: 600;
+}
+
+.month-title {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: $color-text;
+}
+
+.weekday-row {
+  display: flex;
+  margin-bottom: $space-2;
+}
+
+.weekday-cell {
+  flex: 1;
+  @include flex-center;
+}
+
+.weekday-text {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  font-weight: 600;
+}
+
+.calendar-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: $space-4;
+}
+
+.calendar-cell {
+  width: 14.28%;
+  aspect-ratio: 1;
+  @include flex-center;
+  @include interactive;
+  flex-direction: column;
+  position: relative;
+
+  &.empty {
+    visibility: hidden;
+  }
+
+  &.selected {
+    background: $color-primary;
+    border-radius: $radius-full;
+  }
+
+  &.today {
+    .calendar-day {
+      color: $color-primary;
+      font-weight: 700;
+    }
+  }
+}
+
+.calendar-day {
+  font-size: $font-size-sm;
+  color: $color-text;
+}
+
+.calendar-day.selected-text {
+  color: $color-bg-card;
+}
+
+.calendar-dot {
+  width: $space-1;
+  height: $space-1;
+  border-radius: $radius-full;
+  background: $color-primary;
+  position: absolute;
+  bottom: $space-1;
+}
+
+.calendar-cell.selected .calendar-dot {
+  background: $color-bg-card;
+}
+
+.records-section {
+  @include card;
+  padding: $space-4;
+}
+
+.records-title {
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: $color-text;
+  margin-bottom: $space-3;
+}
+
+.records-empty {
+  @include flex-center;
+  padding: $space-4;
+}
+
+.records-empty-text {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.record-card {
+  @include flex-between;
+  padding: $space-3;
+  background: $color-bg-subtle;
+  border-radius: $radius-lg;
+  margin-bottom: $space-2;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.record-info {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.record-name {
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: $color-text;
+}
+
+.record-servings {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.record-delete {
+  padding: $space-1 $space-3;
+  border-radius: $radius-full;
+  background: $color-danger-bg;
+  @include interactive;
+}
+
+.record-delete-text {
+  font-size: $font-size-xs;
+  color: $color-danger;
+}

@@ -79,12 +79,12 @@ export function RecipeDetailPage() {
     <div className="space-y-8">
       {/* Header - sticky */}
       <div className="sticky top-0 z-40 -mx-4 -mt-4 flex items-center gap-3 bg-[var(--color-bg)]/95 px-4 py-3 backdrop-blur-sm">
-        <Link
-          to="/"
+        <button
+          onClick={() => navigate(-1)}
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
         >
           <ArrowLeft size={18} className="text-stone-600" />
-        </Link>
+        </button>
         <h1 className="flex-1 truncate font-display text-lg font-semibold tracking-tight text-stone-900">
           {recipe.name}
         </h1>
@@ -270,7 +270,7 @@ export function RecipeDetailPage() {
         <button
           onClick={async () => {
             await generateFromRecipe(recipe.id, servings)
-            window.location.href = '/shopping'
+            navigate('/shopping')
           }}
           className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-stone-200 bg-white py-4 text-sm font-medium text-stone-700 shadow-xs transition-all duration-200 hover:shadow-sm active:scale-[0.98]"
         >

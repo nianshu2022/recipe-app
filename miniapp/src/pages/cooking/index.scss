@@ -1,0 +1,216 @@
+@import '../../styles/variables.scss';
+@import '../../styles/mixins.scss';
+
+.cooking-page {
+  min-height: 100vh;
+  background: $color-bg;
+  display: flex;
+  flex-direction: column;
+}
+
+.cooking-topbar {
+  @include flex-between;
+  padding: 80rpx $space-4 $space-3;
+  background: $color-bg-card;
+  box-shadow: $shadow-sm;
+}
+
+.cooking-back {
+  @include back-button;
+}
+
+.cooking-back-icon {
+  font-size: $font-size-xl;
+  color: $color-text;
+  font-weight: 600;
+}
+
+.cooking-title {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: $color-text;
+}
+
+.cooking-spacer {
+  width: $touch-min;
+}
+
+.cooking-progress {
+  padding: $space-3 $space-4;
+  background: $color-bg-card;
+}
+
+.cooking-progress-bar {
+  height: $space-1;
+  background: $color-border-light;
+  border-radius: $radius-full;
+  overflow: hidden;
+  margin-bottom: $space-1;
+}
+
+.cooking-progress-fill {
+  height: 100%;
+  background: $color-primary;
+  border-radius: $radius-full;
+  transition: $transition-base;
+}
+
+.cooking-progress-text {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  text-align: center;
+  display: block;
+}
+
+.cooking-step {
+  flex: 1;
+  padding: $space-6 $space-4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-badge {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: $radius-full;
+  background: $color-primary;
+  @include flex-center;
+  margin-bottom: $space-4;
+}
+
+.step-badge-text {
+  font-size: $font-size-2xl;
+  color: $color-bg-card;
+  font-weight: 700;
+}
+
+.step-description {
+  font-size: $font-size-xl;
+  color: $color-text;
+  line-height: 1.6;
+  text-align: center;
+  margin-bottom: $space-6;
+  padding: 0 $space-2;
+}
+
+.step-timer {
+  @include card;
+  width: 100%;
+  padding: $space-5;
+  margin-bottom: $space-4;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.step-timer-display {
+  font-size: 96rpx;
+  font-weight: 700;
+  color: $color-primary;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: $space-4;
+}
+
+.step-timer-controls {
+  display: flex;
+  gap: $space-3;
+}
+
+.timer-btn {
+  padding: $space-2 $space-5;
+  border-radius: $radius-full;
+  background: $color-primary;
+  @include flex-center;
+  @include interactive;
+}
+
+.timer-btn-secondary {
+  background: $color-bg-subtle;
+}
+
+.timer-btn-text {
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: $color-bg-card;
+}
+
+.timer-btn-secondary .timer-btn-text {
+  color: $color-text-secondary;
+}
+
+.step-tip {
+  width: 100%;
+  @include card;
+  padding: $space-3 $space-4;
+  background: $color-warning-bg;
+  margin-bottom: $space-4;
+}
+
+.step-tip-label {
+  font-size: $font-size-xs;
+  color: $color-warning;
+  font-weight: 600;
+  margin-bottom: $space-1;
+  display: block;
+}
+
+.step-tip-text {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.5;
+}
+
+.cooking-bottom {
+  display: flex;
+  gap: $space-3;
+  padding: $space-4;
+  background: $color-bg-card;
+  box-shadow: $shadow-sm;
+  padding-bottom: calc(#{$space-4} + env(safe-area-inset-bottom));
+}
+
+.cooking-btn {
+  flex: 1;
+  height: $btn-height;
+  border-radius: $radius-full;
+  @include flex-center;
+  @include interactive;
+}
+
+.cooking-btn-primary {
+  background: $color-primary;
+}
+
+.cooking-btn-secondary {
+  background: $color-bg-subtle;
+}
+
+.cooking-btn-success {
+  background: $color-success;
+}
+
+.cooking-btn.disabled {
+  opacity: 0.4;
+}
+
+.cooking-btn-text {
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: $color-text-secondary;
+}
+
+.cooking-btn-text-primary {
+  color: $color-bg-card;
+}
+
+.cooking-loading {
+  flex: 1;
+  @include flex-center;
+  min-height: 100vh;
+}
+
+.cooking-loading-text {
+  font-size: $font-size-base;
+  color: $color-text-muted;
+}

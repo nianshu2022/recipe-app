@@ -26,7 +26,7 @@ const slotColors: Record<MealSlot, string> = {
 }
 
 export function MealPlanPage() {
-  const { currentPlan, loading, loadCurrentWeek, setMeals, removeMeal, clearPlan, getWeekDates, getSlotLabel, getDayLabel } =
+  const { currentPlan, loading, loadCurrentWeek, setMeals, removeMeal, clearPlan, cleanupStaleRecipes, getWeekDates, getSlotLabel, getDayLabel } =
     useMealPlanStore()
   const { recipes, loadRecipes } = useRecipeStore()
   const { generateFromRecipes } = useShoppingStore()
@@ -52,6 +52,12 @@ export function MealPlanPage() {
     loadCurrentWeek()
     loadRecipes()
   }, [loadCurrentWeek, loadRecipes])
+
+  useEffect(() => {
+    if (currentPlan && recipes.length > 0) {
+      cleanupStaleRecipes(new Set(recipes.map((r) => r.id)))
+    }
+  }, [currentPlan, recipes, cleanupStaleRecipes])
 
   const weekDates = getWeekDates()
   const today = new Date()

@@ -116,80 +116,83 @@
 }
 
 /* Base styles */
-* {
-  -webkit-tap-highlight-color: transparent;
-}
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
 
-html {
-  font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--color-text);
-  background-color: var(--color-bg);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
+  html {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 
-body {
-  margin: 0;
-}
+  body {
+    margin: 0;
+  }
 
-#root {
-  min-height: 100%;
-}
+  #root {
+    min-height: 100%;
+  }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-stone-300);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-stone-400);
-}
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-stone-300);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-stone-400);
+  }
 
-/* Selection */
-::selection {
-  background: var(--color-accent-200);
-  color: var(--color-accent-800);
-}
+  /* Selection */
+  ::selection {
+    background: var(--color-accent-200);
+    color: var(--color-accent-800);
+  }
 
-/* Focus styles */
-:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
+  /* Focus styles */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
 
-/* Smooth transitions for interactive elements */
-button, a, input, select, textarea {
-  transition: all var(--duration-fast) var(--ease-out);
-}
+  /* Smooth transitions for interactive elements */
+  button, a, input, select, textarea {
+    transition: all var(--duration-fast) var(--ease-out);
+  }
 
-/* Prevent iOS Safari from auto-zooming when focusing inputs (font-size must be >= 16px) */
-@media (max-width: 768px) {
-  input, select, textarea {
-    font-size: 16px !important;
+  /* Prevent iOS Safari from auto-zooming when focusing inputs (font-size must be >= 16px) */
+  @media (max-width: 768px) {
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  /* Placeholder styling */
+  ::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  /* Image defaults */
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
   }
 }
 
-/* Placeholder styling */
-::placeholder {
-  color: var(--color-text-muted);
-}
-
-/* Image defaults */
-img {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
 
 /* Blind box shake animation */
 @keyframes shake {
@@ -220,4 +223,14 @@ img {
 
 .rotate-y-180 {
   transform: rotateY(180deg);
+}
+
+/* Glow pulse for center nav button */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(201, 88, 58, 0.25), 0 0 0 0 rgba(201, 88, 58, 0); }
+  50% { box-shadow: 0 4px 20px rgba(201, 88, 58, 0.4), 0 0 12px 2px rgba(201, 88, 58, 0.15); }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2.5s ease-in-out infinite;
 }

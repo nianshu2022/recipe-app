@@ -1,0 +1,156 @@
+@import './variables.scss';
+
+@mixin card {
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  padding: $space-4;
+  box-shadow: $shadow-sm;
+}
+
+@mixin card-elevated {
+  @include card;
+  box-shadow: $shadow-md;
+}
+
+@mixin badge($bg, $text) {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  background: $bg;
+  color: $text;
+}
+
+@mixin badge-primary {
+  @include badge($color-primary-bg, $color-primary);
+}
+
+@mixin badge-success {
+  @include badge($color-success-bg, $color-success);
+}
+
+@mixin badge-warning {
+  @include badge($color-warning-bg, $color-warning);
+}
+
+@mixin badge-danger {
+  @include badge($color-danger-bg, $color-danger);
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky;
+  background: $color-bg-transparent;
+  backdrop-filter: blur(20rpx);
+}
+
+@mixin page-padding {
+  padding: $space-5 $space-4 $space-8;
+}
+
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-clamp($lines: 2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $lines;
+}
+
+@mixin back-button {
+  @include flex-center;
+  width: $touch-min;
+  height: $touch-min;
+  border-radius: $radius-lg;
+  background: $color-bg-card;
+  box-shadow: $shadow-sm;
+  transition: $transition-fast;
+
+  &:active {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+}
+
+@mixin touch-target {
+  min-width: $touch-min;
+  min-height: $touch-min;
+  @include flex-center;
+}
+
+@mixin interactive {
+  transition: $transition-fast;
+
+  &:active {
+    opacity: 0.7;
+    transform: scale(0.97);
+  }
+}
+
+@mixin btn-primary {
+  height: $btn-height;
+  @include flex-center;
+  border-radius: $radius-xl;
+  background: $color-text;
+  color: $color-bg-card;
+  font-size: $font-size-base;
+  font-weight: 600;
+  transition: $transition-fast;
+
+  &:active {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+}
+
+@mixin btn-secondary {
+  height: $btn-height;
+  @include flex-center;
+  border-radius: $radius-xl;
+  background: $color-bg-card;
+  color: $color-text;
+  font-size: $font-size-base;
+  font-weight: 500;
+  box-shadow: $shadow-sm;
+  transition: $transition-fast;
+
+  &:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+@mixin input-field {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 $space-4;
+  border-radius: $radius-lg;
+  border: 2rpx solid $color-border;
+  background: $color-bg-card;
+  font-size: $font-size-base;
+  color: $color-text;
+  transition: $transition-fast;
+
+  &:focus {
+    border-color: $color-text-muted;
+  }
+}

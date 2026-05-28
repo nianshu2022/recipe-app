@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, ShoppingCart, Plus, Trash2, Check, X, ChevronDown, Eraser,
 } from 'lucide-react'
@@ -7,6 +7,7 @@ import { useShoppingStore } from '@/stores/shoppingStore'
 import type { ShoppingItem } from '@/types'
 
 export function ShoppingListPage() {
+  const navigate = useNavigate()
   const {
     lists, currentListId, loadLists, toggleItem, addItem, removeItem,
     clearChecked, deleteList, setCurrentList,
@@ -54,12 +55,12 @@ export function ShoppingListPage() {
     return (
       <div className="space-y-8">
         <div className="flex items-center gap-3">
-          <Link
-            to="/settings"
+          <button
+            onClick={() => navigate(-1)}
             className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
           >
             <ArrowLeft size={18} className="text-stone-600" />
-          </Link>
+          </button>
           <h1 className="font-display text-2xl font-semibold tracking-tight text-stone-900">
             购物清单
           </h1>
@@ -85,12 +86,12 @@ export function ShoppingListPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link
-          to="/settings"
+        <button
+          onClick={() => navigate(-1)}
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
         >
           <ArrowLeft size={18} className="text-stone-600" />
-        </Link>
+        </button>
         <div className="flex-1">
           <h1 className="font-display text-2xl font-semibold tracking-tight text-stone-900">
             购物清单

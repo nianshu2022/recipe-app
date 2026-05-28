@@ -4,7 +4,7 @@ import {
   Search, Plus, Dice5, Clock, ChefHat, Flame, Leaf, Soup, Wheat, IceCreamCone, CupSoda,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
-import { seedSampleRecipes } from '@/utils/sampleRecipes'
+import { getRandomChineseRecipes } from '@/data/chineseRecipes'
 import { BrandLoading } from '@/components/ui/BrandLoading'
 import type { Category, Difficulty } from '@/types'
 
@@ -59,7 +59,11 @@ export function HomePage() {
   }, [searchParams, searchQuery, setSearchQuery])
 
   const handleImportSamples = async () => {
-    await seedSampleRecipes()
+    const { db } = await import('@/db')
+    const samples = getRandomChineseRecipes(5)
+    for (const recipe of samples) {
+      await db.putRecipe(recipe)
+    }
     await loadRecipes()
   }
 

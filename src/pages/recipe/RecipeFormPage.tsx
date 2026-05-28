@@ -164,7 +164,7 @@ export function RecipeFormPage() {
       {/* Basic info */}
       <div className="space-y-5">
         <div>
-          <label className="mb-2 block text-sm font-medium text-stone-700">菜名</label>
+          <label className="mb-2 block text-sm font-medium text-stone-700">菜名<span className="ml-0.5 text-red-500">*</span></label>
           <input
             type="text"
             value={name}
@@ -263,16 +263,7 @@ export function RecipeFormPage() {
 
       {/* Ingredients */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold text-stone-900">用料</h2>
-          <button
-            onClick={addIngredient}
-            className="flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary-dark"
-          >
-            <Plus size={14} />
-            添加
-          </button>
-        </div>
+        <h2 className="font-display text-lg font-semibold text-stone-900">用料<span className="ml-1 text-xs font-normal text-red-500">*必填</span></h2>
         <div className="space-y-2">
           {ingredients.map((ing) => (
             <div key={ing.id} className="flex items-center gap-2">
@@ -293,7 +284,7 @@ export function RecipeFormPage() {
               <select
                 value={ing.unit}
                 onChange={(e) => updateIngredient(ing.id, 'unit', e.target.value)}
-                className="w-14 appearance-none rounded-xl border border-stone-200 bg-white px-1 py-2.5 text-sm text-stone-800 shadow-xs outline-none transition-all duration-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 sm:w-16"
+                className={`w-14 appearance-none rounded-xl border border-stone-200 bg-white px-1 py-2.5 text-sm shadow-xs outline-none transition-all duration-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 sm:w-16 ${ing.unit ? 'text-stone-800' : 'text-stone-400'}`}
               >
                 <option value="">单位</option>
                 {UNIT_OPTIONS.map((u) => (
@@ -309,20 +300,18 @@ export function RecipeFormPage() {
             </div>
           ))}
         </div>
+        <button
+          onClick={addIngredient}
+          className="flex w-full items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-stone-200 py-2.5 text-sm font-medium text-stone-400 transition-colors hover:border-stone-300 hover:text-stone-600"
+        >
+          <Plus size={14} />
+          添加用料
+        </button>
       </div>
 
       {/* Steps */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold text-stone-900">步骤</h2>
-          <button
-            onClick={addStep}
-            className="flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary-dark"
-          >
-            <Plus size={14} />
-            添加
-          </button>
-        </div>
+        <h2 className="font-display text-lg font-semibold text-stone-900">步骤<span className="ml-1 text-xs font-normal text-red-500">*必填</span></h2>
         <div className="space-y-3">
           {steps.map((step, index) => (
             <div key={index} className="rounded-2xl bg-white p-4 shadow-xs">
@@ -363,6 +352,13 @@ export function RecipeFormPage() {
             </div>
           ))}
         </div>
+        <button
+          onClick={addStep}
+          className="flex w-full items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-stone-200 py-2.5 text-sm font-medium text-stone-400 transition-colors hover:border-stone-300 hover:text-stone-600"
+        >
+          <Plus size={14} />
+          添加步骤
+        </button>
       </div>
     </div>
   )

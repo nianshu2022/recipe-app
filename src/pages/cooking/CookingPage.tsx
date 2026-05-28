@@ -66,12 +66,11 @@ export function CookingPage() {
   }
 
   useEffect(() => {
-    if (timerRunning && timerSeconds > 0) {
+    if (timerRunning) {
       timerRef.current = setInterval(() => {
         setTimerSeconds((s) => {
           if (s <= 1) {
             setTimerRunning(false)
-            // Notify when timer ends
             if ('Notification' in window && Notification.permission === 'granted') {
               new Notification('计时结束', { body: '步骤计时已完成！' })
             }
@@ -84,14 +83,16 @@ export function CookingPage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [timerRunning, timerSeconds])
+  }, [timerRunning])
 
-  // Auto-start timer when step has timer
+  // Prepare timer when step changes (don't auto-start)
   useEffect(() => {
     if (recipe && !completed) {
       const stepTimer = recipe.steps[currentStep]?.timer
       if (stepTimer) {
-        startTimer(stepTimer * 60)
+        setTimerTotal(stepTimer * 60)
+        setTimerSeconds(stepTimer * 60)
+        setTimerRunning(false)
       } else {
         setTimerRunning(false)
         setTimerSeconds(0)
@@ -101,13 +102,21 @@ export function CookingPage() {
   }, [currentStep, recipe, completed])
 
   // Fullscreen
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen?.()
-      setIsFullscreen(true)
-    } else {
-      document.exitFullscreen?.()
-      setIsFullscreen(false)
+  useEffect(() => {
+    const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
+  }, [])
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen()
+      } else {
+        await document.exitFullscreen()
+      }
+    } catch {
+      // ignore
     }
   }
 
