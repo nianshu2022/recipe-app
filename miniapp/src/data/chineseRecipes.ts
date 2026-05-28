@@ -713,7 +713,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { order: 1, description: '鸡腿肉、土豆、胡萝卜切块，洋葱切丝' },
       { order: 2, description: '锅中少油，炒香洋葱至透明，放入鸡肉炒至变色' },
       { order: 3, description: '加入土豆和胡萝卜翻炒，加水没过食材，大火烧开转中火煮15分钟', timer: 900 },
-      { order: 4, description: '关火放入咖喱块搅化，小火再煮5分钟至浓稠，浇在米饭上', timer: 300' },
+      { order: 4, description: '关火放入咖喱块搅化，小火再煮5分钟至浓稠，浇在米饭上', timer: 300 },
     ],
   },
   {
@@ -907,7 +907,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { id: 'i5', name: '小苏打', amount: 2, unit: '克', type: 'seasoning', scalable: false },
     ],
     steps: [
-      { order: 1, description: '五花肉冷水下锅煮20分钟捞出，皮面用叉子扎密密的小孔', timer: 1200' },
+      { order: 1, description: '五花肉冷水下锅煮20分钟捞出，皮面用叉子扎密密的小孔', timer: 1200 },
       { order: 2, description: '肉面切网格不要切断皮，抹上五香粉和盐' },
       { order: 3, description: '皮面刷白醋和小苏打，放冰箱冷藏4小时风干', timer: 14400 },
       { order: 4, description: '烤箱220°C烤40分钟至表皮爆裂酥脆', timer: 2400 },
