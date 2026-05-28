@@ -28,32 +28,6 @@ export function CookingPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const alarmRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const handleVoiceCommand = useCallback((transcript: string) => {
-    if (!recipe) return
-    const steps = recipe.steps
-    matchCommand(transcript, {
-      '下一步|下一个': () => setCurrentStep((s) => Math.min(s + 1, steps.length - 1)),
-      '上一步|上一个': () => setCurrentStep((s) => Math.max(0, s - 1)),
-      '完成|做好了|做完了': () => setCompleted(true),
-      '开始计时|计时': () => {
-        const timer = steps[currentStep]?.timer
-        if (timer) startTimer(timer * 60)
-      },
-      '暂停|停止|关闭': () => { setTimerRunning(false); stopAlarm() },
-      '继续': () => setTimerRunning(true),
-      '重复|再说一遍': () => {
-        const utterance = new SpeechSynthesisUtterance(steps[currentStep]?.description)
-        utterance.lang = 'zh-CN'
-        speechSynthesis.speak(utterance)
-      },
-    })
-  }, [recipe, currentStep, stopAlarm])
-
-  const { isListening } = useVoiceControl({
-    enabled: voiceEnabled && !completed,
-    onCommand: handleVoiceCommand,
-  })
-
   // Play a single beep pattern using Web Audio API
   const playBeepPattern = useCallback(() => {
     try {
@@ -93,6 +67,32 @@ export function CookingPage() {
       playBeepPattern()
     }, 1500)
   }, [playBeepPattern])
+
+  const handleVoiceCommand = useCallback((transcript: string) => {
+    if (!recipe) return
+    const steps = recipe.steps
+    matchCommand(transcript, {
+      '下一步|下一个': () => setCurrentStep((s) => Math.min(s + 1, steps.length - 1)),
+      '上一步|上一个': () => setCurrentStep((s) => Math.max(0, s - 1)),
+      '完成|做好了|做完了': () => setCompleted(true),
+      '开始计时|计时': () => {
+        const timer = steps[currentStep]?.timer
+        if (timer) startTimer(timer * 60)
+      },
+      '暂停|停止|关闭': () => { setTimerRunning(false); stopAlarm() },
+      '继续': () => setTimerRunning(true),
+      '重复|再说一遍': () => {
+        const utterance = new SpeechSynthesisUtterance(steps[currentStep]?.description)
+        utterance.lang = 'zh-CN'
+        speechSynthesis.speak(utterance)
+      },
+    })
+  }, [recipe, currentStep, stopAlarm])
+
+  const { isListening } = useVoiceControl({
+    enabled: voiceEnabled && !completed,
+    onCommand: handleVoiceCommand,
+  })
 
   // Timer functions
   const startTimer = (seconds: number) => {
