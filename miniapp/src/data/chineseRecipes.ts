@@ -72,7 +72,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { id: 'i11', name: '淀粉', amount: 10, unit: '克', type: 'seasoning', scalable: true },
     ],
     steps: [
-      { order: 1, description: '鸡胸肉切丁，加酱油、淀粉腌制15分钟', timer: 900 },
+      { order: 1, description: '鸡胸肉切丁，加酱油、淀粉腌制15分钟', timer: 15 },
       { order: 2, description: '调碗汁：酱油、醋、糖、淀粉、少许水混合' },
       { order: 3, description: '热油炒花生米至酥脆盛出' },
       { order: 4, description: '锅中爆香干辣椒、花椒，放入鸡丁滑炒变色' },
@@ -102,7 +102,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { order: 1, description: '五花肉切块，冷水下锅焯水去腥，捞出沥干' },
       { order: 2, description: '锅中少油，小火炒化冰糖至焦糖色' },
       { order: 3, description: '放入五花肉翻炒上色，加入姜片、八角、桂皮、葱段' },
-      { order: 4, description: '加入酱油、料酒和没过肉的热水，大火烧开转小火炖60分钟', timer: 3600 },
+      { order: 4, description: '加入酱油、料酒和没过肉的热水，大火烧开转小火炖60分钟', timer: 60 },
       { order: 5, description: '大火收汁至浓稠即可' },
     ],
   },
@@ -126,9 +126,9 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { id: 'i8', name: '淀粉', amount: 5, unit: '克', type: 'seasoning', scalable: true },
     ],
     steps: [
-      { order: 1, description: '豆腐切小块，入淡盐水中浸泡5分钟', timer: 300 },
+      { order: 1, description: '豆腐切小块，入淡盐水中浸泡5分钟', timer: 5 },
       { order: 2, description: '热油炒香肉末，加豆瓣酱、姜末、蒜末炒出红油' },
-      { order: 3, description: '加适量水烧开，放入豆腐块小火煮3分钟入味', timer: 180 },
+      { order: 3, description: '加适量水烧开，放入豆腐块小火煮3分钟入味', timer: 3 },
       { order: 4, description: '水淀粉勾芡，撒花椒粉和葱花出锅' },
     ],
   },
@@ -154,7 +154,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { id: 'i10', name: '淀粉', amount: 10, unit: '克', type: 'seasoning', scalable: true },
     ],
     steps: [
-      { order: 1, description: '里脊肉切丝，加酱油、淀粉腌制10分钟', timer: 600 },
+      { order: 1, description: '里脊肉切丝，加酱油、淀粉腌制10分钟', timer: 10 },
       { order: 2, description: '木耳、胡萝卜、青椒切丝备用' },
       { order: 3, description: '调鱼香汁：酱油、醋、糖、淀粉、少许水拌匀' },
       { order: 4, description: '热油滑炒肉丝变色盛出，爆香泡椒和葱姜蒜' },
@@ -181,7 +181,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { order: 1, description: '鸡翅两面划刀，冷水下锅焯水捞出' },
       { order: 2, description: '热锅少油，放入鸡翅煎至两面金黄' },
       { order: 3, description: '加入姜片、酱油、料酒，倒入可乐没过鸡翅' },
-      { order: 4, description: '大火烧开转中小火炖15分钟，大火收汁即可', timer: 900 },
+      { order: 4, description: '大火烧开转中小火炖15分钟，大火收汁即可', timer: 15 },
     ],
   },
   {
@@ -229,7 +229,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { id: 'i7', name: '盐', amount: 2, unit: '克', type: 'seasoning', scalable: true },
     ],
     steps: [
-      { order: 1, description: '里脊肉切条，加盐、蛋液、淀粉抓匀腌制15分钟', timer: 900 },
+      { order: 1, description: '里脊肉切条，加盐、蛋液、淀粉抓匀腌制15分钟', timer: 15 },
       { order: 2, description: '调糖醋汁：番茄酱、白醋、糖、少许水拌匀' },
       { order: 3, description: '油温六成热，逐条下入肉条炸至定型捞出' },
       { order: 4, description: '油温升至八成热复炸至金黄酥脆' },
@@ -256,7 +256,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { id: 'i7', name: '盐', amount: 2, unit: '克', type: 'seasoning', scalable: true },
     ],
     steps: [
-      { order: 1, description: '黄瓜拍碎切段，加少许盐腌5分钟挤去水分', timer: 300 },
+      { order: 1, description: '黄瓜拍碎切段，加少许盐腌5分钟挤去水分', timer: 5 },
       { order: 2, description: '蒜切末，与生抽、醋、香油、辣椒油调成料汁' },
       { order: 3, description: '料汁浇在黄瓜上拌匀即可' },
     ],
@@ -352,7 +352,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
     ],
     steps: [
       { order: 1, description: '豆腐、木耳切丝，鸡蛋打散' },
-      { order: 2, description: '锅中水烧开，放入豆腐丝、木耳丝、火腿丝煮2分钟', timer: 120 },
+      { order: 2, description: '锅中水烧开，放入豆腐丝、木耳丝、火腿丝煮2分钟', timer: 2 },
       { order: 3, description: '加酱油、胡椒粉调味，水淀粉勾芡' },
       { order: 4, description: '淋入蛋液，关火后加醋和香油搅匀' },
     ],
@@ -426,7 +426,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { id: 'i9', name: '食用油', amount: 10, unit: '毫升', type: 'seasoning', scalable: true },
     ],
     steps: [
-      { order: 1, description: '面粉加水揉成光滑面团，盖保鲜膜醒30分钟', timer: 1800 },
+      { order: 1, description: '面粉加水揉成光滑面团，盖保鲜膜醒30分钟', timer: 30 },
       { order: 2, description: '白菜剁碎挤水，与肉馅、葱姜末、调料混合搅拌上劲' },
       { order: 3, description: '面团搓条切剂子，擀成中间厚边缘薄的饺子皮' },
       { order: 4, description: '包入馅料捏紧' },
@@ -474,10 +474,10 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { id: 'i5', name: '冰糖', amount: 30, unit: '克', type: 'seasoning', scalable: true },
     ],
     steps: [
-      { order: 1, description: '银耳提前泡发2小时，去蒂撕小朵', timer: 7200 },
+      { order: 1, description: '银耳提前泡发2小时，去蒂撕小朵', timer: 120 },
       { order: 2, description: '莲子去芯，红枣洗净' },
-      { order: 3, description: '银耳、莲子、红枣入锅，加足量水大火烧开转小火炖40分钟', timer: 2400 },
-      { order: 4, description: '加入冰糖和枸杞，再煮10分钟至汤汁浓稠即可', timer: 600 },
+      { order: 3, description: '银耳、莲子、红枣入锅，加足量水大火烧开转小火炖40分钟', timer: 40 },
+      { order: 4, description: '加入冰糖和枸杞，再煮10分钟至汤汁浓稠即可', timer: 10 },
     ],
   },
   // ─── 饮品 ───────────────────────────────────────────────────
@@ -499,7 +499,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { id: 'i6', name: '桂花', amount: 3, unit: '克', type: 'seasoning', scalable: true },
     ],
     steps: [
-      { order: 1, description: '乌梅、山楂、陈皮、甘草洗净浸泡30分钟', timer: 1800 },
+      { order: 1, description: '乌梅、山楂、陈皮、甘草洗净浸泡30分钟', timer: 30 },
       { order: 2, description: '加1.5升水大火煮开，转小火熬30分钟' },
       { order: 3, description: '加入冰糖煮化，过滤掉渣' },
       { order: 4, description: '晾凉后撒桂花，冷藏后饮用更佳' },
@@ -523,7 +523,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { order: 1, description: '老姜磨碎挤出姜汁，取15毫升倒入碗中' },
       { order: 2, description: '牛奶加糖加热至70-80°C（锅边冒小泡，不要煮沸）' },
       { order: 3, description: '将热牛奶从20cm高处冲入姜汁碗中，不要搅动' },
-      { order: 4, description: '静置10分钟凝固即可享用', timer: 600 },
+      { order: 4, description: '静置10分钟凝固即可享用', timer: 10 },
     ],
   },
   // ─── 早餐 ───────────────────────────────────────────────────
@@ -712,8 +712,8 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
     steps: [
       { order: 1, description: '鸡腿肉、土豆、胡萝卜切块，洋葱切丝' },
       { order: 2, description: '锅中少油，炒香洋葱至透明，放入鸡肉炒至变色' },
-      { order: 3, description: '加入土豆和胡萝卜翻炒，加水没过食材，大火烧开转中火煮15分钟', timer: 900 },
-      { order: 4, description: '关火放入咖喱块搅化，小火再煮5分钟至浓稠，浇在米饭上', timer: 300 },
+      { order: 3, description: '加入土豆和胡萝卜翻炒，加水没过食材，大火烧开转中火煮15分钟', timer: 15 },
+      { order: 4, description: '关火放入咖喱块搅化，小火再煮5分钟至浓稠，浇在米饭上', timer: 5 },
     ],
   },
   {
@@ -861,7 +861,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { order: 1, description: '粉丝温水泡软铺盘底，虾开背去虾线摆在粉丝上' },
       { order: 2, description: '蒜切碎末，小火炸至金黄成蒜蓉' },
       { order: 3, description: '蒜蓉加生抽拌匀，淋在虾上' },
-      { order: 4, description: '上锅大火蒸8分钟，出锅撒葱花', timer: 480 },
+      { order: 4, description: '上锅大火蒸8分钟，出锅撒葱花', timer: 8 },
     ],
   },
   {
@@ -907,10 +907,10 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { id: 'i5', name: '小苏打', amount: 2, unit: '克', type: 'seasoning', scalable: false },
     ],
     steps: [
-      { order: 1, description: '五花肉冷水下锅煮20分钟捞出，皮面用叉子扎密密的小孔', timer: 1200 },
+      { order: 1, description: '五花肉冷水下锅煮20分钟捞出，皮面用叉子扎密密的小孔', timer: 20 },
       { order: 2, description: '肉面切网格不要切断皮，抹上五香粉和盐' },
-      { order: 3, description: '皮面刷白醋和小苏打，放冰箱冷藏4小时风干', timer: 14400 },
-      { order: 4, description: '烤箱220°C烤40分钟至表皮爆裂酥脆', timer: 2400 },
+      { order: 3, description: '皮面刷白醋和小苏打，放冰箱冷藏4小时风干', timer: 240 },
+      { order: 4, description: '烤箱220°C烤40分钟至表皮爆裂酥脆', timer: 40 },
     ],
   },
   {
@@ -933,7 +933,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { order: 1, description: '红薯洗净对半切开，上锅蒸熟' },
       { order: 2, description: '挖出薯肉，留壳不要挖破' },
       { order: 3, description: '薯肉加黄油、牛奶、蜂蜜压成泥，填回薯壳中' },
-      { order: 4, description: '铺上芝士，烤箱200°C或空气炸锅烤10分钟至芝士融化起泡', timer: 600 },
+      { order: 4, description: '铺上芝士，烤箱200°C或空气炸锅烤10分钟至芝士融化起泡', timer: 10 },
     ],
   },
   // ─── 快手菜 ─────────────────────────────────────────────────
@@ -1003,7 +1003,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
     ],
     steps: [
       { order: 1, description: '茄子对半切开，表面划十字花刀' },
-      { order: 2, description: '上锅大火蒸10分钟至软烂', timer: 600 },
+      { order: 2, description: '上锅大火蒸10分钟至软烂', timer: 10 },
       { order: 3, description: '蒜切末，用热油泼出蒜香，加生抽和蚝油拌匀' },
       { order: 4, description: '蒜蓉酱淋在蒸好的茄子上，撒葱花' },
     ],
@@ -1026,7 +1026,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { id: 'i6', name: '辣椒油', amount: 5, unit: '毫升', type: 'seasoning', scalable: true },
     ],
     steps: [
-      { order: 1, description: '木耳泡发撕小朵，焯水1分钟捞出过凉水', timer: 60 },
+      { order: 1, description: '木耳泡发撕小朵，焯水1分钟捞出过凉水', timer: 1 },
       { order: 2, description: '蒜切末，香菜切段' },
       { order: 3, description: '加入生抽、醋、辣椒油、蒜末拌匀' },
       { order: 4, description: '撒上香菜即可' },
@@ -1099,7 +1099,7 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
     steps: [
       { order: 1, description: '小锅（或搪瓷杯）放入红茶、红枣和枸杞' },
       { order: 2, description: '倒入牛奶，小火慢慢加热不要煮沸' },
-      { order: 3, description: '加入红糖搅匀，小火煮3分钟让茶味渗出', timer: 180 },
+      { order: 3, description: '加入红糖搅匀，小火煮3分钟让茶味渗出', timer: 3 },
       { order: 4, description: '过滤茶叶即可饮用' },
     ],
   },
@@ -1175,11 +1175,11 @@ const recipes: (Omit<Recipe, 'id' | 'userId' | 'syncStatus' | 'createdAt' | 'upd
       { id: 'i7', name: '食用油', amount: 5, unit: '毫升', type: 'seasoning', scalable: false },
     ],
     steps: [
-      { order: 1, description: '西葫芦擦细丝，加少许盐腌制5分钟，拧干多余水分', timer: 300 },
+      { order: 1, description: '西葫芦擦细丝，加少许盐腌制5分钟，拧干多余水分', timer: 5 },
       { order: 2, description: '西葫芦丝中加入燕麦片、打散的鸡蛋、少许盐和黑胡椒搅拌均匀' },
       { order: 3, description: '虾仁开背，用开水焯烫至变色捞出备用' },
       { order: 4, description: '平底锅刷薄油，倒入西葫芦燕麦蛋糊并用铲子摊平' },
-      { order: 5, description: '将虾仁均匀摆在蛋饼表面，小火煎至底部凝固微黄，翻面再煎2分钟即可', timer: 120 },
+      { order: 5, description: '将虾仁均匀摆在蛋饼表面，小火煎至底部凝固微黄，翻面再煎2分钟即可', timer: 2 },
     ],
   },
   {
