@@ -27,11 +27,23 @@ export function CookingPage() {
   const [alarmActive, setAlarmActive] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const alarmRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const audioCtxRef = useRef<AudioContext | null>(null)
+
+  // Initialize AudioContext on user interaction to unlock audio playback
+  const ensureAudioCtx = useCallback(() => {
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new AudioContext()
+    }
+    if (audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume()
+    }
+    return audioCtxRef.current
+  }, [])
 
   // Play a single beep pattern using Web Audio API
   const playBeepPattern = useCallback(() => {
     try {
-      const ctx = new AudioContext()
+      const ctx = ensureAudioCtx()
       const playBeep = (freq: number, startTime: number, duration: number) => {
         const osc = ctx.createOscillator()
         const gain = ctx.createGain()
@@ -49,7 +61,7 @@ export function CookingPage() {
       playBeep(880, now + 0.25, 0.2)
       playBeep(1320, now + 0.5, 0.4)
     } catch { /* AudioContext not supported */ }
-  }, [])
+  }, [ensureAudioCtx])
 
   const stopAlarm = useCallback(() => {
     setAlarmActive(false)
@@ -96,12 +108,14 @@ export function CookingPage() {
 
   // Timer functions
   const startTimer = (seconds: number) => {
+    ensureAudioCtx() // unlock audio on user interaction
     setTimerTotal(seconds)
     setTimerSeconds(seconds)
     setTimerRunning(true)
   }
 
   const toggleTimer = () => {
+    ensureAudioCtx() // unlock audio on user interaction
     if (alarmActive) stopAlarm()
     setTimerRunning(!timerRunning)
   }
@@ -148,10 +162,11 @@ export function CookingPage() {
     }
   }, [currentStep, recipe, completed])
 
-  // Cleanup alarm on unmount
+  // Cleanup alarm and audio on unmount
   useEffect(() => {
     return () => {
       if (alarmRef.current) clearInterval(alarmRef.current)
+      audioCtxRef.current?.close()
     }
   }, [])
 
