@@ -231,7 +231,7 @@ export function CookingPage() {
           <ChefHat size={28} className="text-stone-300" />
         </div>
         <p className="mb-4 text-sm text-stone-400">菜谱不存在</p>
-        <Link to="/" className="rounded-xl bg-stone-900 px-6 py-2.5 text-sm font-medium text-white">
+        <Link to="/" replace className="rounded-xl bg-stone-900 px-6 py-2.5 text-sm font-medium text-white">
           返回首页
         </Link>
       </div>
@@ -260,6 +260,7 @@ export function CookingPage() {
         <p className="mt-1 text-xs text-stone-300">已自动记录到做菜日历</p>
         <Link
           to={`/recipe/${recipe.id}`}
+          replace
           className="mt-10 rounded-2xl bg-stone-900 px-10 py-3.5 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl active:scale-95"
         >
           返回菜谱
@@ -274,6 +275,7 @@ export function CookingPage() {
       <div className="flex items-center gap-3 px-5 py-4">
         <Link
           to={`/recipe/${recipe.id}`}
+          replace
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
         >
           <ArrowLeft size={18} className="text-stone-600" />

@@ -138,7 +138,7 @@ export function RecipeFormPage() {
     } else {
       await addRecipe({ userId: 'local', ...recipeData })
     }
-    navigate('/')
+    navigate('/', { replace: true })
   }
 
   return (
@@ -148,6 +148,7 @@ export function RecipeFormPage() {
         <div className="flex items-center gap-3">
           <Link
             to={isEditing ? `/recipe/${id}` : '/'}
+            replace
             className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
           >
             <ArrowLeft size={18} className="text-[var(--color-text-secondary)]" />

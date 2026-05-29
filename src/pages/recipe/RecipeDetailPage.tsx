@@ -41,7 +41,7 @@ export function RecipeDetailPage() {
   const handleDelete = async () => {
     if (!recipe) return
     await deleteRecipe(recipe.id)
-    navigate('/')
+    navigate('/', { replace: true })
   }
 
   useEffect(() => {
@@ -73,6 +73,7 @@ export function RecipeDetailPage() {
         <p className="mb-4 text-sm text-stone-400">菜谱不存在</p>
         <Link
           to="/"
+          replace
           className="rounded-xl bg-stone-900 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-stone-800"
         >
           返回首页

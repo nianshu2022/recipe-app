@@ -27,7 +27,7 @@ export function LoginPage() {
     }
 
     if (ok) {
-      navigate('/settings')
+      navigate('/settings', { replace: true })
     } else {
       setError(isRegister ? '注册失败，邮箱可能已被使用' : '邮箱或密码错误')
     }
@@ -41,6 +41,7 @@ export function LoginPage() {
       <div className="flex items-center gap-3">
         <Link
           to="/settings"
+          replace
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
         >
           <ArrowLeft size={18} className="text-stone-600" />
