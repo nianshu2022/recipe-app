@@ -1,36 +1,13 @@
 import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  Search, Plus, Dice5, Clock, ChefHat, Flame, Leaf, Soup, Wheat, IceCreamCone, CupSoda,
+  Search, Plus, Dice5, Clock, ChefHat,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { getRandomChineseRecipes } from '@/data/chineseRecipes'
 import { BrandLoading } from '@/components/ui/BrandLoading'
-import type { Category, Difficulty } from '@/types'
-
-const categoryIcons: Record<Category, typeof ChefHat> = {
-  'cold-dish': Leaf,
-  'hot-dish': Flame,
-  'soup': Soup,
-  'staple': Wheat,
-  'dessert': IceCreamCone,
-  'drink': CupSoda,
-}
-
-const categoryLabels: Record<Category, string> = {
-  'cold-dish': '凉菜',
-  'hot-dish': '热菜',
-  'soup': '汤羹',
-  'staple': '主食',
-  'dessert': '甜品',
-  'drink': '饮品',
-}
-
-const difficultyConfig: Record<Difficulty, { label: string; color: string }> = {
-  easy: { label: '简单', color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' },
-  medium: { label: '中等', color: 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400' },
-  hard: { label: '困难', color: 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400' },
-}
+import { categoryIcons, categoryLabels, difficultyConfig } from '@/constants/categories'
+import type { Category } from '@/types'
 
 export function HomePage() {
   const {
@@ -42,7 +19,7 @@ export function HomePage() {
     setCategoryFilter,
     setDifficultyFilter,
     loadRecipes,
-    filteredRecipes,
+    filteredRecipes: recipes,
   } = useRecipeStore()
 
   const [searchParams] = useSearchParams()
@@ -67,7 +44,6 @@ export function HomePage() {
     await loadRecipes()
   }
 
-  const recipes = filteredRecipes()
   const categories = Object.entries(categoryLabels) as [Category, string][]
 
   return (

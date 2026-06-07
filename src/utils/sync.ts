@@ -4,10 +4,12 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://recipe-api.nianshu202
 const API_FALLBACK = import.meta.env.VITE_API_FALLBACK ?? 'https://recipe-app-api.2478951652.workers.dev'
 
 let useFallback = false
+let syncing = false
 
 function getBaseUrl(): string {
   return useFallback ? API_FALLBACK : API_BASE
 }
+
 
 interface SyncResponse {
   changes: Record<string, unknown[]>
@@ -34,6 +36,11 @@ async function apiFetch(path: string, options: RequestInit = {}): Promise<Respon
 
   try {
     const res = await fetch(`${getBaseUrl()}${path}`, { ...options, headers })
+    // If we were using fallback and primary works again, switch back
+    if (useFallback && getBaseUrl() === API_FALLBACK) {
+      // Try primary on next request
+      useFallback = false
+    }
     return res
   } catch {
     // If primary fails and we're not already using fallback, try fallback
@@ -152,6 +159,23 @@ export async function pullChanges(): Promise<void> {
       const r = record as Record<string, unknown>
       const mapped = mapServerToClient(table, r)
       if (!mapped.id || typeof mapped.id !== 'string') continue
+
+      // Don't overwrite local pending changes with stale server data
+      let localRecord: Record<string, unknown> | undefined
+      switch (table) {
+        case 'recipes': localRecord = await db.getRecipe(mapped.id as string) as unknown as Record<string, unknown> | undefined; break
+        case 'collections': localRecord = await db.getCollection(mapped.id as string) as unknown as Record<string, unknown> | undefined; break
+        case 'cooking_records': localRecord = await db.getCookingRecord(mapped.id as string) as unknown as Record<string, unknown> | undefined; break
+        case 'shopping_lists': localRecord = await db.getShoppingList(mapped.id as string) as unknown as Record<string, unknown> | undefined; break
+        case 'fridge_items': localRecord = await db.getFridgeItem(mapped.id as string) as unknown as Record<string, unknown> | undefined; break
+        case 'meal_plans': localRecord = await db.getMealPlan(mapped.id as string) as unknown as Record<string, unknown> | undefined; break
+      }
+
+      if (localRecord && localRecord.syncStatus === 'pending') {
+        // Local has unsynced changes, skip this server record to avoid overwriting
+        continue
+      }
+
       switch (table) {
         case 'recipes':
           await db.putRecipe(mapped as never)
@@ -271,8 +295,14 @@ export async function pushChanges(): Promise<void> {
 }
 
 export async function fullSync(): Promise<void> {
-  await pushChanges()
-  await pullChanges()
+  if (syncing) return
+  syncing = true
+  try {
+    await pushChanges()
+    await pullChanges()
+  } finally {
+    syncing = false
+  }
 }
 
 // Field mapping between client (camelCase) and server (snake_case)

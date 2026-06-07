@@ -26,26 +26,38 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (email, password) => {
     set({ loading: true })
-    const ok = await apiLogin(email, password)
-    if (ok) {
-      set({ isLoggedIn: true, user: getCurrentUser(), loading: false })
-      // Auto-sync after login
-      try { await fullSync() } catch (e) { console.warn('Post-login sync failed:', e) }
-    } else {
+    try {
+      const ok = await apiLogin(email, password)
+      if (ok) {
+        set({ isLoggedIn: true, user: getCurrentUser(), loading: false })
+        // Auto-sync after login
+        try { await fullSync() } catch (e) { console.warn('Post-login sync failed:', e) }
+      } else {
+        set({ loading: false })
+      }
+      return ok
+    } catch (e) {
+      console.error('Login error:', e)
       set({ loading: false })
+      return false
     }
-    return ok
   },
 
   register: async (email, password, nickname) => {
     set({ loading: true })
-    const ok = await apiRegister(email, password, nickname)
-    if (ok) {
-      set({ isLoggedIn: true, user: getCurrentUser(), loading: false })
-    } else {
+    try {
+      const ok = await apiRegister(email, password, nickname)
+      if (ok) {
+        set({ isLoggedIn: true, user: getCurrentUser(), loading: false })
+      } else {
+        set({ loading: false })
+      }
+      return ok
+    } catch (e) {
+      console.error('Register error:', e)
       set({ loading: false })
+      return false
     }
-    return ok
   },
 
   logout: () => {

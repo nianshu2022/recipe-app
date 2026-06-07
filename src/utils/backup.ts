@@ -43,6 +43,15 @@ function isValidRecord(record: unknown): record is Record<string, unknown> {
   return typeof record === 'object' && record !== null && !Array.isArray(record)
 }
 
+function sanitizeRecord(record: Record<string, unknown>): Record<string, unknown> {
+  const sanitized: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(record)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue
+    sanitized[key] = value
+  }
+  return sanitized
+}
+
 function validateId(record: Record<string, unknown>): boolean {
   return typeof record.id === 'string' && record.id.length > 0
 }
@@ -56,37 +65,45 @@ export async function importData(json: string): Promise<{ success: boolean; mess
     }
 
     let count = 0
+    let totalImported = 0
     for (const recipe of data.recipes) {
       if (!isValidRecord(recipe) || !validateId(recipe)) continue
-      await db.putRecipe(recipe as never)
+      await db.putRecipe(sanitizeRecord(recipe) as never)
       count++
+      totalImported++
     }
     for (const collection of data.collections ?? []) {
       if (!isValidRecord(collection) || !validateId(collection)) continue
-      await db.putCollection(collection as never)
+      await db.putCollection(sanitizeRecord(collection) as never)
+      totalImported++
     }
     for (const menu of data.menus ?? []) {
       if (!isValidRecord(menu) || !validateId(menu)) continue
-      await db.putMenu(menu as never)
+      await db.putMenu(sanitizeRecord(menu) as never)
+      totalImported++
     }
     for (const plan of data.mealPlans ?? []) {
       if (!isValidRecord(plan) || !validateId(plan)) continue
-      await db.putMealPlan(plan as never)
+      await db.putMealPlan(sanitizeRecord(plan) as never)
+      totalImported++
     }
     for (const list of data.shoppingLists ?? []) {
       if (!isValidRecord(list) || !validateId(list)) continue
-      await db.putShoppingList(list as never)
+      await db.putShoppingList(sanitizeRecord(list) as never)
+      totalImported++
     }
     for (const item of data.fridgeItems ?? []) {
       if (!isValidRecord(item) || !validateId(item)) continue
-      await db.putFridgeItem(item as never)
+      await db.putFridgeItem(sanitizeRecord(item) as never)
+      totalImported++
     }
     for (const record of data.cookingRecords ?? []) {
       if (!isValidRecord(record) || !validateId(record)) continue
-      await db.putCookingRecord(record as never)
+      await db.putCookingRecord(sanitizeRecord(record) as never)
+      totalImported++
     }
 
-    return { success: true, message: `成功导入 ${count} 道菜谱` }
+    return { success: true, message: `成功导入 ${totalImported} 条数据（${count} 道菜谱）` }
   } catch (e) {
     return { success: false, message: `导入失败: ${e instanceof Error ? e.message : '未知错误'}` }
   }

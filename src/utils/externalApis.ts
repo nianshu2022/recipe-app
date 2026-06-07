@@ -78,17 +78,27 @@ function parseMealDbIngredients(meal: MealDbMeal): Ingredient[] {
     let amount = 0
     let unit = ''
     if (measure) {
-      const match = measure.match(/^([\d./]+)\s*(.*)$/)
-      if (match) {
-        const raw = match[1]
-        // 处理分数如 "3/4"
+      // Handle mixed fractions like "1 1/2", ranges like "2-3", simple fractions like "3/4", and plain numbers
+      const mixedMatch = measure.match(/^(\d+)\s+(\d+)\s*\/\s*(\d+)\s*(.*)$/)
+      const rangeMatch = measure.match(/^(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)\s*(.*)$/)
+      const simpleMatch = measure.match(/^([\d./]+)\s*(.*)$/)
+      if (mixedMatch) {
+        // "1 1/2 cups" -> 1.5 cups
+        amount = Number(mixedMatch[1]) + Number(mixedMatch[2]) / Number(mixedMatch[3])
+        unit = mixedMatch[4] || ''
+      } else if (rangeMatch) {
+        // "2-3 cups" -> 2.5 cups (average)
+        amount = (Number(rangeMatch[1]) + Number(rangeMatch[2])) / 2
+        unit = rangeMatch[3] || ''
+      } else if (simpleMatch) {
+        const raw = simpleMatch[1]
         if (raw.includes('/')) {
           const [num, den] = raw.split('/')
           amount = Number(num) / Number(den)
         } else {
           amount = Number(raw)
         }
-        unit = match[2] || ''
+        unit = simpleMatch[2] || ''
       } else {
         unit = measure
       }

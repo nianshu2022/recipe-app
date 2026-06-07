@@ -107,9 +107,9 @@ export const useFridgeStore = create<FridgeState>((set, get) => ({
   consumeItem: async (id, amount) => {
     const item = get().items.find((i) => i.id === id)
     if (!item) return
-    if (amount && item.amount > amount) {
+    if (amount !== undefined && amount > 0 && item.amount > amount) {
       await get().updateItem(id, { amount: item.amount - amount })
-    } else {
+    } else if (amount !== undefined && amount > 0) {
       await get().removeItem(id)
     }
   },

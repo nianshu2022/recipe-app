@@ -108,9 +108,9 @@ export function getMacroPercentages(nutrition: Nutrition) {
   const fatCal = nutrition.fat * 9
   const total = proteinCal + carbsCal + fatCal
   if (total === 0) return { protein: 0, carbs: 0, fat: 0 }
-  return {
-    protein: Math.round((proteinCal / total) * 100),
-    carbs: Math.round((carbsCal / total) * 100),
-    fat: Math.round((fatCal / total) * 100),
-  }
+  const protein = Math.round((proteinCal / total) * 100)
+  const carbs = Math.round((carbsCal / total) * 100)
+  // Derive fat from remainder to ensure sum is exactly 100
+  const fat = 100 - protein - carbs
+  return { protein, carbs, fat }
 }

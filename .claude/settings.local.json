@@ -50,7 +50,12 @@
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(f'name: {p.get\\(\\\\\"product_name\\\\\",\\\\\"N/A\\\\\"\\)}, brands: {p.get\\(\\\\\"brands\\\\\",\\\\\"N/A\\\\\"\\)}'\\) for p in d.get\\('products',[]\\)]\")",
       "Bash(curl -s \"https://world.openfoodfacts.org/cgi/search.pl?search_terms=pork&search_simple=1&json=1&page_size=5\")",
       "Bash(python -c \"import json; d=json.load\\(open\\('/tmp/off_test.json'\\)\\); [print\\(f'name: {p.get\\(\\\\\"product_name\\\\\",\\\\\"N/A\\\\\"\\)}, brands: {p.get\\(\\\\\"brands\\\\\",\\\\\"N/A\\\\\"\\)}'\\) for p in d.get\\('products',[]\\)]\")",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(git rm *)",
+      "Bash(npx cap *)",
+      "Bash(where studio64.exe)",
+      "Bash(where studio.exe)",
+      "Bash(npx eslint *)"
     ],
     "additionalDirectories": [
       "d:\\project\\nianshu\\recipe-app\\src"

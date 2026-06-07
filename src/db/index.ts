@@ -96,6 +96,9 @@ export const db = {
   async getAllCollections() {
     return (await getDB()).getAll('collections')
   },
+  async getCollection(id: string) {
+    return (await getDB()).get('collections', id)
+  },
   async putCollection(collection: Collection) {
     return (await getDB()).put('collections', collection)
   },
@@ -118,6 +121,9 @@ export const db = {
   async getAllCookingRecords() {
     return (await getDB()).getAll('cookingRecords')
   },
+  async getCookingRecord(id: string) {
+    return (await getDB()).get('cookingRecords', id)
+  },
   async putCookingRecord(record: CookingRecord) {
     return (await getDB()).put('cookingRecords', record)
   },
@@ -125,6 +131,9 @@ export const db = {
   // Shopping Lists
   async getAllShoppingLists() {
     return (await getDB()).getAll('shoppingLists')
+  },
+  async getShoppingList(id: string) {
+    return (await getDB()).get('shoppingLists', id)
   },
   async putShoppingList(list: ShoppingList) {
     return (await getDB()).put('shoppingLists', list)
@@ -134,6 +143,9 @@ export const db = {
   async getAllFridgeItems() {
     return (await getDB()).getAll('fridgeItems')
   },
+  async getFridgeItem(id: string) {
+    return (await getDB()).get('fridgeItems', id)
+  },
   async putFridgeItem(item: FridgeItem) {
     return (await getDB()).put('fridgeItems', item)
   },
@@ -141,6 +153,9 @@ export const db = {
   // Meal Plans
   async getAllMealPlans() {
     return (await getDB()).getAll('mealPlans')
+  },
+  async getMealPlan(id: string) {
+    return (await getDB()).get('mealPlans', id)
   },
   async putMealPlan(plan: MealPlan) {
     return (await getDB()).put('mealPlans', plan)

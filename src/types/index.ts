@@ -27,7 +27,7 @@ export interface Step {
   image?: string
   video?: string
   tip?: string
-  timer?: number // seconds
+  timer?: number // minutes
 }
 
 export interface Nutrition {

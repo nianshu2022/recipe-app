@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, Download, Upload, Trash2, CheckCircle } from 'lucide-react'
 import { exportData, downloadBackup, importData } from '@/utils/backup'
 import { db } from '@/db'
+import { useUIStore } from '@/stores/uiStore'
 
 export function DataManagementPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -13,8 +14,8 @@ export function DataManagementPage() {
     collections: number
     cookingRecords: number
   } | null>(null)
+  const showConfirm = useUIStore((s) => s.showConfirm)
 
-  // Load stats on mount
   useEffect(() => {
     loadStats()
   }, [])
@@ -62,6 +63,19 @@ export function DataManagementPage() {
         fileInputRef.current.value = ''
       }
     }
+  }
+
+  const handleClearData = async () => {
+    await showConfirm({
+      title: '清除所有数据',
+      message: '确定要清除所有本地数据吗？此操作不可撤销。',
+      confirmText: '清除',
+      variant: 'danger',
+      onConfirm: () => {
+        indexedDB.deleteDatabase('recipe-app')
+        window.location.reload()
+      },
+    })
   }
 
   return (
@@ -143,7 +157,7 @@ export function DataManagementPage() {
         <div
           className={`flex items-center gap-2 rounded-2xl p-4 text-sm ${
             message.type === 'success'
-              ? 'bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400'
+              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
               : 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400'
           }`}
         >
@@ -159,12 +173,7 @@ export function DataManagementPage() {
         </h2>
         <div className="overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs">
           <button
-            onClick={() => {
-              if (confirm('确定要清除所有本地数据吗？此操作不可撤销。')) {
-                indexedDB.deleteDatabase('recipe-app')
-                window.location.reload()
-              }
-            }}
+            onClick={handleClearData}
             className="flex w-full items-center gap-3 px-5 py-4 transition-colors hover:bg-red-50 dark:hover:bg-red-950/20"
           >
             <Trash2 size={20} className="text-red-500" />

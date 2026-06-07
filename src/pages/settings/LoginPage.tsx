@@ -34,7 +34,7 @@ export function LoginPage() {
   }
 
   const inputCls =
-    'w-full rounded-xl border border-stone-200 bg-white py-3 pl-11 pr-4 text-sm text-stone-800 shadow-xs outline-none transition-all duration-200 placeholder:text-stone-400 focus:border-stone-400 focus:ring-2 focus:ring-stone-100'
+    'w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] py-3 pl-11 pr-4 text-sm text-[var(--color-text)] shadow-xs outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-300)] focus:ring-2 focus:ring-[var(--color-border-subtle)]'
 
   return (
     <div className="space-y-8">
@@ -42,19 +42,19 @@ export function LoginPage() {
         <Link
           to="/settings"
           replace
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
         >
-          <ArrowLeft size={18} className="text-stone-600" />
+          <ArrowLeft size={18} className="text-[var(--color-text-secondary)]" />
         </Link>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-stone-900">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--color-text)]">
           {isRegister ? '注册' : '登录'}
         </h1>
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-xs">
+      <div className="rounded-2xl bg-[var(--color-bg-card)] p-6 shadow-xs">
         <div className="space-y-4">
           <div className="relative">
-            <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+            <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
             <input
               type="email"
               value={email}
@@ -66,7 +66,7 @@ export function LoginPage() {
 
           {isRegister && (
             <div className="relative">
-              <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+              <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
               <input
                 type="text"
                 value={nickname}
@@ -78,7 +78,7 @@ export function LoginPage() {
           )}
 
           <div className="relative">
-            <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+            <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
             <input
               type="password"
               value={password}
@@ -96,7 +96,7 @@ export function LoginPage() {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full rounded-xl bg-stone-900 py-3 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] disabled:opacity-50"
+            className="w-full rounded-xl bg-[var(--color-primary)] py-3 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] disabled:opacity-50"
           >
             {loading ? '处理中...' : isRegister ? '注册' : '登录'}
           </button>
@@ -105,14 +105,14 @@ export function LoginPage() {
         <div className="mt-4 text-center">
           <button
             onClick={() => { setIsRegister(!isRegister); setError('') }}
-            className="text-sm text-stone-500 transition-colors hover:text-stone-700"
+            className="text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-secondary)]"
           >
             {isRegister ? '已有账号？去登录' : '没有账号？去注册'}
           </button>
         </div>
       </div>
 
-      <p className="text-center text-xs text-stone-400">
+      <p className="text-center text-xs text-[var(--color-text-muted)]">
         登录后可多设备同步菜谱数据
       </p>
     </div>

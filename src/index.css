@@ -234,3 +234,29 @@
 .animate-glow-pulse {
   animation: glow-pulse 2.5s ease-in-out infinite;
 }
+
+/* Page transition */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: page-in 0.25s var(--ease-out) both;
+}
+
+/* Toast slide-in */
+@keyframes slide-in-from-top-2 {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation-fill-mode: both;
+}
+
+.slide-in-from-top-2 {
+  animation-name: slide-in-from-top-2;
+  animation-duration: 0.2s;
+  animation-timing-function: var(--ease-out);
+}

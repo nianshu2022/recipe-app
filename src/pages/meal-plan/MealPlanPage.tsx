@@ -1,16 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Eraser, ShoppingCart, Plus, Search, Check, Flame, Leaf, Soup, Wheat, IceCreamCone, CupSoda, ChefHat } from 'lucide-react'
+import { X, Eraser, ShoppingCart, Plus, Search, Check } from 'lucide-react'
 import type { Category } from '@/types'
-
-const categoryIcons: Record<Category, typeof ChefHat> = {
-  'cold-dish': Leaf, 'hot-dish': Flame, 'soup': Soup,
-  'staple': Wheat, 'dessert': IceCreamCone, 'drink': CupSoda,
-}
-const categoryLabels: Record<Category, string> = {
-  'cold-dish': '凉菜', 'hot-dish': '热菜', 'soup': '汤羹',
-  'staple': '主食', 'dessert': '甜品', 'drink': '饮品',
-}
+import { categoryIcons, categoryLabels } from '@/constants/categories'
 import { useMealPlanStore, type MealSlot } from '@/stores/mealPlanStore'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useShoppingStore } from '@/stores/shoppingStore'
@@ -235,7 +227,7 @@ export function MealPlanPage() {
 
       {/* Recipe picker modal */}
       {selecting && (
-        <div className="fixed inset-x-0 top-0 z-[60] flex items-end justify-center bg-black/30 backdrop-blur-sm" style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom))' }} onClick={() => setSelecting(null)}>
+        <div className="fixed inset-x-0 top-0 z-[60] flex items-end justify-center bg-black/30 backdrop-blur-sm" style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom))' }} role="dialog" aria-modal="true" aria-label={`选择菜谱 · ${getSlotLabel(selecting.slot)}`} onKeyDown={(e) => { if (e.key === 'Escape') setSelecting(null) }} onClick={() => setSelecting(null)}>
           <div
             className="flex max-h-[75vh] w-full max-w-2xl flex-col rounded-t-3xl bg-[var(--color-bg-card)]"
             onClick={(e) => e.stopPropagation()}

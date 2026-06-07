@@ -149,18 +149,22 @@ export function CookingPage() {
   useEffect(() => {
     if (recipe && !completed) {
       stopAlarm()
+      // Clear any running timer interval to prevent stacking
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+      setTimerRunning(false)
       const stepTimer = recipe.steps[currentStep]?.timer
       if (stepTimer) {
         setTimerTotal(stepTimer * 60)
         setTimerSeconds(stepTimer * 60)
-        setTimerRunning(false)
       } else {
-        setTimerRunning(false)
         setTimerSeconds(0)
         setTimerTotal(0)
       }
     }
-  }, [currentStep, recipe, completed])
+  }, [currentStep, recipe, completed, stopAlarm])
 
   // Cleanup alarm and audio on unmount
   useEffect(() => {
@@ -192,7 +196,9 @@ export function CookingPage() {
   // Save cooking record on completion
   useEffect(() => {
     if (completed && recipe && !recordSaved) {
-      addRecord(recipe.id, recipe.servings)
+      addRecord(recipe.id, recipe.servings).catch((e) => {
+        console.error('Failed to save cooking record:', e)
+      })
       setRecordSaved(true)
     }
   }, [completed, recipe, recordSaved, addRecord])
@@ -226,12 +232,12 @@ export function CookingPage() {
 
   if (!recipe) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center bg-stone-50">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
-          <ChefHat size={28} className="text-stone-300" />
+      <div className="flex min-h-dvh flex-col items-center justify-center bg-[var(--color-bg)]">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--color-bg-subtle)]">
+          <ChefHat size={28} className="text-[var(--color-text-muted)]" />
         </div>
-        <p className="mb-4 text-sm text-stone-400">菜谱不存在</p>
-        <Link to="/" replace className="rounded-xl bg-stone-900 px-6 py-2.5 text-sm font-medium text-white">
+        <p className="mb-4 text-sm text-[var(--color-text-muted)]">菜谱不存在</p>
+        <Link to="/" replace className="rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-sm font-medium text-white">
           返回首页
         </Link>
       </div>
@@ -239,6 +245,19 @@ export function CookingPage() {
   }
 
   const steps = recipe.steps
+  if (steps.length === 0) {
+    return (
+      <div className="flex min-h-dvh flex-col items-center justify-center bg-[var(--color-bg)]">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--color-bg-subtle)]">
+          <ChefHat size={28} className="text-[var(--color-text-muted)]" />
+        </div>
+        <p className="mb-4 text-sm text-[var(--color-text-muted)]">该菜谱没有步骤</p>
+        <Link to="/" replace className="rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-sm font-medium text-white">
+          返回首页
+        </Link>
+      </div>
+    )
+  }
   const step = steps[currentStep]
   const progress = ((currentStep + 1) / steps.length) * 100
   const timerPercent = timerTotal > 0 ? ((timerTotal - timerSeconds) / timerTotal) * 100 : 0
@@ -251,17 +270,17 @@ export function CookingPage() {
 
   if (completed) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center bg-stone-50 px-8">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-50 to-emerald-100 shadow-md">
-          <PartyPopper size={40} className="text-emerald-600" />
+      <div className="flex min-h-dvh flex-col items-center justify-center bg-[var(--color-bg)] px-8">
+        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-50 to-emerald-100 shadow-md dark:from-emerald-950/30 dark:to-emerald-900/20">
+          <PartyPopper size={40} className="text-emerald-600 dark:text-emerald-400" />
         </div>
-        <h2 className="font-display text-3xl font-semibold tracking-tight text-stone-900">大功告成</h2>
-        <p className="mt-2 text-sm text-stone-400">{recipe.name} 做好了</p>
-        <p className="mt-1 text-xs text-stone-300">已自动记录到做菜日历</p>
+        <h2 className="font-display text-3xl font-semibold tracking-tight text-[var(--color-text)]">大功告成</h2>
+        <p className="mt-2 text-sm text-[var(--color-text-muted)]">{recipe.name} 做好了</p>
+        <p className="mt-1 text-xs text-[var(--color-text-muted)]">已自动记录到做菜日历</p>
         <Link
           to={`/recipe/${recipe.id}`}
           replace
-          className="mt-10 rounded-2xl bg-stone-900 px-10 py-3.5 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl active:scale-95"
+          className="mt-10 rounded-2xl bg-[var(--color-primary)] px-10 py-3.5 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl active:scale-95"
         >
           返回菜谱
         </Link>
@@ -270,21 +289,21 @@ export function CookingPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-stone-50">
+    <div className="flex min-h-dvh flex-col bg-[var(--color-bg)]">
       {/* Top bar */}
       <div className="flex items-center gap-3 px-5 py-4">
         <Link
           to={`/recipe/${recipe.id}`}
           replace
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
         >
-          <ArrowLeft size={18} className="text-stone-600" />
+          <ArrowLeft size={18} className="text-[var(--color-text-secondary)]" />
         </Link>
-        <h1 className="flex-1 text-base font-semibold text-stone-800">{recipe.name}</h1>
+        <h1 className="flex-1 text-base font-semibold text-[var(--color-text)]">{recipe.name}</h1>
         <button
           onClick={() => setVoiceEnabled(!voiceEnabled)}
           className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-xs transition-all duration-200 active:scale-95 ${
-            voiceEnabled ? 'bg-emerald-50 text-emerald-600' : 'bg-white text-stone-400 hover:text-stone-600'
+            voiceEnabled ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'
           }`}
           title={voiceEnabled ? '关闭语音控制' : '开启语音控制'}
         >
@@ -292,7 +311,7 @@ export function CookingPage() {
         </button>
         <button
           onClick={toggleFullscreen}
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-stone-400 shadow-xs transition-all duration-200 hover:text-stone-600 active:scale-95"
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] text-[var(--color-text-muted)] shadow-xs transition-all duration-200 hover:text-[var(--color-text-secondary)] active:scale-95"
           title={isFullscreen ? '退出全屏' : '全屏模式'}
         >
           {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
@@ -301,9 +320,9 @@ export function CookingPage() {
 
       {/* Voice status */}
       {voiceEnabled && (
-        <div className="mx-5 mb-2 flex items-center justify-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5">
-          <span className={`h-1.5 w-1.5 rounded-full ${isListening ? 'bg-emerald-500 animate-pulse' : 'bg-stone-300'}`} />
-          <span className="text-[11px] font-medium text-emerald-700">
+        <div className="mx-5 mb-2 flex items-center justify-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 dark:bg-emerald-950/30">
+          <span className={`h-1.5 w-1.5 rounded-full ${isListening ? 'bg-emerald-500 animate-pulse' : 'bg-[var(--color-text-muted)]'}`} />
+          <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
             {isListening ? '语音控制 · 说"下一步""上一步""开始计时"' : '正在启动...'}
           </span>
         </div>
@@ -311,23 +330,23 @@ export function CookingPage() {
 
       {/* Progress bar */}
       <div className="mx-5 mb-6">
-        <div className="relative h-1.5 overflow-hidden rounded-full bg-stone-200/60">
+        <div className="relative h-1.5 overflow-hidden rounded-full bg-[var(--color-bg-subtle)]">
           <div
-            className="absolute left-0 top-0 h-full rounded-full bg-stone-900 transition-all duration-500"
+            className="absolute left-0 top-0 h-full rounded-full bg-[var(--color-text)] transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="mt-2 text-center text-xs text-stone-400">
+        <p className="mt-2 text-center text-xs text-[var(--color-text-muted)]">
           第 {currentStep + 1} / {steps.length} 步
         </p>
       </div>
 
       {/* Step content */}
       <div className="flex flex-1 flex-col items-center justify-center px-8">
-        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-900 text-2xl font-bold text-white shadow-lg">
+        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--color-text)] text-2xl font-bold text-[var(--color-bg)] shadow-lg">
           {step.order}
         </div>
-        <p className="text-center text-xl leading-relaxed font-medium text-stone-800">
+        <p className="text-center text-xl leading-relaxed font-medium text-[var(--color-text)]">
           {step.description}
         </p>
 
@@ -335,15 +354,14 @@ export function CookingPage() {
         {timerTotal > 0 && (
           <div className="mt-6 w-full max-w-xs">
             <div className="mb-2 flex items-center justify-center gap-3">
-              <span className="font-mono text-3xl font-light tracking-wider text-stone-800">
+              <span className="font-mono text-3xl font-light tracking-wider text-[var(--color-text)]">
                 {formatTime(timerSeconds)}
               </span>
             </div>
-            {/* Timer progress ring */}
-            <div className="mx-auto mb-3 h-1.5 w-48 overflow-hidden rounded-full bg-stone-200/60">
+            <div className="mx-auto mb-3 h-1.5 w-48 overflow-hidden rounded-full bg-[var(--color-bg-subtle)]">
               <div
                 className={`h-full rounded-full transition-all duration-1000 ${
-                  timerSeconds <= 10 && timerSeconds > 0 ? 'bg-red-500' : 'bg-stone-800'
+                  timerSeconds <= 10 && timerSeconds > 0 ? 'bg-red-500' : 'bg-[var(--color-text)]'
                 }`}
                 style={{ width: `${timerPercent}%` }}
               />
@@ -360,13 +378,13 @@ export function CookingPage() {
                 <>
                   <button
                     onClick={toggleTimer}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-900 text-white shadow-md transition-all duration-200 active:scale-95"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-text)] text-[var(--color-bg)] shadow-md transition-all duration-200 active:scale-95"
                   >
                     {timerRunning ? <Pause size={16} /> : <Play size={16} fill="currentColor" />}
                   </button>
                   <button
                     onClick={resetTimer}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-stone-500 shadow-xs transition-all duration-200 hover:bg-stone-50 active:scale-95"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:bg-[var(--color-bg-subtle)] active:scale-95"
                   >
                     <RotateCcw size={16} />
                   </button>
@@ -377,20 +395,20 @@ export function CookingPage() {
         )}
 
         {step.tip && (
-          <div className="mt-5 flex items-start gap-2.5 rounded-2xl bg-white px-5 py-4 shadow-xs">
+          <div className="mt-5 flex items-start gap-2.5 rounded-2xl bg-[var(--color-bg-card)] px-5 py-4 shadow-xs">
             <Lightbulb size={16} className="mt-0.5 shrink-0 text-amber-500" />
-            <p className="text-sm leading-relaxed text-stone-500">{step.tip}</p>
+            <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">{step.tip}</p>
           </div>
         )}
       </div>
 
       {/* Bottom controls */}
-      <div className="border-t border-stone-200/60 bg-white/80 px-5 py-4 backdrop-blur-xl">
+      <div className="border-t border-[var(--color-border)]/60 bg-[var(--color-bg-card)]/80 px-5 py-4 backdrop-blur-xl">
         <div className="flex items-center justify-between">
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
-            className="flex items-center gap-1.5 rounded-2xl border border-stone-200 bg-white px-5 py-2.5 text-sm font-medium text-stone-600 shadow-xs transition-all duration-200 hover:bg-stone-50 active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
+            className="flex items-center gap-1.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-5 py-2.5 text-sm font-medium text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:bg-[var(--color-bg-subtle)] active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
           >
             <ChevronLeft size={16} />
             上一步
@@ -406,7 +424,7 @@ export function CookingPage() {
           ) : (
             <button
               onClick={() => setCurrentStep(currentStep + 1)}
-              className="flex items-center gap-1.5 rounded-2xl bg-stone-900 px-5 py-2.5 text-sm font-medium text-white shadow-md transition-all duration-200 hover:bg-stone-800 active:scale-95"
+              className="flex items-center gap-1.5 rounded-2xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-medium text-white shadow-md transition-all duration-200 hover:bg-[var(--color-primary-dark)] active:scale-95"
             >
               下一步
               <ChevronRight size={16} />

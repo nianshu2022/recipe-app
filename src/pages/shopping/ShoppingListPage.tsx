@@ -4,6 +4,7 @@ import {
   ArrowLeft, ShoppingCart, Plus, Trash2, Check, X, ChevronDown, Eraser,
 } from 'lucide-react'
 import { useShoppingStore } from '@/stores/shoppingStore'
+import { useUIStore } from '@/stores/uiStore'
 import type { ShoppingItem } from '@/types'
 
 export function ShoppingListPage() {
@@ -12,6 +13,8 @@ export function ShoppingListPage() {
     lists, currentListId, loadLists, toggleItem, addItem, removeItem,
     clearChecked, deleteList, setCurrentList,
   } = useShoppingStore()
+  const showConfirm = useUIStore((s) => s.showConfirm)
+  const showToast = useUIStore((s) => s.showToast)
 
   const [showAdd, setShowAdd] = useState(false)
   const [newName, setNewName] = useState('')
@@ -39,6 +42,18 @@ export function ShoppingListPage() {
     })
   }
 
+  const handleDeleteList = async () => {
+    if (!list) return
+    const confirmed = await showConfirm({
+      title: '删除清单',
+      message: '确定要删除这个购物清单吗？',
+      confirmText: '删除',
+      variant: 'danger',
+      onConfirm: () => deleteList(list.id),
+    })
+    if (confirmed) showToast('清单已删除', 'info')
+  }
+
   // Group items by category
   const grouped = list
     ? list.items.reduce<Record<string, ShoppingItem[]>>((acc, item) => {
@@ -57,23 +72,23 @@ export function ShoppingListPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
           >
-            <ArrowLeft size={18} className="text-stone-600" />
+            <ArrowLeft size={18} className="text-[var(--color-text-secondary)]" />
           </button>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-stone-900">
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--color-text)]">
             购物清单
           </h1>
         </div>
         <div className="flex flex-col items-center justify-center py-16">
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-stone-100">
-            <ShoppingCart size={36} className="text-stone-300" />
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--color-bg-subtle)]">
+            <ShoppingCart size={36} className="text-[var(--color-text-muted)]" />
           </div>
-          <h3 className="mb-2 text-lg font-medium text-stone-700">清单是空的</h3>
-          <p className="mb-6 text-sm text-stone-400">从菜谱生成一份购物清单吧</p>
+          <h3 className="mb-2 text-lg font-medium text-[var(--color-text)]">清单是空的</h3>
+          <p className="mb-6 text-sm text-[var(--color-text-muted)]">从菜谱生成一份购物清单吧</p>
           <Link
             to="/"
-            className="rounded-2xl bg-stone-900 px-8 py-3 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
+            className="rounded-2xl bg-[var(--color-primary)] px-8 py-3 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
           >
             去选菜谱
           </Link>
@@ -88,15 +103,15 @@ export function ShoppingListPage() {
       <div className="flex items-center gap-3">
         <button
           onClick={() => navigate(-1)}
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
         >
-          <ArrowLeft size={18} className="text-stone-600" />
+          <ArrowLeft size={18} className="text-[var(--color-text-secondary)]" />
         </button>
         <div className="flex-1">
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-stone-900">
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--color-text)]">
             购物清单
           </h1>
-          <p className="text-xs text-stone-400">
+          <p className="text-xs text-[var(--color-text-muted)]">
             {checkedCount}/{totalCount} 已购
           </p>
         </div>
@@ -106,7 +121,7 @@ export function ShoppingListPage() {
           <select
             value={list?.id ?? ''}
             onChange={(e) => setCurrentList(e.target.value)}
-            className="rounded-lg border border-stone-200 bg-white px-2 py-1.5 text-xs text-stone-600 outline-none"
+            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-2 py-1.5 text-xs text-[var(--color-text-secondary)] outline-none"
           >
             {lists.map((l, i) => (
               <option key={l.id} value={l.id}>
@@ -119,7 +134,7 @@ export function ShoppingListPage() {
           {checkedCount > 0 && (
             <button
               onClick={() => clearChecked(list.id)}
-              className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-stone-500 shadow-xs transition-all duration-200 hover:bg-red-50 hover:text-red-500 active:scale-95"
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:bg-red-50 hover:text-red-500 active:scale-95"
               title="清除已购"
             >
               <Eraser size={16} />
@@ -127,7 +142,7 @@ export function ShoppingListPage() {
           )}
           <button
             onClick={() => setShowAdd(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-stone-900 text-white shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
           >
             <Plus size={16} strokeWidth={2.2} />
           </button>
@@ -144,18 +159,18 @@ export function ShoppingListPage() {
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
             placeholder="输入食材名称"
             autoFocus
-            className="flex-1 rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-800 shadow-xs outline-none transition-all duration-200 placeholder:text-stone-400 focus:border-stone-400 focus:ring-2 focus:ring-stone-100"
+            className="flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-2.5 text-sm text-[var(--color-text)] shadow-xs outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-300)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
           />
           <button
             onClick={handleAdd}
             disabled={!newName.trim()}
-            className="rounded-xl bg-stone-900 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 active:scale-95 disabled:opacity-40"
+            className="rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 active:scale-95 disabled:opacity-40"
           >
             添加
           </button>
           <button
             onClick={() => { setShowAdd(false); setNewName('') }}
-            className="rounded-xl bg-white px-3 py-2.5 text-stone-500 shadow-xs transition-all duration-200 hover:bg-stone-50 active:scale-95"
+            className="rounded-xl bg-[var(--color-bg-card)] px-3 py-2.5 text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:bg-[var(--color-bg-subtle)] active:scale-95"
           >
             <X size={16} />
           </button>
@@ -163,7 +178,7 @@ export function ShoppingListPage() {
       )}
 
       {/* Progress bar */}
-      <div className="overflow-hidden rounded-full bg-stone-200/60">
+      <div className="overflow-hidden rounded-full bg-[var(--color-bg-subtle)]">
         <div
           className="h-1.5 rounded-full bg-emerald-500 transition-all duration-500"
           style={{ width: totalCount > 0 ? `${(checkedCount / totalCount) * 100}%` : '0%' }}
@@ -178,29 +193,29 @@ export function ShoppingListPage() {
           const isExpanded = expandedCats.size === 0 || expandedCats.has(cat)
 
           return (
-            <div key={cat} className="overflow-hidden rounded-2xl bg-white shadow-xs">
+            <div key={cat} className="overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs">
               <button
                 onClick={() => toggleCat(cat)}
-                className="flex w-full items-center justify-between px-5 py-3 transition-colors hover:bg-stone-50"
+                className="flex w-full items-center justify-between px-5 py-3 transition-colors hover:bg-[var(--color-bg-subtle)]"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-stone-800">{cat}</span>
-                  <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-500">
+                  <span className="text-sm font-semibold text-[var(--color-text)]">{cat}</span>
+                  <span className="rounded-full bg-[var(--color-bg-subtle)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text-secondary)]">
                     {catChecked}/{items.length}
                   </span>
                 </div>
                 <ChevronDown
                   size={16}
-                  className={`text-stone-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                  className={`text-[var(--color-text-muted)] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                 />
               </button>
               {isExpanded && (
-                <div className="border-t border-stone-100">
+                <div className="border-t border-[var(--color-border-subtle)]">
                   {items.map((item) => (
                     <div
                       key={item.id}
-                      className={`flex items-center gap-3 px-5 py-3 transition-colors ${
-                        item.checked ? 'bg-stone-50' : ''
+                      className={`group flex items-center gap-3 px-5 py-3 transition-colors ${
+                        item.checked ? 'bg-[var(--color-bg-subtle)]' : ''
                       }`}
                     >
                       <button
@@ -208,7 +223,7 @@ export function ShoppingListPage() {
                         className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200 ${
                           item.checked
                             ? 'border-emerald-500 bg-emerald-500 text-white'
-                            : 'border-stone-300 hover:border-stone-400'
+                            : 'border-[var(--color-border)] hover:border-[var(--color-stone-300)]'
                         }`}
                       >
                         {item.checked && <Check size={12} strokeWidth={3} />}
@@ -216,18 +231,18 @@ export function ShoppingListPage() {
                       <span
                         className={`flex-1 text-sm transition-all duration-200 ${
                           item.checked
-                            ? 'text-stone-400 line-through'
-                            : 'text-stone-700'
+                            ? 'text-[var(--color-text-muted)] line-through'
+                            : 'text-[var(--color-text)]'
                         }`}
                       >
                         {item.name}
                       </span>
-                      <span className={`text-xs ${item.checked ? 'text-stone-300' : 'text-stone-400'}`}>
+                      <span className={`text-xs ${item.checked ? 'text-[var(--color-text-muted)]' : 'text-[var(--color-text-muted)]'}`}>
                         {item.amount > 0 ? `${item.amount}${item.unit}` : ''}
                       </span>
                       <button
                         onClick={() => removeItem(list.id, item.id)}
-                        className="rounded-lg p-1 text-stone-300 opacity-0 transition-all duration-200 hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                        className="rounded-lg p-1 text-[var(--color-text-muted)] opacity-0 transition-all duration-200 hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
                       >
                         <Trash2 size={12} />
                       </button>
@@ -242,10 +257,8 @@ export function ShoppingListPage() {
 
       {/* Delete list */}
       <button
-        onClick={() => {
-          if (confirm('确定要删除这个购物清单吗？')) deleteList(list.id)
-        }}
-        className="w-full rounded-xl py-3 text-center text-sm font-medium text-stone-400 transition-colors hover:text-red-500"
+        onClick={handleDeleteList}
+        className="w-full rounded-xl py-3 text-center text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-red-500"
       >
         删除清单
       </button>

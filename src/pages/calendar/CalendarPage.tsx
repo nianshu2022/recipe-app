@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, CalendarDays, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CalendarDays, Trash2, CalendarDays as CalendarIcon } from 'lucide-react'
 import { useCalendarStore } from '@/stores/calendarStore'
 import { useRecipeStore } from '@/stores/recipeStore'
+import { BrandLoading } from '@/components/ui/BrandLoading'
 
 const dayNames = ['一', '二', '三', '四', '五', '六', '日']
 const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
@@ -60,6 +61,26 @@ export function CalendarPage() {
 
   const formatDate = (day: number) =>
     `${viewYear}-${String(viewMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+
+  if (loading) {
+    return (
+      <BrandLoading>
+        <div className="space-y-3">
+          <div className="grid grid-cols-3 gap-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse rounded-2xl bg-[var(--color-bg-card)] p-4 shadow-xs">
+                <div className="mx-auto h-6 w-12 rounded bg-[var(--color-bg-subtle)]" />
+                <div className="mx-auto mt-2 h-3 w-10 rounded bg-[var(--color-bg-subtle)]" />
+              </div>
+            ))}
+          </div>
+          <div className="animate-pulse rounded-2xl bg-[var(--color-bg-card)] p-5 shadow-xs">
+            <div className="h-48 rounded bg-[var(--color-bg-subtle)]" />
+          </div>
+        </div>
+      </BrandLoading>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -157,7 +178,10 @@ export function CalendarPage() {
             {selectedDate.replace(/-/g, '/')} 的做菜记录
           </h3>
           {selectedRecords.length === 0 ? (
-            <p className="py-4 text-center text-sm text-[var(--color-text-muted)]">这天还没有做菜记录</p>
+            <div className="flex flex-col items-center justify-center rounded-2xl bg-[var(--color-bg-card)] py-8 shadow-xs">
+              <CalendarIcon size={28} className="mb-3 text-[var(--color-text-muted)]" />
+              <p className="text-sm text-[var(--color-text-muted)]">这天还没有做菜记录</p>
+            </div>
           ) : (
             <div className="space-y-2">
               {selectedRecords.map((record) => (

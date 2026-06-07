@@ -1,43 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Package, ChefHat, Flame, Leaf, Soup, Wheat, IceCreamCone, CupSoda,
-  Clock, Users, RotateCcw, ArrowRight, Sparkles, Save,
+  Package, Clock, Users, RotateCcw, ArrowRight, Sparkles, Save,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
 import { getRandomChineseRecipe } from '@/data/chineseRecipes'
-import type { Recipe, Category, Difficulty } from '@/types'
-
-const categoryIcons: Record<Category, typeof ChefHat> = {
-  'cold-dish': Leaf,
-  'hot-dish': Flame,
-  'soup': Soup,
-  'staple': Wheat,
-  'dessert': IceCreamCone,
-  'drink': CupSoda,
-}
-
-const categoryLabels: Record<Category, string> = {
-  'cold-dish': '凉菜',
-  'hot-dish': '热菜',
-  'soup': '汤羹',
-  'staple': '主食',
-  'dessert': '甜品',
-  'drink': '饮品',
-}
-
-const difficultyLabels: Record<Difficulty, string> = {
-  easy: '简单',
-  medium: '中等',
-  hard: '困难',
-}
-
-const difficultyColors: Record<Difficulty, string> = {
-  easy: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400',
-  medium: 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400',
-  hard: 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400',
-}
+import { categoryIcons, categoryLabels, difficultyConfig } from '@/constants/categories'
+import type { Recipe } from '@/types'
 
 type Phase = 'idle' | 'shaking' | 'revealed'
 type Source = 'local' | 'recommend'
@@ -202,8 +172,8 @@ export function BlindBoxPage() {
                     )}
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${difficultyColors[result.difficulty]}`}>
-                      {difficultyLabels[result.difficulty]}
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${difficultyConfig[result.difficulty].color}`}>
+                      {difficultyConfig[result.difficulty].label}
                     </span>
                     <span className="rounded-full bg-[var(--color-bg-subtle)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-text-secondary)]">
                       {categoryLabels[result.category]}

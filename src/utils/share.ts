@@ -89,7 +89,8 @@ export async function exportRecipeAsImage(recipe: Recipe): Promise<void> {
     })
 
     const link = document.createElement('a')
-    link.download = `${recipe.name}.png`
+    const safeName = recipe.name.replace(/[\\/:*?"<>|]/g, '_')
+    link.download = `${safeName}.png`
     link.href = canvas.toDataURL('image/png')
     link.click()
   } finally {

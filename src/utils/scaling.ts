@@ -9,7 +9,7 @@ export function scaleIngredient(
     return ingredient
   }
 
-  if (originalServings <= 0) return ingredient
+  if (originalServings <= 0 || targetServings <= 0) return ingredient
   const ratio = targetServings / originalServings
   const newAmount = Math.round(ingredient.amount * ratio * 100) / 100
 
@@ -29,7 +29,8 @@ export function scaleIngredients(
 
 export function formatAmount(amount: number, unit: string): string {
   if (amount === 0) return ''
-  if (amount === Math.floor(amount)) return `${amount}${unit}`
-  if (amount < 0.01) return `少许`
-  return `${amount}${unit}`
+  const rounded = Math.round(amount * 100) / 100
+  if (rounded === Math.floor(rounded)) return `${rounded}${unit}`
+  if (rounded < 0.01) return `少许`
+  return `${rounded}${unit}`
 }

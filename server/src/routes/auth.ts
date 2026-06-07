@@ -61,7 +61,8 @@ export async function handleAuth(request: Request, env: Env): Promise<Response> 
 
     const existing = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first()
     if (existing) {
-      return jsonResponse({ error: 'Email already registered' }, 409, request)
+      // Use generic message to prevent email enumeration
+      return jsonResponse({ error: 'Registration failed' }, 400, request)
     }
 
     const id = crypto.randomUUID()
@@ -72,14 +73,15 @@ export async function handleAuth(request: Request, env: Env): Promise<Response> 
       .bind(id, email, passwordHash, nickname ?? email.split('@')[0])
       .run()
 
-    const accessToken = await signJWT({ sub: id, email }, env.JWT_SECRET, 900) // 15 min
+    const accessToken = await signJWT({ sub: id }, env.JWT_SECRET, 900) // 15 min
     const refreshToken = await signJWT({ sub: id, type: 'refresh' }, env.JWT_SECRET, 604800) // 7 days
 
-    // Store refresh token
+    // Store hashed refresh token
+    const tokenHash = await hashPassword(refreshToken)
     await env.DB.prepare(
       'INSERT INTO sessions (id, user_id, refresh_token, expires_at) VALUES (?, ?, ?, datetime("now", "+7 days"))',
     )
-      .bind(crypto.randomUUID(), id, refreshToken)
+      .bind(crypto.randomUUID(), id, tokenHash)
       .run()
 
     return jsonResponse({ accessToken, refreshToken, user: { id, email, nickname: nickname ?? email.split('@')[0] } }, 200, request)
@@ -102,13 +104,15 @@ export async function handleAuth(request: Request, env: Env): Promise<Response> 
       return jsonResponse({ error: 'Invalid credentials' }, 401, request)
     }
 
-    const accessToken = await signJWT({ sub: user.id, email: user.email }, env.JWT_SECRET, 900)
+    const accessToken = await signJWT({ sub: user.id }, env.JWT_SECRET, 900)
     const refreshToken = await signJWT({ sub: user.id, type: 'refresh' }, env.JWT_SECRET, 604800)
 
+    // Store hashed refresh token
+    const tokenHash = await hashPassword(refreshToken)
     await env.DB.prepare(
       'INSERT INTO sessions (id, user_id, refresh_token, expires_at) VALUES (?, ?, ?, datetime("now", "+7 days"))',
     )
-      .bind(crypto.randomUUID(), user.id, refreshToken)
+      .bind(crypto.randomUUID(), user.id, tokenHash)
       .run()
 
     return jsonResponse({ accessToken, refreshToken, user: { id: user.id, email: user.email, nickname: user.nickname } }, 200, request)
@@ -126,17 +130,31 @@ export async function handleAuth(request: Request, env: Env): Promise<Response> 
       return jsonResponse({ error: 'Invalid refresh token' }, 401, request)
     }
 
-    const session = await env.DB.prepare(
-      'SELECT id, user_id FROM sessions WHERE refresh_token = ? AND expires_at > datetime("now")',
-    )
-      .bind(refreshToken)
-      .first<{ id: string; user_id: string }>()
+    // Hash the incoming token to match stored hash
+    const tokenHash = await hashPassword(refreshToken)
 
-    if (!session) {
-      // Token reuse detected: invalidate all sessions for this user
-      await env.DB.prepare('DELETE FROM sessions WHERE user_id = ?').bind(payload.sub).run()
-      return jsonResponse({ error: 'Session expired or token reused' }, 401, request)
+    // First check if any session exists for this token (even expired)
+    const anySession = await env.DB.prepare(
+      'SELECT id, user_id, expires_at FROM sessions WHERE refresh_token = ?',
+    )
+      .bind(tokenHash)
+      .first<{ id: string; user_id: string; expires_at: string }>()
+
+    if (!anySession) {
+      // Token not found at all - possible token forgery, but don't wipe all sessions
+      return jsonResponse({ error: 'Invalid refresh token' }, 401, request)
     }
+
+    // Check if the session is expired
+    const isExpired = new Date(anySession.expires_at).getTime() < Date.now()
+
+    if (isExpired) {
+      // Token expired naturally - only delete this one session, not all
+      await env.DB.prepare('DELETE FROM sessions WHERE id = ?').bind(anySession.id).run()
+      return jsonResponse({ error: 'Session expired, please log in again' }, 401, request)
+    }
+
+    const session = anySession
 
     const user = await env.DB.prepare('SELECT id, email, nickname FROM users WHERE id = ?')
       .bind(payload.sub)
@@ -146,12 +164,13 @@ export async function handleAuth(request: Request, env: Env): Promise<Response> 
       return jsonResponse({ error: 'User not found' }, 401, request)
     }
 
-    const newAccessToken = await signJWT({ sub: user.id, email: user.email }, env.JWT_SECRET, 900)
+    const newAccessToken = await signJWT({ sub: user.id }, env.JWT_SECRET, 900)
     const newRefreshToken = await signJWT({ sub: user.id, type: 'refresh' }, env.JWT_SECRET, 604800)
 
-    // Rotate refresh token
+    // Rotate refresh token (store hashed)
+    const newTokenHash = await hashPassword(newRefreshToken)
     await env.DB.prepare('UPDATE sessions SET refresh_token = ?, expires_at = datetime("now", "+7 days") WHERE id = ?')
-      .bind(newRefreshToken, session.id)
+      .bind(newTokenHash, session.id)
       .run()
 
     return jsonResponse({ accessToken: newAccessToken, refreshToken: newRefreshToken, user }, 200, request)

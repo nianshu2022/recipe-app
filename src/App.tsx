@@ -1,42 +1,75 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { Suspense, lazy, useEffect, type ReactNode } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { HomePage } from '@/pages/home/HomePage'
-import { RecipeDetailPage } from '@/pages/recipe/RecipeDetailPage'
-import { RecipeFormPage } from '@/pages/recipe/RecipeFormPage'
-import { CookingPage } from '@/pages/cooking/CookingPage'
-import { CalendarPage } from '@/pages/calendar/CalendarPage'
-import { FridgePage } from '@/pages/fridge/FridgePage'
-import { MealPlanPage } from '@/pages/meal-plan/MealPlanPage'
-import { SettingsPage } from '@/pages/settings/SettingsPage'
-import { CollectionPage } from '@/pages/collection/CollectionPage'
-import { ShoppingListPage } from '@/pages/shopping/ShoppingListPage'
-import { LoginPage } from '@/pages/settings/LoginPage'
-import { DataManagementPage } from '@/pages/settings/DataManagementPage'
-import { BlindBoxPage } from '@/pages/blind-box/BlindBoxPage'
-import { DiscoverPage } from '@/pages/discover/DiscoverPage'
+import { ToastContainer } from '@/components/ui/Toast'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+
+// Lazy-loaded pages
+const HomePage = lazy(() => import('@/pages/home/HomePage').then(m => ({ default: m.HomePage })))
+const RecipeDetailPage = lazy(() => import('@/pages/recipe/RecipeDetailPage').then(m => ({ default: m.RecipeDetailPage })))
+const RecipeFormPage = lazy(() => import('@/pages/recipe/RecipeFormPage').then(m => ({ default: m.RecipeFormPage })))
+const CookingPage = lazy(() => import('@/pages/cooking/CookingPage').then(m => ({ default: m.CookingPage })))
+const CalendarPage = lazy(() => import('@/pages/calendar/CalendarPage').then(m => ({ default: m.CalendarPage })))
+const FridgePage = lazy(() => import('@/pages/fridge/FridgePage').then(m => ({ default: m.FridgePage })))
+const MealPlanPage = lazy(() => import('@/pages/meal-plan/MealPlanPage').then(m => ({ default: m.MealPlanPage })))
+const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage').then(m => ({ default: m.SettingsPage })))
+const CollectionPage = lazy(() => import('@/pages/collection/CollectionPage').then(m => ({ default: m.CollectionPage })))
+const ShoppingListPage = lazy(() => import('@/pages/shopping/ShoppingListPage').then(m => ({ default: m.ShoppingListPage })))
+const LoginPage = lazy(() => import('@/pages/settings/LoginPage').then(m => ({ default: m.LoginPage })))
+const DataManagementPage = lazy(() => import('@/pages/settings/DataManagementPage').then(m => ({ default: m.DataManagementPage })))
+const BlindBoxPage = lazy(() => import('@/pages/blind-box/BlindBoxPage').then(m => ({ default: m.BlindBoxPage })))
+const DiscoverPage = lazy(() => import('@/pages/discover/DiscoverPage').then(m => ({ default: m.DiscoverPage })))
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
+
+function PageSuspense({ children }: { children: ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-20">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-primary)]" />
+        </div>
+      }
+    >
+      {children}
+    </Suspense>
+  )
+}
+
+function AnimatedRoutes() {
+  const location = useLocation()
+
+  return (
+    <div key={location.pathname} className="page-enter">
+      <Routes location={location}>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<PageSuspense><HomePage /></PageSuspense>} />
+          <Route path="/recipe/:id" element={<PageSuspense><RecipeDetailPage /></PageSuspense>} />
+          <Route path="/recipe/new" element={<PageSuspense><RecipeFormPage /></PageSuspense>} />
+          <Route path="/recipe/:id/edit" element={<PageSuspense><RecipeFormPage /></PageSuspense>} />
+          <Route path="/calendar" element={<PageSuspense><CalendarPage /></PageSuspense>} />
+          <Route path="/fridge" element={<PageSuspense><FridgePage /></PageSuspense>} />
+          <Route path="/meal-plan" element={<PageSuspense><MealPlanPage /></PageSuspense>} />
+          <Route path="/settings" element={<PageSuspense><SettingsPage /></PageSuspense>} />
+          <Route path="/login" element={<PageSuspense><LoginPage /></PageSuspense>} />
+          <Route path="/settings/data" element={<PageSuspense><DataManagementPage /></PageSuspense>} />
+          <Route path="/collection" element={<PageSuspense><CollectionPage /></PageSuspense>} />
+          <Route path="/shopping" element={<PageSuspense><ShoppingListPage /></PageSuspense>} />
+          <Route path="/blind-box" element={<PageSuspense><BlindBoxPage /></PageSuspense>} />
+          <Route path="/discover" element={<PageSuspense><DiscoverPage /></PageSuspense>} />
+          <Route path="*" element={<PageSuspense><NotFoundPage /></PageSuspense>} />
+        </Route>
+        <Route path="/cooking/:id" element={<PageSuspense><CookingPage /></PageSuspense>} />
+      </Routes>
+    </div>
+  )
+}
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/recipe/:id" element={<RecipeDetailPage />} />
-          <Route path="/recipe/new" element={<RecipeFormPage />} />
-          <Route path="/recipe/:id/edit" element={<RecipeFormPage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/fridge" element={<FridgePage />} />
-          <Route path="/meal-plan" element={<MealPlanPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/settings/data" element={<DataManagementPage />} />
-          <Route path="/collection" element={<CollectionPage />} />
-          <Route path="/shopping" element={<ShoppingListPage />} />
-          <Route path="/blind-box" element={<BlindBoxPage />} />
-          <Route path="/discover" element={<DiscoverPage />} />
-        </Route>
-        <Route path="/cooking/:id" element={<CookingPage />} />
-      </Routes>
+      <AnimatedRoutes />
+      <ToastContainer />
+      <ConfirmDialog />
     </BrowserRouter>
   )
 }

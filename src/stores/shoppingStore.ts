@@ -157,7 +157,7 @@ export const useShoppingStore = create<ShoppingState>((set, get) => ({
     )
     // Move unchecked to top
     items.sort((a, b) => (a.checked === b.checked ? 0 : a.checked ? 1 : -1))
-    const updated = { ...list, items, updatedAt: new Date().toISOString() }
+    const updated = { ...list, items, updatedAt: new Date().toISOString(), syncStatus: 'pending' as const }
     await db.putShoppingList(updated)
     set((s) => ({ lists: s.lists.map((l) => (l.id === listId ? updated : l)) }))
   },
@@ -174,7 +174,7 @@ export const useShoppingStore = create<ShoppingState>((set, get) => ({
       checked: false,
     }
     const items = [...list.items, newItem]
-    const updated = { ...list, items, updatedAt: new Date().toISOString() }
+    const updated = { ...list, items, updatedAt: new Date().toISOString(), syncStatus: 'pending' as const }
     await db.putShoppingList(updated)
     set((s) => ({ lists: s.lists.map((l) => (l.id === listId ? updated : l)) }))
   },
@@ -183,7 +183,7 @@ export const useShoppingStore = create<ShoppingState>((set, get) => ({
     const list = get().lists.find((l) => l.id === listId)
     if (!list) return
     const items = list.items.filter((i) => i.id !== itemId)
-    const updated = { ...list, items, updatedAt: new Date().toISOString() }
+    const updated = { ...list, items, updatedAt: new Date().toISOString(), syncStatus: 'pending' as const }
     await db.putShoppingList(updated)
     set((s) => ({ lists: s.lists.map((l) => (l.id === listId ? updated : l)) }))
   },
@@ -192,7 +192,7 @@ export const useShoppingStore = create<ShoppingState>((set, get) => ({
     const list = get().lists.find((l) => l.id === listId)
     if (!list) return
     const items = list.items.map((i) => (i.id === itemId ? { ...i, ...updates } : i))
-    const updated = { ...list, items, updatedAt: new Date().toISOString() }
+    const updated = { ...list, items, updatedAt: new Date().toISOString(), syncStatus: 'pending' as const }
     await db.putShoppingList(updated)
     set((s) => ({ lists: s.lists.map((l) => (l.id === listId ? updated : l)) }))
   },
@@ -201,7 +201,7 @@ export const useShoppingStore = create<ShoppingState>((set, get) => ({
     const list = get().lists.find((l) => l.id === listId)
     if (!list) return
     const items = list.items.filter((i) => !i.checked)
-    const updated = { ...list, items, updatedAt: new Date().toISOString() }
+    const updated = { ...list, items, updatedAt: new Date().toISOString(), syncStatus: 'pending' as const }
     await db.putShoppingList(updated)
     set((s) => ({ lists: s.lists.map((l) => (l.id === listId ? updated : l)) }))
   },
@@ -209,7 +209,7 @@ export const useShoppingStore = create<ShoppingState>((set, get) => ({
   deleteList: async (listId) => {
     const list = get().lists.find((l) => l.id === listId)
     if (!list) return
-    const deleted = { ...list, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+    const deleted = { ...list, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString(), syncStatus: 'pending' as const }
     await db.putShoppingList(deleted)
     set((s) => ({
       lists: s.lists.filter((l) => l.id !== listId),
