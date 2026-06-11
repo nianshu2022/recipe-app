@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, CalendarDays, Trash2, CalendarDays as CalendarIcon } from 'lucide-react'
 import { useCalendarStore } from '@/stores/calendarStore'
 import { useRecipeStore } from '@/stores/recipeStore'
-import { BrandLoading } from '@/components/ui/BrandLoading'
+import { PageSkeleton, CalendarSkeleton } from '@/components/ui/Skeleton'
 
 const dayNames = ['一', '二', '三', '四', '五', '六', '日']
 const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
@@ -64,21 +64,9 @@ export function CalendarPage() {
 
   if (loading) {
     return (
-      <BrandLoading>
-        <div className="space-y-3">
-          <div className="grid grid-cols-3 gap-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse rounded-2xl bg-[var(--color-bg-card)] p-4 shadow-xs">
-                <div className="mx-auto h-6 w-12 rounded bg-[var(--color-bg-subtle)]" />
-                <div className="mx-auto mt-2 h-3 w-10 rounded bg-[var(--color-bg-subtle)]" />
-              </div>
-            ))}
-          </div>
-          <div className="animate-pulse rounded-2xl bg-[var(--color-bg-card)] p-5 shadow-xs">
-            <div className="h-48 rounded bg-[var(--color-bg-subtle)]" />
-          </div>
-        </div>
-      </BrandLoading>
+      <PageSkeleton>
+        <CalendarSkeleton />
+      </PageSkeleton>
     )
   }
 

@@ -99,7 +99,12 @@ export const useFridgeStore = create<FridgeState>((set, get) => ({
   removeItem: async (id) => {
     const item = get().items.find((i) => i.id === id)
     if (!item) return
-    const deleted = { ...item, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+    const deleted = {
+      ...item,
+      deletedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      syncStatus: 'pending' as const,
+    }
     await db.putFridgeItem(deleted)
     set((s) => ({ items: s.items.filter((i) => i.id !== id) }))
   },

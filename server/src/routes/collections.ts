@@ -2,6 +2,19 @@ import type { Env } from '../index'
 import type { User } from '../middleware/auth'
 import { jsonResponse } from '../utils/response'
 
+type CreateCollectionBody = {
+  id?: string
+  name?: string
+  cover_image?: string
+  recipe_ids?: string[]
+}
+
+type UpdateCollectionBody = {
+  name?: string
+  cover_image?: string
+  recipe_ids?: string[]
+}
+
 export async function handleCollections(
   request: Request,
   env: Env,
@@ -23,9 +36,9 @@ export async function handleCollections(
 
   // POST /api/collections
   if (request.method === 'POST' && !id) {
-    let body: { id?: string; name?: string; recipe_ids?: string[] } = {}
+    let body: CreateCollectionBody
     try {
-      body = await request.json()
+      body = await request.json() as CreateCollectionBody
     } catch {
       return jsonResponse({ error: 'Invalid JSON body' }, 400, request)
     }
@@ -36,18 +49,18 @@ export async function handleCollections(
 
     const now = new Date().toISOString()
     await env.DB.prepare(
-      'INSERT INTO collections (id, user_id, name, recipe_ids, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO collections (id, user_id, name, cover_image, recipe_ids, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
     )
-      .bind(body.id, user.id, body.name, JSON.stringify(body.recipe_ids ?? []), now, now)
+      .bind(body.id, user.id, body.name, body.cover_image ?? null, JSON.stringify(body.recipe_ids ?? []), now, now)
       .run()
     return jsonResponse({ id: body.id, created_at: now }, 201, request)
   }
 
   // PUT /api/collections/:id
   if (request.method === 'PUT' && id) {
-    let body: { name?: string; recipe_ids?: string[] } = {}
+    let body: UpdateCollectionBody
     try {
-      body = await request.json()
+      body = await request.json() as UpdateCollectionBody
     } catch {
       return jsonResponse({ error: 'Invalid JSON body' }, 400, request)
     }
@@ -56,6 +69,7 @@ export async function handleCollections(
     const sets: string[] = ['updated_at = ?']
     const params: unknown[] = [now]
     if (body.name !== undefined) { sets.push('name = ?'); params.push(body.name) }
+    if (body.cover_image !== undefined) { sets.push('cover_image = ?'); params.push(body.cover_image) }
     if (body.recipe_ids !== undefined) { sets.push('recipe_ids = ?'); params.push(JSON.stringify(body.recipe_ids)) }
     params.push(id, user.id)
     await env.DB.prepare(`UPDATE collections SET ${sets.join(', ')} WHERE id = ? AND user_id = ?`)

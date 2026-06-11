@@ -1,5 +1,5 @@
 import {
-  ChefHat, Flame, Leaf, Soup, Wheat, IceCreamCone, CupSoda,
+  Flame, Leaf, Soup, Wheat, IceCreamCone, CupSoda,
   type LucideIcon,
 } from 'lucide-react'
 import type { Category, Difficulty } from '@/types'

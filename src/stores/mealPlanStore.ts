@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { MealPlan } from '@/types'
 import { db } from '@/db'
 import { generateId } from '@/utils/id'
+import { on } from '@/utils/events'
 
 export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack'
 
@@ -204,5 +205,10 @@ export const useMealPlanStore = create<MealPlanState>((set, get) => ({
   getSlotLabel: (slot) => slotLabels[slot],
   getDayLabel: (index) => dayLabels[index],
 }))
+
+// Listen for recipe deletion events to clean up meal plans
+on('recipe:deleted', ({ id }) => {
+  useMealPlanStore.getState().removeRecipeFromPlan(id)
+})
 
 export { slotLabels, dayLabels }

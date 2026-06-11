@@ -1,4 +1,8 @@
 import { db } from '@/db'
+import type {
+  Recipe, Collection, CookingRecord,
+  ShoppingList, FridgeItem, MealPlan,
+} from '@/types'
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://recipe-api.nianshu2022.cn'
 const API_FALLBACK = import.meta.env.VITE_API_FALLBACK ?? 'https://recipe-app-api.2478951652.workers.dev'
@@ -6,10 +10,21 @@ const API_FALLBACK = import.meta.env.VITE_API_FALLBACK ?? 'https://recipe-app-ap
 let useFallback = false
 let syncing = false
 
+const JSON_FIELDS = new Set([
+  'tags',
+  'ingredients',
+  'steps',
+  'nutrition',
+  'recipe_ids',
+  'source_recipe_ids',
+  'items',
+  'days',
+  'nutriments',
+])
+
 function getBaseUrl(): string {
   return useFallback ? API_FALLBACK : API_BASE
 }
-
 
 interface SyncResponse {
   changes: Record<string, unknown[]>
@@ -18,6 +33,51 @@ interface SyncResponse {
 
 interface PushPayload {
   changes: Record<string, { action: 'upsert' | 'delete'; data: Record<string, unknown> }[]>
+}
+
+interface SyncableRecord {
+  id: string
+  syncStatus: string
+  deletedAt?: string
+}
+
+type DBMethods = {
+  getAll: () => Promise<SyncableRecord[]>
+  get: (id: string) => Promise<SyncableRecord | undefined>
+  put: (record: SyncableRecord) => Promise<IDBValidKey>
+}
+
+const TABLE_CONFIG: Record<string, DBMethods> = {
+  recipes: {
+    getAll: () => db.getAllRecipes() as Promise<SyncableRecord[]>,
+    get: (id) => db.getRecipe(id) as Promise<SyncableRecord | undefined>,
+    put: (r) => db.putRecipe(r as Recipe),
+  },
+  collections: {
+    getAll: () => db.getAllCollections() as Promise<SyncableRecord[]>,
+    get: (id) => db.getCollection(id) as Promise<SyncableRecord | undefined>,
+    put: (r) => db.putCollection(r as Collection),
+  },
+  cooking_records: {
+    getAll: () => db.getAllCookingRecords() as Promise<SyncableRecord[]>,
+    get: (id) => db.getCookingRecord(id) as Promise<SyncableRecord | undefined>,
+    put: (r) => db.putCookingRecord(r as CookingRecord),
+  },
+  shopping_lists: {
+    getAll: () => db.getAllShoppingLists() as Promise<SyncableRecord[]>,
+    get: (id) => db.getShoppingList(id) as Promise<SyncableRecord | undefined>,
+    put: (r) => db.putShoppingList(r as ShoppingList),
+  },
+  fridge_items: {
+    getAll: () => db.getAllFridgeItems() as Promise<SyncableRecord[]>,
+    get: (id) => db.getFridgeItem(id) as Promise<SyncableRecord | undefined>,
+    put: (r) => db.putFridgeItem(r as FridgeItem),
+  },
+  meal_plans: {
+    getAll: () => db.getAllMealPlans() as Promise<SyncableRecord[]>,
+    get: (id) => db.getMealPlan(id) as Promise<SyncableRecord | undefined>,
+    put: (r) => db.putMealPlan(r as MealPlan),
+  },
 }
 
 function getToken(): string | null {
@@ -36,14 +96,11 @@ async function apiFetch(path: string, options: RequestInit = {}): Promise<Respon
 
   try {
     const res = await fetch(`${getBaseUrl()}${path}`, { ...options, headers })
-    // If we were using fallback and primary works again, switch back
-    if (useFallback && getBaseUrl() === API_FALLBACK) {
-      // Try primary on next request
+    if (useFallback) {
       useFallback = false
     }
     return res
   } catch {
-    // If primary fails and we're not already using fallback, try fallback
     if (!useFallback) {
       useFallback = true
       console.warn('Primary API unavailable, switching to fallback')
@@ -51,6 +108,22 @@ async function apiFetch(path: string, options: RequestInit = {}): Promise<Respon
     }
     throw new Error('Network error')
   }
+}
+
+async function apiFetchWithRefresh(
+  path: string,
+  options: RequestInit = {},
+): Promise<Response> {
+  let res = await apiFetch(path, options)
+  if (res.status === 401) {
+    const refreshed = await refreshTokenIfNeeded()
+    if (refreshed) {
+      res = await apiFetch(path, options)
+    } else {
+      throw new Error('Authentication expired')
+    }
+  }
+  return res
 }
 
 async function refreshTokenIfNeeded(): Promise<boolean> {
@@ -74,6 +147,12 @@ async function refreshTokenIfNeeded(): Promise<boolean> {
   }
 }
 
+function storeAuthData(data: { accessToken: string; refreshToken: string; user: unknown }) {
+  localStorage.setItem('access_token', data.accessToken)
+  localStorage.setItem('refresh_token', data.refreshToken)
+  localStorage.setItem('user', JSON.stringify(data.user))
+}
+
 export async function login(email: string, password: string): Promise<boolean> {
   const res = await apiFetch('/api/auth/login', {
     method: 'POST',
@@ -82,9 +161,7 @@ export async function login(email: string, password: string): Promise<boolean> {
   if (!res.ok) return false
 
   const data = await res.json()
-  localStorage.setItem('access_token', data.accessToken)
-  localStorage.setItem('refresh_token', data.refreshToken)
-  localStorage.setItem('user', JSON.stringify(data.user))
+  storeAuthData(data)
   return true
 }
 
@@ -96,9 +173,7 @@ export async function register(email: string, password: string, nickname?: strin
   if (!res.ok) return false
 
   const data = await res.json()
-  localStorage.setItem('access_token', data.accessToken)
-  localStorage.setItem('refresh_token', data.refreshToken)
-  localStorage.setItem('user', JSON.stringify(data.user))
+  storeAuthData(data)
   return true
 }
 
@@ -130,190 +205,12 @@ export function getCurrentUser(): { id: string; email: string; nickname: string 
   return s ? JSON.parse(s) : null
 }
 
-// Sync engine
-export async function pullChanges(): Promise<void> {
-  const since = localStorage.getItem('last_sync') ?? '1970-01-01T00:00:00Z'
-  let res = await apiFetch(`/api/sync?since=${encodeURIComponent(since)}`)
-
-  // Try refresh if unauthorized
-  if (res.status === 401) {
-    const refreshed = await refreshTokenIfNeeded()
-    if (refreshed) {
-      res = await apiFetch(`/api/sync?since=${encodeURIComponent(since)}`)
-    } else {
-      throw new Error('Authentication expired')
-    }
-  }
-
-  if (!res.ok) throw new Error('Pull failed')
-
-  const data: SyncResponse = await res.json()
-
-  // Apply changes to IndexedDB
-  const validTables = new Set(['recipes', 'collections', 'cooking_records', 'shopping_lists', 'fridge_items', 'meal_plans'])
-  for (const [table, records] of Object.entries(data.changes)) {
-    if (!validTables.has(table)) continue
-    if (!Array.isArray(records)) continue
-    for (const record of records) {
-      if (typeof record !== 'object' || record === null) continue
-      const r = record as Record<string, unknown>
-      const mapped = mapServerToClient(table, r)
-      if (!mapped.id || typeof mapped.id !== 'string') continue
-
-      // Don't overwrite local pending changes with stale server data
-      let localRecord: Record<string, unknown> | undefined
-      switch (table) {
-        case 'recipes': localRecord = await db.getRecipe(mapped.id as string) as unknown as Record<string, unknown> | undefined; break
-        case 'collections': localRecord = await db.getCollection(mapped.id as string) as unknown as Record<string, unknown> | undefined; break
-        case 'cooking_records': localRecord = await db.getCookingRecord(mapped.id as string) as unknown as Record<string, unknown> | undefined; break
-        case 'shopping_lists': localRecord = await db.getShoppingList(mapped.id as string) as unknown as Record<string, unknown> | undefined; break
-        case 'fridge_items': localRecord = await db.getFridgeItem(mapped.id as string) as unknown as Record<string, unknown> | undefined; break
-        case 'meal_plans': localRecord = await db.getMealPlan(mapped.id as string) as unknown as Record<string, unknown> | undefined; break
-      }
-
-      if (localRecord && localRecord.syncStatus === 'pending') {
-        // Local has unsynced changes, skip this server record to avoid overwriting
-        continue
-      }
-
-      switch (table) {
-        case 'recipes':
-          await db.putRecipe(mapped as never)
-          break
-        case 'collections':
-          await db.putCollection(mapped as never)
-          break
-        case 'cooking_records':
-          await db.putCookingRecord(mapped as never)
-          break
-        case 'shopping_lists':
-          await db.putShoppingList(mapped as never)
-          break
-        case 'fridge_items':
-          await db.putFridgeItem(mapped as never)
-          break
-        case 'meal_plans':
-          await db.putMealPlan(mapped as never)
-          break
-      }
-    }
-  }
-
-  localStorage.setItem('last_sync', data.timestamp)
-}
-
-export async function pushChanges(): Promise<void> {
-  const changes: PushPayload['changes'] = {}
-
-  // Collect pending items from IndexedDB
-  const recipes = (await db.getAllRecipes()).filter((r) => r.syncStatus === 'pending')
-  if (recipes.length > 0) {
-    changes.recipes = recipes.map((r) => ({
-      action: r.deletedAt ? 'delete' : 'upsert',
-      data: mapClientToServer('recipes', r),
-    }))
-  }
-
-  const collections = (await db.getAllCollections()).filter((c) => c.syncStatus === 'pending')
-  if (collections.length > 0) {
-    changes.collections = collections.map((c) => ({
-      action: c.deletedAt ? 'delete' : 'upsert',
-      data: mapClientToServer('collections', c),
-    }))
-  }
-
-  const cookingRecords = (await db.getAllCookingRecords()).filter((r) => r.syncStatus === 'pending')
-  if (cookingRecords.length > 0) {
-    changes.cooking_records = cookingRecords.map((r) => ({
-      action: r.deletedAt ? 'delete' : 'upsert',
-      data: mapClientToServer('cooking_records', r),
-    }))
-  }
-
-  const shoppingLists = (await db.getAllShoppingLists()).filter((l) => l.syncStatus === 'pending')
-  if (shoppingLists.length > 0) {
-    changes.shopping_lists = shoppingLists.map((l) => ({
-      action: l.deletedAt ? 'delete' : 'upsert',
-      data: mapClientToServer('shopping_lists', l),
-    }))
-  }
-
-  const fridgeItems = (await db.getAllFridgeItems()).filter((i) => i.syncStatus === 'pending')
-  if (fridgeItems.length > 0) {
-    changes.fridge_items = fridgeItems.map((i) => ({
-      action: i.deletedAt ? 'delete' : 'upsert',
-      data: mapClientToServer('fridge_items', i),
-    }))
-  }
-
-  const mealPlans = (await db.getAllMealPlans()).filter((p) => p.syncStatus === 'pending')
-  if (mealPlans.length > 0) {
-    changes.meal_plans = mealPlans.map((p) => ({
-      action: p.deletedAt ? 'delete' : 'upsert',
-      data: mapClientToServer('meal_plans', p),
-    }))
-  }
-
-  if (Object.keys(changes).length === 0) return
-
-  let res = await apiFetch('/api/sync', {
-    method: 'POST',
-    body: JSON.stringify({ changes }),
-  })
-
-  if (res.status === 401) {
-    const refreshed = await refreshTokenIfNeeded()
-    if (refreshed) {
-      res = await apiFetch('/api/sync', {
-        method: 'POST',
-        body: JSON.stringify({ changes }),
-      })
-    }
-  }
-
-  if (!res.ok) throw new Error('Push failed')
-
-  // Mark as synced
-  for (const recipe of recipes) {
-    await db.putRecipe({ ...recipe, syncStatus: 'synced' })
-  }
-  for (const col of collections) {
-    await db.putCollection({ ...col, syncStatus: 'synced' })
-  }
-  for (const record of cookingRecords) {
-    await db.putCookingRecord({ ...record, syncStatus: 'synced' })
-  }
-  for (const list of shoppingLists) {
-    await db.putShoppingList({ ...list, syncStatus: 'synced' })
-  }
-  for (const item of fridgeItems) {
-    await db.putFridgeItem({ ...item, syncStatus: 'synced' })
-  }
-  for (const plan of mealPlans) {
-    await db.putMealPlan({ ...plan, syncStatus: 'synced' })
-  }
-}
-
-export async function fullSync(): Promise<void> {
-  if (syncing) return
-  syncing = true
-  try {
-    await pushChanges()
-    await pullChanges()
-  } finally {
-    syncing = false
-  }
-}
-
-// Field mapping between client (camelCase) and server (snake_case)
-function mapServerToClient(_table: string, record: Record<string, unknown>): Record<string, unknown> {
+function mapServerToClient(record: Record<string, unknown>): Record<string, unknown> {
   const mapped: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(record)) {
-    // Skip prototype pollution vectors
     if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue
     const camelKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
-    // Parse JSON fields
-    if (typeof value === 'string' && (key === 'tags' || key === 'ingredients' || key === 'steps' || key === 'nutrition' || key === 'recipe_ids' || key === 'source_recipe_ids' || key === 'items' || key === 'days')) {
+    if (typeof value === 'string' && JSON_FIELDS.has(key)) {
       try {
         mapped[camelKey] = JSON.parse(value)
       } catch {
@@ -327,17 +224,91 @@ function mapServerToClient(_table: string, record: Record<string, unknown>): Rec
   return mapped
 }
 
-function mapClientToServer(_table: string, record: Record<string, unknown>): Record<string, unknown> {
+function mapClientToServer(record: Record<string, unknown>): Record<string, unknown> {
   const mapped: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(record)) {
     if (key === 'syncStatus' || key === 'userId') continue
+    if (value === undefined) continue
     const snakeKey = key.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`)
-    // Stringify array/object fields
-    if (Array.isArray(value) || (typeof value === 'object' && value !== null && !(value instanceof Date))) {
+    if (JSON_FIELDS.has(snakeKey)) {
       mapped[snakeKey] = JSON.stringify(value)
     } else {
       mapped[snakeKey] = value
     }
   }
   return mapped
+}
+
+function toChangeEntry(record: SyncableRecord) {
+  return {
+    action: record.deletedAt ? 'delete' as const : 'upsert' as const,
+    data: mapClientToServer(record as unknown as Record<string, unknown>),
+  }
+}
+
+export async function pullChanges(): Promise<void> {
+  const since = localStorage.getItem('last_sync') ?? '1970-01-01T00:00:00Z'
+  const res = await apiFetchWithRefresh(`/api/sync?since=${encodeURIComponent(since)}`)
+  if (!res.ok) throw new Error('Pull failed')
+
+  const data: SyncResponse = await res.json()
+
+  for (const [table, records] of Object.entries(data.changes)) {
+    const config = TABLE_CONFIG[table]
+    if (!config || !Array.isArray(records)) continue
+
+    for (const record of records) {
+      if (typeof record !== 'object' || record === null) continue
+      const mapped = mapServerToClient(record as Record<string, unknown>)
+      if (!mapped.id || typeof mapped.id !== 'string') continue
+
+      const localRecord = await config.get(mapped.id as string)
+      if (localRecord && localRecord.syncStatus === 'pending') continue
+
+      await config.put(mapped as unknown as SyncableRecord)
+    }
+  }
+
+  localStorage.setItem('last_sync', data.timestamp)
+}
+
+export async function pushChanges(): Promise<void> {
+  const changes: PushPayload['changes'] = {}
+  const pendingRecords: Record<string, SyncableRecord[]> = {}
+
+  for (const [table, config] of Object.entries(TABLE_CONFIG)) {
+    const all = await config.getAll()
+    const pending = all.filter((r) => r.syncStatus === 'pending')
+    if (pending.length > 0) {
+      changes[table] = pending.map((r) => toChangeEntry(r))
+      pendingRecords[table] = pending
+    }
+  }
+
+  if (Object.keys(changes).length === 0) return
+
+  const res = await apiFetchWithRefresh('/api/sync', {
+    method: 'POST',
+    body: JSON.stringify({ changes }),
+  })
+
+  if (!res.ok) throw new Error('Push failed')
+
+  for (const [table, records] of Object.entries(pendingRecords)) {
+    const config = TABLE_CONFIG[table]
+    for (const record of records) {
+      await config.put({ ...record, syncStatus: 'synced' })
+    }
+  }
+}
+
+export async function fullSync(): Promise<void> {
+  if (syncing) return
+  syncing = true
+  try {
+    await pushChanges()
+    await pullChanges()
+  } finally {
+    syncing = false
+  }
 }

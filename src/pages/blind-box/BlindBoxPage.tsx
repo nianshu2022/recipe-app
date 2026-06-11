@@ -60,8 +60,20 @@ export function BlindBoxPage() {
 
   const handleSave = async () => {
     if (!result) return
-    const { id, createdAt, updatedAt, syncStatus, ...rest } = result
-    await addRecipe(rest)
+    await addRecipe({
+      userId: result.userId,
+      name: result.name,
+      category: result.category,
+      tags: result.tags,
+      coverImage: result.coverImage,
+      difficulty: result.difficulty,
+      duration: result.duration,
+      servings: result.servings,
+      ingredients: result.ingredients,
+      steps: result.steps,
+      nutrition: result.nutrition,
+      deletedAt: result.deletedAt,
+    })
     setSaved(true)
   }
 

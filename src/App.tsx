@@ -3,6 +3,7 @@ import { Suspense, lazy, useEffect, type ReactNode } from 'react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ToastContainer } from '@/components/ui/Toast'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 // Lazy-loaded pages
 const HomePage = lazy(() => import('@/pages/home/HomePage').then(m => ({ default: m.HomePage })))
@@ -65,11 +66,40 @@ function AnimatedRoutes() {
 }
 
 export default function App() {
+  useEffect(() => {
+    let lastTouchEnd = 0
+
+    const preventGestureZoom = (event: Event) => {
+      event.preventDefault()
+    }
+    const preventDoubleTapZoom = (event: TouchEvent) => {
+      const now = Date.now()
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault()
+      }
+      lastTouchEnd = now
+    }
+
+    document.addEventListener('gesturestart', preventGestureZoom, { passive: false })
+    document.addEventListener('gesturechange', preventGestureZoom, { passive: false })
+    document.addEventListener('gestureend', preventGestureZoom, { passive: false })
+    document.addEventListener('touchend', preventDoubleTapZoom, { passive: false })
+
+    return () => {
+      document.removeEventListener('gesturestart', preventGestureZoom)
+      document.removeEventListener('gesturechange', preventGestureZoom)
+      document.removeEventListener('gestureend', preventGestureZoom)
+      document.removeEventListener('touchend', preventDoubleTapZoom)
+    }
+  }, [])
+
   return (
-    <BrowserRouter>
-      <AnimatedRoutes />
-      <ToastContainer />
-      <ConfirmDialog />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AnimatedRoutes />
+        <ToastContainer />
+        <ConfirmDialog />
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, ShoppingCart, Plus, Trash2, Check, X, ChevronDown, Eraser,
 } from 'lucide-react'
 import { useShoppingStore } from '@/stores/shoppingStore'
 import { useUIStore } from '@/stores/uiStore'
+import { EmptyState } from '@/components/ui/EmptyState'
 import type { ShoppingItem } from '@/types'
 
 export function ShoppingListPage() {
@@ -72,6 +73,7 @@ export function ShoppingListPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
+            aria-label="返回"
             className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
           >
             <ArrowLeft size={18} className="text-[var(--color-text-secondary)]" />
@@ -80,19 +82,12 @@ export function ShoppingListPage() {
             购物清单
           </h1>
         </div>
-        <div className="flex flex-col items-center justify-center py-16">
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--color-bg-subtle)]">
-            <ShoppingCart size={36} className="text-[var(--color-text-muted)]" />
-          </div>
-          <h3 className="mb-2 text-lg font-medium text-[var(--color-text)]">清单是空的</h3>
-          <p className="mb-6 text-sm text-[var(--color-text-muted)]">从菜谱生成一份购物清单吧</p>
-          <Link
-            to="/"
-            className="rounded-2xl bg-[var(--color-primary)] px-8 py-3 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
-          >
-            去选菜谱
-          </Link>
-        </div>
+        <EmptyState
+          icon={ShoppingCart}
+          title="清单是空的"
+          description="从菜谱生成一份购物清单吧"
+          action={{ label: '去选菜谱', to: '/' }}
+        />
       </div>
     )
   }

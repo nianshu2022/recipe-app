@@ -2,12 +2,19 @@ import { create } from 'zustand'
 import type { Recipe, Category, Difficulty } from '@/types'
 import { db } from '@/db'
 import { generateId } from '@/utils/id'
-import { useMealPlanStore } from './mealPlanStore'
+import { emit } from '@/utils/events'
 
-function filterRecipes(recipes: Recipe[], searchQuery: string, categoryFilter: Category | null, difficultyFilter: Difficulty | null) {
+function filterRecipes(
+  recipes: Recipe[],
+  searchQuery: string,
+  categoryFilter: Category | null,
+  difficultyFilter: Difficulty | null,
+): Recipe[] {
+  if (!searchQuery && !categoryFilter && !difficultyFilter) return recipes
+
+  const query = searchQuery?.toLowerCase()
   return recipes.filter((recipe) => {
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
+    if (query) {
       const matchName = recipe.name.toLowerCase().includes(query)
       const matchTags = recipe.tags.some((t) => t.toLowerCase().includes(query))
       const matchIngredients = recipe.ingredients.some((i) =>
@@ -29,7 +36,6 @@ interface RecipeState {
   difficultyFilter: Difficulty | null
   filteredRecipes: Recipe[]
 
-  // Actions
   loadRecipes: () => Promise<void>
   addRecipe: (recipe: Omit<Recipe, 'id' | 'syncStatus' | 'createdAt' | 'updatedAt'>) => Promise<void>
   updateRecipe: (id: string, updates: Partial<Recipe>) => Promise<void>
@@ -48,14 +54,16 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
   filteredRecipes: [],
 
   loadRecipes: async () => {
+    const current = get()
+    if (current.loading) return
+
     set({ loading: true })
     try {
       const recipes = await db.getAllRecipes()
       const activeRecipes = recipes.filter((r) => !r.deletedAt)
-      const { searchQuery, categoryFilter, difficultyFilter } = get()
       set({
         recipes: activeRecipes,
-        filteredRecipes: filterRecipes(activeRecipes, searchQuery, categoryFilter, difficultyFilter),
+        filteredRecipes: filterRecipes(activeRecipes, current.searchQuery, current.categoryFilter, current.difficultyFilter),
         loading: false,
       })
     } catch (error) {
@@ -74,11 +82,11 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
       updatedAt: now,
     }
     await db.putRecipe(recipe)
-    const { recipes, searchQuery, categoryFilter, difficultyFilter } = get()
+    const { recipes } = get()
     const newRecipes = [...recipes, recipe]
     set({
       recipes: newRecipes,
-      filteredRecipes: filterRecipes(newRecipes, searchQuery, categoryFilter, difficultyFilter),
+      filteredRecipes: filterRecipes(newRecipes, get().searchQuery, get().categoryFilter, get().difficultyFilter),
     })
   },
 
@@ -93,11 +101,10 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
       updatedAt: new Date().toISOString(),
     }
     await db.putRecipe(updated)
-    const { recipes, searchQuery, categoryFilter, difficultyFilter } = get()
-    const newRecipes = recipes.map((r) => (r.id === id ? updated : r))
+    const newRecipes = get().recipes.map((r) => (r.id === id ? updated : r))
     set({
       recipes: newRecipes,
-      filteredRecipes: filterRecipes(newRecipes, searchQuery, categoryFilter, difficultyFilter),
+      filteredRecipes: filterRecipes(newRecipes, get().searchQuery, get().categoryFilter, get().difficultyFilter),
     })
   },
 
@@ -111,40 +118,35 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
       syncStatus: 'pending',
       updatedAt: new Date().toISOString(),
     }
-    try {
-      await db.putRecipe(deleted)
-      await useMealPlanStore.getState().removeRecipeFromPlan(id)
-    } catch (e) {
-      console.error('Failed to delete recipe:', e)
-      return
-    }
-    const { recipes, searchQuery, categoryFilter, difficultyFilter } = get()
-    const newRecipes = recipes.filter((r) => r.id !== id)
+
+    await db.putRecipe(deleted)
+    const newRecipes = get().recipes.filter((r) => r.id !== id)
     set({
       recipes: newRecipes,
-      filteredRecipes: filterRecipes(newRecipes, searchQuery, categoryFilter, difficultyFilter),
+      filteredRecipes: filterRecipes(newRecipes, get().searchQuery, get().categoryFilter, get().difficultyFilter),
     })
+
+    emit('recipe:deleted', { id })
   },
 
   setSearchQuery: (query) => {
-    const { recipes, categoryFilter, difficultyFilter } = get()
     set({
       searchQuery: query,
-      filteredRecipes: filterRecipes(recipes, query, categoryFilter, difficultyFilter),
+      filteredRecipes: filterRecipes(get().recipes, query, get().categoryFilter, get().difficultyFilter),
     })
   },
+
   setCategoryFilter: (category) => {
-    const { recipes, searchQuery, difficultyFilter } = get()
     set({
       categoryFilter: category,
-      filteredRecipes: filterRecipes(recipes, searchQuery, category, difficultyFilter),
+      filteredRecipes: filterRecipes(get().recipes, get().searchQuery, category, get().difficultyFilter),
     })
   },
+
   setDifficultyFilter: (difficulty) => {
-    const { recipes, searchQuery, categoryFilter } = get()
     set({
       difficultyFilter: difficulty,
-      filteredRecipes: filterRecipes(recipes, searchQuery, categoryFilter, difficulty),
+      filteredRecipes: filterRecipes(get().recipes, get().searchQuery, get().categoryFilter, difficulty),
     })
   },
 }))

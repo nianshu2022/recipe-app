@@ -3,24 +3,28 @@ import type { User } from '../middleware/auth'
 import { jsonResponse } from '../utils/response'
 
 const tables = [
-  { table: 'recipes', idCol: 'id' },
-  { table: 'collections', idCol: 'id' },
-  { table: 'menus', idCol: 'id' },
-  { table: 'meal_plans', idCol: 'id' },
-  { table: 'shopping_lists', idCol: 'id' },
-  { table: 'fridge_items', idCol: 'id' },
-  { table: 'cooking_records', idCol: 'id' },
+  { table: 'recipes' },
+  { table: 'collections' },
+  { table: 'menus' },
+  { table: 'meal_plans' },
+  { table: 'shopping_lists' },
+  { table: 'fridge_items' },
+  { table: 'cooking_records' },
 ]
 
 // Whitelisted columns per table for SQL safety
 const allowedColumns: Record<string, Set<string>> = {
-  recipes: new Set(['id', 'user_id', 'name', 'category', 'tags', 'difficulty', 'duration', 'servings', 'cover_image', 'ingredients', 'steps', 'deleted_at', 'created_at', 'updated_at']),
-  collections: new Set(['id', 'user_id', 'name', 'recipe_ids', 'deleted_at', 'created_at', 'updated_at']),
+  recipes: new Set(['id', 'user_id', 'name', 'category', 'tags', 'difficulty', 'duration', 'servings', 'cover_image', 'ingredients', 'steps', 'nutrition', 'deleted_at', 'created_at', 'updated_at']),
+  collections: new Set(['id', 'user_id', 'name', 'cover_image', 'recipe_ids', 'deleted_at', 'created_at', 'updated_at']),
   menus: new Set(['id', 'user_id', 'name', 'recipe_ids', 'deleted_at', 'created_at', 'updated_at']),
   meal_plans: new Set(['id', 'user_id', 'week_start', 'days', 'deleted_at', 'created_at', 'updated_at']),
   shopping_lists: new Set(['id', 'user_id', 'source_recipe_ids', 'items', 'deleted_at', 'created_at', 'updated_at']),
-  fridge_items: new Set(['id', 'user_id', 'name', 'category', 'amount', 'unit', 'expiry_date', 'image_url', 'barcode', 'deleted_at', 'created_at', 'updated_at']),
-  cooking_records: new Set(['id', 'user_id', 'recipe_id', 'recipe_name', 'date', 'servings', 'deleted_at', 'created_at', 'updated_at']),
+  fridge_items: new Set(['id', 'user_id', 'name', 'brand', 'category', 'amount', 'unit', 'image_url', 'nutriments', 'purchase_date', 'expiry_date', 'deleted_at', 'created_at', 'updated_at']),
+  cooking_records: new Set(['id', 'user_id', 'recipe_id', 'date', 'servings', 'notes', 'deleted_at', 'created_at', 'updated_at']),
+}
+
+type SyncBody = {
+  changes?: Record<string, { action: 'upsert' | 'delete'; data: Record<string, unknown> }[]>
 }
 
 function sanitizeColumns(table: string, data: Record<string, unknown>): Record<string, unknown> {
@@ -58,11 +62,9 @@ export async function handleSync(request: Request, env: Env, user: User): Promis
 
   // POST /api/sync — batch push
   if (request.method === 'POST') {
-    let body: {
-      changes?: Record<string, { action: 'upsert' | 'delete'; data: Record<string, unknown> }[]>
-    } = {}
+    let body: SyncBody
     try {
-      body = await request.json()
+      body = await request.json() as SyncBody
     } catch {
       return jsonResponse({ error: 'Invalid JSON body' }, 400, request)
     }
@@ -79,13 +81,16 @@ export async function handleSync(request: Request, env: Env, user: User): Promis
 
       let count = 0
       for (const op of ops) {
-        const data = sanitizeColumns(table, { ...op.data, user_id: user.id })
+        if (op.action !== 'upsert' && op.action !== 'delete') continue
+        const now = new Date().toISOString()
+        const data = sanitizeColumns(table, { ...op.data, user_id: user.id, updated_at: now })
+        if (typeof data.id !== 'string') continue
 
         if (op.action === 'delete') {
           await env.DB.prepare(
-            `UPDATE ${table} SET deleted_at = datetime('now'), updated_at = datetime('now') WHERE id = ? AND user_id = ?`,
+            `UPDATE ${table} SET deleted_at = ?, updated_at = ? WHERE id = ? AND user_id = ?`,
           )
-            .bind(data.id, user.id)
+            .bind(now, now, data.id, user.id)
             .run()
         } else {
           // Upsert
@@ -100,7 +105,7 @@ export async function handleSync(request: Request, env: Env, user: User): Promis
           if (updates.length > 0) {
             await env.DB.prepare(
               `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})
-               ON CONFLICT(id) DO UPDATE SET ${updates}, updated_at = datetime('now')
+               ON CONFLICT(id) DO UPDATE SET ${updates}
                WHERE ${table}.user_id = excluded.user_id`,
             )
               .bind(...values)

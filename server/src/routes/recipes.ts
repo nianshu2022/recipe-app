@@ -1,6 +1,27 @@
 import type { Env } from '../index'
 import type { User } from '../middleware/auth'
-import { jsonResponse } from '../utils/response'
+import {
+  jsonResponse, errorResponse,
+  checkRateLimit, rateLimitHeaders,
+  validateRecipeInput, validateString,
+} from '../utils/response'
+
+type RecipeBody = {
+  id?: string
+  name?: string
+  category?: string
+  tags?: string[]
+  difficulty?: string
+  duration?: number
+  servings?: number
+  ingredients?: unknown[]
+  steps?: unknown[]
+  nutrition?: unknown
+  cover_image?: string
+}
+
+const MAX_PAGE_SIZE = 100
+const DEFAULT_PAGE_SIZE = 50
 
 export async function handleRecipes(
   request: Request,
@@ -12,19 +33,51 @@ export async function handleRecipes(
   const idMatch = path.match(/^\/api\/recipes\/([^/]+)/)
   const id = idMatch?.[1]
 
+  // Rate limit: 60 requests per minute per user
+  const rateResult = checkRateLimit(`recipes:${user.id}`, 60, 60_000)
+  const extraHeaders = rateLimitHeaders(rateResult)
+  if (!rateResult.allowed) {
+    return jsonResponse({ error: 'Too many requests' }, 429, request)
+  }
+
   // GET /api/recipes
   if (request.method === 'GET' && !id) {
     const since = url.searchParams.get('since')
+    const page = Math.max(1, parseInt(url.searchParams.get('page') ?? '1', 10))
+    const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, parseInt(url.searchParams.get('page_size') ?? String(DEFAULT_PAGE_SIZE), 10)))
+    const offset = (page - 1) * pageSize
+
     let query = 'SELECT * FROM recipes WHERE user_id = ? AND deleted_at IS NULL'
     const params: unknown[] = [user.id]
     if (since) {
       query += ' AND updated_at > ?'
       params.push(since)
     }
-    query += ' ORDER BY updated_at DESC'
+
+    // Get total count for pagination
+    const countQuery = `SELECT COUNT(*) as total FROM recipes WHERE user_id = ? AND deleted_at IS NULL${since ? ' AND updated_at > ?' : ''}`
+    const countParams = since ? [user.id, since] : [user.id]
+    const { total } = await env.DB.prepare(countQuery).bind(...countParams).first<{ total: number }>() ?? { total: 0 }
+
+    query += ' ORDER BY updated_at DESC LIMIT ? OFFSET ?'
+    params.push(pageSize, offset)
 
     const { results } = await env.DB.prepare(query).bind(...params).all()
-    return jsonResponse(results, 200, request)
+    return new Response(JSON.stringify({
+      data: results,
+      pagination: {
+        page,
+        page_size: pageSize,
+        total,
+        total_pages: Math.ceil(total / pageSize),
+      },
+    }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        ...extraHeaders,
+      },
+    })
   }
 
   // GET /api/recipes/:id
@@ -32,33 +85,26 @@ export async function handleRecipes(
     const recipe = await env.DB.prepare('SELECT * FROM recipes WHERE id = ? AND user_id = ?')
       .bind(id, user.id)
       .first()
-    if (!recipe) return jsonResponse({ error: 'Not found' }, 404, request)
+    if (!recipe) return errorResponse('Not found', 404, request)
     return jsonResponse(recipe, 200, request)
   }
 
   // POST /api/recipes
   if (request.method === 'POST' && !id) {
-    let body: {
-      id?: string
-      name?: string
-      category?: string
-      tags?: string[]
-      difficulty?: string
-      duration?: number
-      servings?: number
-      ingredients?: unknown[]
-      steps?: unknown[]
-      nutrition?: unknown
-      cover_image?: string
-    } = {}
+    let body: RecipeBody
     try {
-      body = await request.json()
+      body = await request.json() as RecipeBody
     } catch {
-      return jsonResponse({ error: 'Invalid JSON body' }, 400, request)
+      return errorResponse('Invalid JSON body', 400, request)
     }
 
-    if (!body.id || !body.name || !body.category) {
-      return jsonResponse({ error: 'Missing required recipe fields' }, 400, request)
+    if (!body.id || !validateString(body.id, 50)) {
+      return errorResponse('Invalid recipe ID', 400, request)
+    }
+
+    const validation = validateRecipeInput(body as Record<string, unknown>)
+    if (!validation.valid) {
+      return errorResponse(validation.error!, 400, request)
     }
 
     const now = new Date().toISOString()
@@ -67,7 +113,7 @@ export async function handleRecipes(
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
       .bind(
-        body.id, user.id, body.name, body.category,
+        body.id, user.id, body.name!, body.category!,
         JSON.stringify(body.tags ?? []), body.difficulty ?? 'easy', body.duration ?? 30, body.servings ?? 2,
         JSON.stringify(body.ingredients ?? []), JSON.stringify(body.steps ?? []),
         body.nutrition ? JSON.stringify(body.nutrition) : null,
@@ -80,22 +126,16 @@ export async function handleRecipes(
 
   // PUT /api/recipes/:id
   if (request.method === 'PUT' && id) {
-    let body: {
-      name?: string
-      category?: string
-      tags?: string[]
-      difficulty?: string
-      duration?: number
-      servings?: number
-      ingredients?: unknown[]
-      steps?: unknown[]
-      nutrition?: unknown
-      cover_image?: string
-    } = {}
+    let body: RecipeBody
     try {
-      body = await request.json()
+      body = await request.json() as RecipeBody
     } catch {
-      return jsonResponse({ error: 'Invalid JSON body' }, 400, request)
+      return errorResponse('Invalid JSON body', 400, request)
+    }
+
+    const validation = validateRecipeInput(body as Record<string, unknown>)
+    if (!validation.valid) {
+      return errorResponse(validation.error!, 400, request)
     }
 
     const now = new Date().toISOString()

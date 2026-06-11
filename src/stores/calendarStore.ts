@@ -59,7 +59,12 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
   deleteRecord: async (id) => {
     const record = get().records.find((r) => r.id === id)
     if (!record) return
-    const deleted = { ...record, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+    const deleted = {
+      ...record,
+      deletedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      syncStatus: 'pending' as const,
+    }
     await db.putCookingRecord(deleted)
     set((s) => ({ records: s.records.filter((r) => r.id !== id) }))
   },

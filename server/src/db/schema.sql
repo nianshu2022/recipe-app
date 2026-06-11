@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS sessions (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE INDEX IF NOT EXISTS idx_sessions_refresh_token ON sessions(refresh_token);
+
 -- Recipes
 CREATE TABLE IF NOT EXISTS recipes (
   id TEXT PRIMARY KEY,
@@ -95,9 +97,12 @@ CREATE TABLE IF NOT EXISTS fridge_items (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id),
   name TEXT NOT NULL,
+  brand TEXT,
   amount REAL NOT NULL DEFAULT 0,
   unit TEXT NOT NULL DEFAULT '',
   category TEXT NOT NULL DEFAULT '',
+  image_url TEXT,
+  nutriments TEXT,
   purchase_date TEXT NOT NULL,
   expiry_date TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),

@@ -226,7 +226,7 @@ export function FridgePage() {
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-semibold text-[var(--color-text)]">添加食材</h3>
-              <button onClick={() => { setShowAdd(false); setNewName(''); setNewBrand(''); setNewAmount(''); setNewUnit(''); setNewExpiryDays(''); setNewPurchaseDate(new Date().toISOString().split('T')[0]); setNewNutriments(undefined); setOffResults([]); setOffError(null); setHasSearched(false) }} className="rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]">
+              <button onClick={() => { setShowAdd(false); setNewName(''); setNewBrand(''); setNewAmount(''); setNewUnit(''); setNewExpiryDays(''); setNewPurchaseDate(new Date().toISOString().split('T')[0]); setNewNutriments(undefined); setOffResults([]); setOffError(null); setHasSearched(false) }} aria-label="关闭" className="rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]">
                 <X size={18} />
               </button>
             </div>
@@ -517,14 +517,14 @@ export function FridgePage() {
 
       {/* Recommendations */}
       {recommendations.length > 0 && items.length > 0 && (
-        <div className="rounded-2xl bg-white p-4 shadow-xs">
+        <div className="rounded-2xl bg-[var(--color-bg-card)] p-4 shadow-xs">
           <p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">根据现有食材推荐</p>
           <div className="flex flex-wrap gap-2">
             {recommendations.map((recipe) => (
               <Link
                 key={recipe.id}
                 to={`/recipe/${recipe.id}`}
-                className="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+                className="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:hover:bg-emerald-950/50"
               >
                 {recipe.name}
               </Link>
@@ -539,7 +539,7 @@ export function FridgePage() {
           <button
             onClick={() => setCategoryFilter(null)}
             className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${
-              categoryFilter === null ? 'bg-[var(--color-text)] text-[var(--color-bg)]' : 'bg-white text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
+              categoryFilter === null ? 'bg-[var(--color-text)] text-[var(--color-bg)]' : 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
             }`}
           >
             全部
@@ -549,7 +549,7 @@ export function FridgePage() {
               key={cat}
               onClick={() => setCategoryFilter(categoryFilter === cat ? null : cat)}
               className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${
-                categoryFilter === cat ? 'bg-[var(--color-text)] text-[var(--color-bg)]' : 'bg-white text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
+                categoryFilter === cat ? 'bg-[var(--color-text)] text-[var(--color-bg)]' : 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
               }`}
             >
               {cat} ({categoryCounts[cat]})
@@ -563,7 +563,7 @@ export function FridgePage() {
         <BrandLoading>
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse rounded-2xl bg-white p-4 shadow-xs">
+              <div key={i} className="animate-pulse rounded-2xl bg-[var(--color-bg-card)] p-4 shadow-xs">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-[var(--color-bg-subtle)]" />
                   <div className="flex-1 space-y-2">
@@ -591,7 +591,7 @@ export function FridgePage() {
             return (
               <div
                 key={item.id}
-                className={`group flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-xs transition-all duration-200 hover:shadow-sm ${
+                className={`group flex items-center gap-3 rounded-2xl bg-[var(--color-bg-card)] px-4 py-3 shadow-xs transition-all duration-200 hover:shadow-sm ${
                   isExpired ? 'opacity-60' : ''
                 }`}
               >
@@ -615,15 +615,15 @@ export function FridgePage() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => openEdit(item)}
+                    aria-label="编辑"
                     className="rounded-lg p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-secondary)]"
-                    title="编辑"
                   >
                     <Pencil size={14} />
                   </button>
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="rounded-lg p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-red-50 hover:text-red-500"
-                    title="删除"
+                    aria-label="删除"
+                    className="rounded-lg p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30 dark:hover:text-red-400"
                   >
                     <Trash2 size={14} />
                   </button>

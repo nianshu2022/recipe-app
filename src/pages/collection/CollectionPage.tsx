@@ -6,6 +6,7 @@ import {
 import { useCollectionStore } from '@/stores/collectionStore'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useUIStore } from '@/stores/uiStore'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 export function CollectionPage() {
   const navigate = useNavigate()
@@ -97,13 +98,12 @@ export function CollectionPage() {
 
       {/* List */}
       {collections.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16">
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--color-bg-subtle)]">
-            <FolderHeart size={36} className="text-[var(--color-text-muted)]" />
-          </div>
-          <h3 className="mb-2 text-lg font-medium text-[var(--color-text)]">还没有收藏夹</h3>
-          <p className="text-sm text-[var(--color-text-muted)]">去菜谱库逛逛，把喜欢的菜收藏起来</p>
-        </div>
+        <EmptyState
+          icon={FolderHeart}
+          title="还没有收藏夹"
+          description="去菜谱库逛逛，把喜欢的菜收藏起来"
+          action={{ label: '去逛逛', to: '/' }}
+        />
       ) : (
         <div className="space-y-3">
           {collections.map((col) => {

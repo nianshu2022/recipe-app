@@ -1,15 +1,16 @@
 import { db } from '@/db'
+import type { Recipe, Collection, Menu, MealPlan, ShoppingList, FridgeItem, CookingRecord } from '@/types'
 
 interface BackupData {
   version: 1
   exportedAt: string
-  recipes: unknown[]
-  collections: unknown[]
-  menus: unknown[]
-  mealPlans: unknown[]
-  shoppingLists: unknown[]
-  fridgeItems: unknown[]
-  cookingRecords: unknown[]
+  recipes: Recipe[]
+  collections: Collection[]
+  menus: Menu[]
+  mealPlans: MealPlan[]
+  shoppingLists: ShoppingList[]
+  fridgeItems: FridgeItem[]
+  cookingRecords: CookingRecord[]
 }
 
 export async function exportData(): Promise<string> {
@@ -66,40 +67,41 @@ export async function importData(json: string): Promise<{ success: boolean; mess
 
     let count = 0
     let totalImported = 0
+
     for (const recipe of data.recipes) {
       if (!isValidRecord(recipe) || !validateId(recipe)) continue
-      await db.putRecipe(sanitizeRecord(recipe) as never)
+      await db.putRecipe(sanitizeRecord(recipe) as unknown as Recipe)
       count++
       totalImported++
     }
     for (const collection of data.collections ?? []) {
       if (!isValidRecord(collection) || !validateId(collection)) continue
-      await db.putCollection(sanitizeRecord(collection) as never)
+      await db.putCollection(sanitizeRecord(collection) as unknown as Collection)
       totalImported++
     }
     for (const menu of data.menus ?? []) {
       if (!isValidRecord(menu) || !validateId(menu)) continue
-      await db.putMenu(sanitizeRecord(menu) as never)
+      await db.putMenu(sanitizeRecord(menu) as unknown as Menu)
       totalImported++
     }
     for (const plan of data.mealPlans ?? []) {
       if (!isValidRecord(plan) || !validateId(plan)) continue
-      await db.putMealPlan(sanitizeRecord(plan) as never)
+      await db.putMealPlan(sanitizeRecord(plan) as unknown as MealPlan)
       totalImported++
     }
     for (const list of data.shoppingLists ?? []) {
       if (!isValidRecord(list) || !validateId(list)) continue
-      await db.putShoppingList(sanitizeRecord(list) as never)
+      await db.putShoppingList(sanitizeRecord(list) as unknown as ShoppingList)
       totalImported++
     }
     for (const item of data.fridgeItems ?? []) {
       if (!isValidRecord(item) || !validateId(item)) continue
-      await db.putFridgeItem(sanitizeRecord(item) as never)
+      await db.putFridgeItem(sanitizeRecord(item) as unknown as FridgeItem)
       totalImported++
     }
     for (const record of data.cookingRecords ?? []) {
       if (!isValidRecord(record) || !validateId(record)) continue
-      await db.putCookingRecord(sanitizeRecord(record) as never)
+      await db.putCookingRecord(sanitizeRecord(record) as unknown as CookingRecord)
       totalImported++
     }
 

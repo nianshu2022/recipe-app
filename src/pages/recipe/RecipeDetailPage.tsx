@@ -12,7 +12,7 @@ import { exportRecipeAsImage } from '@/utils/share'
 import { estimateNutrition, getCalorieLevel, getMacroPercentages } from '@/utils/nutrition'
 import { getAllRecipes } from '@/data/chineseRecipes'
 import { scaleIngredients, formatAmount } from '@/utils/scaling'
-import { categoryLabels, difficultyConfig } from '@/constants/categories'
+import { difficultyConfig } from '@/constants/categories'
 import type { Recipe } from '@/types'
 
 export function RecipeDetailPage() {
@@ -120,6 +120,7 @@ export function RecipeDetailPage() {
       <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-center gap-3 bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
         <button
           onClick={() => navigate(-1)}
+          aria-label="返回"
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
         >
           <ArrowLeft size={18} className="text-[var(--color-text-secondary)]" />
@@ -129,18 +130,21 @@ export function RecipeDetailPage() {
         </h1>
         <button
           onClick={() => navigate(`/recipe/${id}/edit`)}
+          aria-label="编辑菜谱"
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-90"
         >
           <Pencil size={18} className="text-[var(--color-text-secondary)]" />
         </button>
         <button
           onClick={handleDelete}
+          aria-label="删除菜谱"
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-90"
         >
           <Trash2 size={18} className="text-red-500" />
         </button>
         <button
           onClick={handleToggleFavorite}
+          aria-label={isFavorited ? '取消收藏' : '收藏'}
           className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-90"
         >
           <Heart

@@ -9,7 +9,7 @@ import { handleRecipes } from './routes/recipes'
 import { handleCollections } from './routes/collections'
 import { handleSync } from './routes/sync'
 import { authenticate } from './middleware/auth'
-import { getCorsHeaders, jsonResponse, errorResponse } from './utils/response'
+import { getCorsHeaders, errorResponse, checkRateLimit } from './utils/response'
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -22,6 +22,13 @@ export default {
 
     const url = new URL(request.url)
     const path = url.pathname
+
+    // Global rate limit: 100 requests per minute per IP
+    const clientIp = request.headers.get('CF-Connecting-IP') ?? 'unknown'
+    const globalRate = checkRateLimit(`global:${clientIp}`, 100, 60_000)
+    if (!globalRate.allowed) {
+      return jsonResponse({ error: 'Too many requests' }, 429, request)
+    }
 
     try {
       // Public routes
@@ -52,9 +59,20 @@ export default {
 
       return errorResponse('Not found', 404, request)
     } catch (e) {
-      console.error(e)
-      return errorResponse('Internal server error', 500, request)
+      console.error('Unhandled error:', e)
+      const message = e instanceof Error ? e.message : 'Internal server error'
+      return errorResponse(message, 500, request)
     }
   },
 }
 
+function jsonResponse(data: unknown, status: number, request?: Request) {
+  const origin = request?.headers.get('Origin') ?? null
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      ...getCorsHeaders(origin),
+    },
+  })
+}

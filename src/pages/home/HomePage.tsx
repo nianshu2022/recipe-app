@@ -1,18 +1,22 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   Search, Plus, Dice5, Clock, ChefHat,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
+import { useDebounce } from '@/hooks/useDebounce'
 import { getRandomChineseRecipes } from '@/data/chineseRecipes'
 import { BrandLoading } from '@/components/ui/BrandLoading'
+import { VirtualList } from '@/components/ui/VirtualList'
 import { categoryIcons, categoryLabels, difficultyConfig } from '@/constants/categories'
-import type { Category } from '@/types'
+import type { Category, Difficulty, Recipe } from '@/types'
+
+const VIRTUAL_THRESHOLD = 20
+const ITEM_HEIGHT = 104
 
 export function HomePage() {
   const {
     loading,
-    searchQuery,
     categoryFilter,
     difficultyFilter,
     setSearchQuery,
@@ -23,6 +27,12 @@ export function HomePage() {
   } = useRecipeStore()
 
   const [searchParams] = useSearchParams()
+  const [inputValue, setInputValue] = useState('')
+  const debouncedSearch = useDebounce(inputValue, 300)
+
+  useEffect(() => {
+    setSearchQuery(debouncedSearch)
+  }, [debouncedSearch, setSearchQuery])
 
   useEffect(() => {
     loadRecipes()
@@ -30,10 +40,10 @@ export function HomePage() {
 
   useEffect(() => {
     const q = searchParams.get('q')
-    if (q && !searchQuery) {
-      setSearchQuery(q)
+    if (q && !inputValue) {
+      setInputValue(q)
     }
-  }, [searchParams, searchQuery, setSearchQuery])
+  }, [searchParams, inputValue])
 
   const handleImportSamples = async () => {
     const { db } = await import('@/db')
@@ -61,12 +71,14 @@ export function HomePage() {
         <div className="flex gap-2">
           <Link
             to="/blind-box"
+            aria-label="菜谱盲盒"
             className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
           >
             <Dice5 size={20} />
           </Link>
           <Link
             to="/recipe/new"
+            aria-label="创建菜谱"
             className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
           >
             <Plus size={20} strokeWidth={2.2} />
@@ -79,8 +91,8 @@ export function HomePage() {
         <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
         <input
           type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
           placeholder="搜索菜谱、食材、标签..."
           className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] py-3 pl-11 pr-4 text-sm text-[var(--color-text)] shadow-xs outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-300)] focus:shadow-sm focus:ring-2 focus:ring-[var(--color-border-subtle)]"
         />
@@ -174,58 +186,69 @@ export function HomePage() {
             </button>
           </div>
         </div>
+      ) : recipes.length > VIRTUAL_THRESHOLD ? (
+        <VirtualList
+          items={recipes}
+          itemHeight={ITEM_HEIGHT}
+          containerHeight={600}
+          renderItem={(recipe) => <RecipeCard recipe={recipe} />}
+        />
       ) : (
         <div className="space-y-3">
-          {recipes.map((recipe) => {
-            const CategoryIcon = categoryIcons[recipe.category]
-            const diff = difficultyConfig[recipe.difficulty]
-            return (
-              <Link
-                key={recipe.id}
-                to={`/recipe/${recipe.id}`}
-                className="group block overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]"
-              >
-                <div className="flex gap-4 p-4">
-                  {recipe.coverImage ? (
-                    <img src={recipe.coverImage} alt={recipe.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
-                  ) : (
-                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-bg-subtle)] to-[var(--color-bg)]">
-                      <CategoryIcon size={28} className="text-[var(--color-text-muted)]" />
-                    </div>
-                  )}
-                  <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
-                    <div>
-                      <h3 className="truncate text-base font-semibold text-[var(--color-text)] transition-colors duration-200 group-hover:text-[var(--color-primary)]">
-                        {recipe.name}
-                      </h3>
-                      <div className="mt-1.5 flex flex-wrap gap-1.5">
-                        <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${diff.color}`}>
-                          {diff.label}
-                        </span>
-                        {recipe.tags.slice(0, 2).map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full bg-[var(--color-bg-subtle)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text-secondary)]"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} />
-                        {recipe.duration}分钟
-                      </span>
-                      <span>{recipe.servings}人份</span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            )
-          })}
+          {recipes.map((recipe) => (
+            <RecipeCard key={recipe.id} recipe={recipe} />
+          ))}
         </div>
       )}
     </div>
+  )
+}
+
+function RecipeCard({ recipe }: { recipe: Recipe }) {
+  const CategoryIcon = categoryIcons[recipe.category]
+  const diff = difficultyConfig[recipe.difficulty]
+
+  return (
+    <Link
+      to={`/recipe/${recipe.id}`}
+      className="group block overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]"
+    >
+      <div className="flex gap-4 p-4">
+        {recipe.coverImage ? (
+          <img src={recipe.coverImage} alt={recipe.name} loading="lazy" className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+        ) : (
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-bg-subtle)] to-[var(--color-bg)]">
+            <CategoryIcon size={28} className="text-[var(--color-text-muted)]" />
+          </div>
+        )}
+        <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
+          <div>
+            <h3 className="truncate text-base font-semibold text-[var(--color-text)] transition-colors duration-200 group-hover:text-[var(--color-primary)]">
+              {recipe.name}
+            </h3>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${diff.color}`}>
+                {diff.label}
+              </span>
+              {recipe.tags.slice(0, 2).map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-[var(--color-bg-subtle)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text-secondary)]"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
+            <span className="flex items-center gap-1">
+              <Clock size={12} />
+              {recipe.duration}分钟
+            </span>
+            <span>{recipe.servings}人份</span>
+          </div>
+        </div>
+      </div>
+    </Link>
   )
 }
