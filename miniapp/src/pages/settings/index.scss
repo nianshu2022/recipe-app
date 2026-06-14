@@ -1,0 +1,193 @@
+@import '@/styles/variables.scss';
+@import '@/styles/mixins.scss';
+
+.settings-page {
+  padding-bottom: $space-8;
+}
+
+.settings-header {
+  padding: $space-4 $space-5 $space-2;
+
+  &__title {
+    font-size: $font-size-3xl;
+    font-weight: 700;
+    color: $color-text;
+  }
+}
+
+.settings-profile {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  margin: $space-3 $space-5;
+  padding: $space-4;
+  background: $color-bg-card;
+  border-radius: $radius-2xl;
+  box-shadow: $shadow-xs;
+
+  &__avatar {
+    @include flex-center;
+    width: 96rpx;
+    height: 96rpx;
+    border-radius: 50%;
+    background: $color-primary-bg;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $color-text;
+    display: block;
+  }
+
+  &__email {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    display: block;
+    margin-top: 4rpx;
+  }
+
+  &__login {
+    @include flex-center;
+    height: 64rpx;
+    padding: 0 $space-4;
+    background: $color-primary;
+    color: #ffffff;
+    border-radius: $radius-2xl;
+    font-weight: 500;
+    font-size: $font-size-sm;
+  }
+
+  &__sync {
+    @include flex-center;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: $radius-xl;
+    background: $color-bg;
+    box-shadow: $shadow-xs;
+    flex-shrink: 0;
+  }
+}
+
+.settings-theme {
+  margin: $space-4 $space-5;
+
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text-muted;
+    display: block;
+    margin-bottom: $space-2;
+  }
+
+  &__options {
+    display: flex;
+    gap: $space-2;
+  }
+
+  &__option {
+    flex: 1;
+    @include flex-center;
+    flex-direction: column;
+    gap: $space-1;
+    padding: $space-3;
+    background: $color-bg-card;
+    border-radius: $radius-xl;
+    box-shadow: $shadow-xs;
+    border: 2rpx solid transparent;
+    transition: $transition-fast;
+
+    &--active {
+      border-color: $color-primary;
+      background: $color-primary-bg;
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+
+  &__label {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+}
+
+.settings-group {
+  margin: $space-4 $space-5;
+
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text-muted;
+    display: block;
+    margin-bottom: $space-2;
+  }
+
+  &__card {
+    background: $color-bg-card;
+    border-radius: $radius-2xl;
+    box-shadow: $shadow-xs;
+    overflow: hidden;
+  }
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-4;
+  transition: $transition-fast;
+
+  &--bordered {
+    border-bottom: 2rpx solid $color-border-subtle;
+  }
+
+  &:active {
+    background: $color-bg-subtle;
+  }
+
+  &__label {
+    flex: 1;
+    font-size: $font-size-base;
+    color: $color-text;
+  }
+}
+
+.settings-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  margin: $space-6 $space-5 $space-4;
+  height: $btn-height;
+  border-radius: $radius-2xl;
+  background: $color-bg-card;
+  box-shadow: $shadow-xs;
+  transition: $transition-fast;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &__text {
+    font-size: $font-size-base;
+    font-weight: 500;
+    color: $color-danger;
+  }
+}
+
+.settings-footer {
+  @include flex-center;
+  padding: $space-4;
+
+  &__text {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+}

@@ -1,0 +1,326 @@
+@import '@/styles/variables.scss';
+@import '@/styles/mixins.scss';
+
+.detail-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.detail-loading {
+  @include flex-center;
+  height: 100vh;
+  color: $color-text-muted;
+}
+
+.detail-header {
+  @include flex-between;
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky;
+  background: $color-bg-transparent;
+  padding: $space-3 $space-4;
+  gap: $space-2;
+
+  &__back {
+    @include flex-center;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: $radius-xl;
+    background: $color-bg-card;
+    box-shadow: $shadow-xs;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    flex: 1;
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $color-text;
+    @include text-truncate;
+    text-align: center;
+  }
+
+  &__btn {
+    @include flex-center;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: $radius-xl;
+    background: $color-bg-card;
+    box-shadow: $shadow-xs;
+    flex-shrink: 0;
+  }
+}
+
+.detail-scroll {
+  flex: 1;
+}
+
+.detail-cover {
+  width: 100%;
+  height: 400rpx;
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+  }
+
+  &__placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, $color-primary-bg 0%, $color-bg-subtle 100%);
+    @include flex-center;
+  }
+}
+
+.detail-content {
+  padding: $space-4 $space-5;
+  padding-bottom: $space-8;
+}
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  margin-bottom: $space-4;
+
+  &__pill {
+    @include pill;
+    background: $color-bg-subtle;
+    color: $color-text-secondary;
+
+    &--easy { @include badge($color-easy-bg, $color-easy); }
+    &--medium { @include badge($color-medium-bg, $color-medium); }
+    &--hard { @include badge($color-hard-bg, $color-hard); }
+  }
+}
+
+.detail-nutrition {
+  @include card;
+  margin-bottom: $space-4;
+
+  &__header {
+    @include flex-between;
+    margin-bottom: $space-3;
+  }
+
+  &__cal {
+    font-size: $font-size-2xl;
+    font-weight: 700;
+    color: $color-text;
+  }
+
+  &__badge {
+    @include badge($color-bg-subtle, $color-text-secondary);
+  }
+
+  &__bar {
+    display: flex;
+    height: 16rpx;
+    border-radius: $radius-full;
+    overflow: hidden;
+    margin-bottom: $space-3;
+    gap: 4rpx;
+  }
+
+  &__segment {
+    border-radius: $radius-full;
+    min-width: 16rpx;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $space-2;
+  }
+
+  &__item {
+    text-align: center;
+  }
+
+  &__value {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $color-text;
+    display: block;
+  }
+
+  &__label {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    display: block;
+  }
+}
+
+.detail-section {
+  margin-bottom: $space-5;
+
+  &__header {
+    @include flex-between;
+    margin-bottom: $space-3;
+  }
+
+  &__title {
+    @include section-title;
+    margin-bottom: $space-3;
+  }
+}
+
+.detail-stepper {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  background: $color-bg-subtle;
+  border-radius: $radius-full;
+  padding: $space-1;
+
+  &__btn {
+    @include flex-center;
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 50%;
+    background: $color-bg-card;
+
+    &:active {
+      background: $color-border;
+    }
+  }
+
+  &__value {
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text;
+    min-width: 80rpx;
+    text-align: center;
+  }
+}
+
+.detail-ingredients {
+  @include card;
+  overflow: hidden;
+}
+
+.detail-ingredient {
+  display: flex;
+  justify-content: space-between;
+  padding: $space-3;
+
+  &--bordered {
+    border-top: 2rpx solid $color-border-subtle;
+  }
+
+  &__name {
+    font-size: $font-size-base;
+    color: $color-text;
+  }
+
+  &__amount {
+    font-size: $font-size-base;
+    color: $color-text-secondary;
+  }
+}
+
+.detail-steps {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.detail-step {
+  @include card;
+  display: flex;
+  gap: $space-3;
+
+  &__number {
+    @include flex-center;
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 50%;
+    background: $color-text;
+    color: $color-bg-card;
+    font-size: $font-size-lg;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__desc {
+    font-size: $font-size-base;
+    color: $color-text;
+    line-height: 1.6;
+  }
+
+  &__timer {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+    margin-top: $space-2;
+    padding: $space-2;
+    background: $color-warning-bg;
+    border-radius: $radius-lg;
+  }
+
+  &__timer-text {
+    font-size: $font-size-sm;
+    color: $color-warning;
+  }
+
+  &__tip {
+    display: flex;
+    gap: $space-2;
+    margin-top: $space-2;
+    padding: $space-2;
+    background: $color-primary-bg;
+    border-radius: $radius-lg;
+  }
+
+  &__tip-text {
+    font-size: $font-size-sm;
+    color: $color-primary;
+    flex: 1;
+  }
+}
+
+.detail-actions {
+  padding: $space-3 $space-5;
+  padding-bottom: calc(#{$space-3} + env(safe-area-inset-bottom));
+  background: $color-bg-card;
+  border-top: 2rpx solid $color-border-subtle;
+
+  &__primary {
+    @include btn-primary;
+    display: flex;
+    flex-direction: row;
+    gap: $space-2;
+    margin-bottom: $space-2;
+  }
+
+  &__text {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  &__row {
+    display: flex;
+    gap: $space-3;
+  }
+
+  &__secondary {
+    flex: 1;
+    @include btn-secondary;
+    display: flex;
+    flex-direction: row;
+    gap: $space-1;
+  }
+
+  &__secondary-text {
+    font-size: $font-size-sm;
+    color: $color-text;
+  }
+}

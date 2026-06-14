@@ -1,5 +1,5 @@
 import { db } from '@/db'
-import type { Recipe, Collection, Menu, MealPlan, ShoppingList, FridgeItem, CookingRecord } from '@/types'
+import type { Recipe, Collection, Menu, MealPlan, ShoppingList, CookingRecord } from '@/types'
 
 interface BackupData {
   version: 1
@@ -9,7 +9,6 @@ interface BackupData {
   menus: Menu[]
   mealPlans: MealPlan[]
   shoppingLists: ShoppingList[]
-  fridgeItems: FridgeItem[]
   cookingRecords: CookingRecord[]
 }
 
@@ -22,7 +21,6 @@ export async function exportData(): Promise<string> {
     menus: await db.getAllMenus(),
     mealPlans: await db.getAllMealPlans(),
     shoppingLists: await db.getAllShoppingLists(),
-    fridgeItems: await db.getAllFridgeItems(),
     cookingRecords: await db.getAllCookingRecords(),
   }
   return JSON.stringify(data, null, 2)
@@ -92,11 +90,6 @@ export async function importData(json: string): Promise<{ success: boolean; mess
     for (const list of data.shoppingLists ?? []) {
       if (!isValidRecord(list) || !validateId(list)) continue
       await db.putShoppingList(sanitizeRecord(list) as unknown as ShoppingList)
-      totalImported++
-    }
-    for (const item of data.fridgeItems ?? []) {
-      if (!isValidRecord(item) || !validateId(item)) continue
-      await db.putFridgeItem(sanitizeRecord(item) as unknown as FridgeItem)
       totalImported++
     }
     for (const record of data.cookingRecords ?? []) {

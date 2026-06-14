@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  ChevronRight, Heart, ShoppingCart, CalendarDays, ChefHat, Moon, Sun, Monitor, Database, LogIn, LogOut, RefreshCw, Refrigerator,
+  ChevronRight, Heart, ShoppingCart, ChefHat, Moon, Sun, Monitor, Database, LogIn, LogOut, RefreshCw,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
@@ -29,8 +29,6 @@ export function SettingsPage() {
       items: [
         { to: '/collection', icon: Heart, label: '我的收藏夹' },
         { to: '/shopping', icon: ShoppingCart, label: '购物清单' },
-        { to: '/fridge', icon: Refrigerator, label: '食材簿' },
-        { to: '/calendar', icon: CalendarDays, label: '味历' },
       ],
     },
     {

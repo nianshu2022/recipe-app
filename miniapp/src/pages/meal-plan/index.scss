@@ -1,0 +1,331 @@
+@import '@/styles/variables.scss';
+@import '@/styles/mixins.scss';
+
+.meal-plan-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.meal-plan-header {
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky;
+  background: $color-bg-transparent;
+  padding: $space-4 $space-5 $space-2;
+
+  &__top {
+    @include flex-between;
+    margin-bottom: $space-3;
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+    font-weight: 700;
+    color: $color-text;
+    display: block;
+  }
+
+  &__count {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    display: block;
+    margin-top: 4rpx;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $space-2;
+  }
+
+  &__btn {
+    @include icon-button;
+  }
+}
+
+.week-nav {
+  @include flex-between;
+  padding: $space-2 0;
+
+  &__btn {
+    @include flex-center;
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: $radius-lg;
+
+    &:active {
+      background: $color-bg-subtle;
+    }
+  }
+
+  &__label {
+    font-size: $font-size-base;
+    font-weight: 500;
+    color: $color-text-secondary;
+  }
+}
+
+.meal-plan-content {
+  flex: 1;
+  padding: 0 $space-5 $space-8;
+}
+
+.day-card {
+  @include card;
+  margin-bottom: $space-3;
+  padding: $space-3;
+
+  &--today {
+    border: 2rpx solid $color-primary;
+    box-shadow: 0 0 0 4rpx $color-primary-bg;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    margin-bottom: $space-3;
+    padding-bottom: $space-2;
+    border-bottom: 2rpx solid $color-border-subtle;
+  }
+
+  &__label {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  &__date {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+
+  &__today-badge {
+    @include badge($color-primary-bg, $color-primary);
+    margin-left: auto;
+  }
+
+  &__slots {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+}
+
+.meal-slot {
+  display: flex;
+  gap: $space-2;
+  min-height: 64rpx;
+
+  &__label {
+    width: 80rpx;
+    height: 48rpx;
+    @include flex-center;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__recipes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-1;
+    align-items: center;
+  }
+
+  &__recipe {
+    display: flex;
+    align-items: center;
+    gap: 4rpx;
+    padding: 4rpx $space-2;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: 500;
+  }
+
+  &__recipe-name {
+    max-width: 200rpx;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__remove {
+    @include flex-center;
+    width: 32rpx;
+    height: 32rpx;
+  }
+
+  &__add {
+    @include flex-center;
+    width: 48rpx;
+    height: 48rpx;
+    border-radius: $radius-full;
+    border: 2rpx dashed $color-border;
+
+    &:active {
+      background: $color-bg-subtle;
+    }
+  }
+
+  &__empty {
+    @include flex-center;
+    height: 48rpx;
+    border-radius: $radius-lg;
+    border: 2rpx dashed $color-border;
+
+    &:active {
+      background: $color-bg-subtle;
+    }
+  }
+
+  &__empty-text {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+}
+
+// Recipe Picker
+.picker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: $z-modal;
+  background: $color-overlay;
+  animation: fade-in 0.15s ease;
+}
+
+.picker-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 75vh;
+  background: $color-bg-card;
+  border-radius: $radius-2xl $radius-2xl 0 0;
+  display: flex;
+  flex-direction: column;
+  animation: slide-up 0.25s ease;
+
+  &__header {
+    @include flex-between;
+    padding: $space-4 $space-5;
+    border-bottom: 2rpx solid $color-border-subtle;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  &__close {
+    @include flex-center;
+    width: 56rpx;
+    height: 56rpx;
+  }
+
+  &__search {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    height: 72rpx;
+    margin: $space-3 $space-5;
+    padding: 0 $space-3;
+    background: $color-bg-subtle;
+    border-radius: $radius-2xl;
+  }
+
+  &__search-input {
+    flex: 1;
+    font-size: $font-size-base;
+  }
+
+  &__filters {
+    padding: 0 $space-5;
+    margin-bottom: $space-2;
+  }
+
+  &__pills {
+    display: inline-flex;
+    gap: $space-2;
+  }
+
+  &__list {
+    flex: 1;
+    padding: 0 $space-5;
+  }
+}
+
+.picker-pill {
+  @include pill;
+
+  &--active {
+    @include pill-active;
+  }
+}
+
+.picker-item {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3 0;
+  border-bottom: 2rpx solid $color-border-subtle;
+
+  &:active {
+    background: $color-bg-subtle;
+  }
+
+  &__cover {
+    width: 80rpx;
+    height: 80rpx;
+    border-radius: $radius-lg;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+  }
+
+  &__placeholder {
+    width: 100%;
+    height: 100%;
+    background: $color-bg-subtle;
+    @include flex-center;
+  }
+
+  &__name {
+    flex: 1;
+    font-size: $font-size-base;
+    font-weight: 500;
+    color: $color-text;
+    @include text-truncate;
+  }
+
+  &__meta {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

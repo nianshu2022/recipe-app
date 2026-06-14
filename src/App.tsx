@@ -4,14 +4,14 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { ToastContainer } from '@/components/ui/Toast'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+import { useRecipeStore } from '@/stores/recipeStore'
 
 // Lazy-loaded pages
 const HomePage = lazy(() => import('@/pages/home/HomePage').then(m => ({ default: m.HomePage })))
 const RecipeDetailPage = lazy(() => import('@/pages/recipe/RecipeDetailPage').then(m => ({ default: m.RecipeDetailPage })))
 const RecipeFormPage = lazy(() => import('@/pages/recipe/RecipeFormPage').then(m => ({ default: m.RecipeFormPage })))
 const CookingPage = lazy(() => import('@/pages/cooking/CookingPage').then(m => ({ default: m.CookingPage })))
-const CalendarPage = lazy(() => import('@/pages/calendar/CalendarPage').then(m => ({ default: m.CalendarPage })))
-const FridgePage = lazy(() => import('@/pages/fridge/FridgePage').then(m => ({ default: m.FridgePage })))
+
 const MealPlanPage = lazy(() => import('@/pages/meal-plan/MealPlanPage').then(m => ({ default: m.MealPlanPage })))
 const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage').then(m => ({ default: m.SettingsPage })))
 const CollectionPage = lazy(() => import('@/pages/collection/CollectionPage').then(m => ({ default: m.CollectionPage })))
@@ -19,7 +19,7 @@ const ShoppingListPage = lazy(() => import('@/pages/shopping/ShoppingListPage').
 const LoginPage = lazy(() => import('@/pages/settings/LoginPage').then(m => ({ default: m.LoginPage })))
 const DataManagementPage = lazy(() => import('@/pages/settings/DataManagementPage').then(m => ({ default: m.DataManagementPage })))
 const BlindBoxPage = lazy(() => import('@/pages/blind-box/BlindBoxPage').then(m => ({ default: m.BlindBoxPage })))
-const DiscoverPage = lazy(() => import('@/pages/discover/DiscoverPage').then(m => ({ default: m.DiscoverPage })))
+
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
 function PageSuspense({ children }: { children: ReactNode }) {
@@ -47,8 +47,7 @@ function AnimatedRoutes() {
           <Route path="/recipe/:id" element={<PageSuspense><RecipeDetailPage /></PageSuspense>} />
           <Route path="/recipe/new" element={<PageSuspense><RecipeFormPage /></PageSuspense>} />
           <Route path="/recipe/:id/edit" element={<PageSuspense><RecipeFormPage /></PageSuspense>} />
-          <Route path="/calendar" element={<PageSuspense><CalendarPage /></PageSuspense>} />
-          <Route path="/fridge" element={<PageSuspense><FridgePage /></PageSuspense>} />
+
           <Route path="/meal-plan" element={<PageSuspense><MealPlanPage /></PageSuspense>} />
           <Route path="/settings" element={<PageSuspense><SettingsPage /></PageSuspense>} />
           <Route path="/login" element={<PageSuspense><LoginPage /></PageSuspense>} />
@@ -56,7 +55,7 @@ function AnimatedRoutes() {
           <Route path="/collection" element={<PageSuspense><CollectionPage /></PageSuspense>} />
           <Route path="/shopping" element={<PageSuspense><ShoppingListPage /></PageSuspense>} />
           <Route path="/blind-box" element={<PageSuspense><BlindBoxPage /></PageSuspense>} />
-          <Route path="/discover" element={<PageSuspense><DiscoverPage /></PageSuspense>} />
+
           <Route path="*" element={<PageSuspense><NotFoundPage /></PageSuspense>} />
         </Route>
         <Route path="/cooking/:id" element={<PageSuspense><CookingPage /></PageSuspense>} />
@@ -66,6 +65,12 @@ function AnimatedRoutes() {
 }
 
 export default function App() {
+  const loadRecipes = useRecipeStore((s) => s.loadRecipes)
+
+  useEffect(() => {
+    loadRecipes()
+  }, [loadRecipes])
+
   useEffect(() => {
     let lastTouchEnd = 0
 

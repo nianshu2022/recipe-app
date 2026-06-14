@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  Search, Plus, Dice5, Clock, ChefHat,
+  Search, Plus, Dice5, Clock, ChefHat, Heart,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
+import { useCollectionStore } from '@/stores/collectionStore'
 import { useDebounce } from '@/hooks/useDebounce'
 import { getRandomChineseRecipes } from '@/data/chineseRecipes'
 import { BrandLoading } from '@/components/ui/BrandLoading'
@@ -33,10 +34,6 @@ export function HomePage() {
   useEffect(() => {
     setSearchQuery(debouncedSearch)
   }, [debouncedSearch, setSearchQuery])
-
-  useEffect(() => {
-    loadRecipes()
-  }, [loadRecipes])
 
   useEffect(() => {
     const q = searchParams.get('q')
@@ -207,13 +204,24 @@ export function HomePage() {
 function RecipeCard({ recipe }: { recipe: Recipe }) {
   const CategoryIcon = categoryIcons[recipe.category]
   const diff = difficultyConfig[recipe.difficulty]
+  const { collections, toggleRecipeInCollection } = useCollectionStore()
+  const isFavorited = collections.some((c) => c.recipeIds.includes(recipe.id))
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (collections.length === 0) {
+      const { addCollection } = useCollectionStore.getState()
+      const col = await addCollection('我的收藏')
+      await toggleRecipeInCollection(col.id, recipe.id)
+    } else {
+      await toggleRecipeInCollection(collections[0].id, recipe.id)
+    }
+  }
 
   return (
-    <Link
-      to={`/recipe/${recipe.id}`}
-      className="group block overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]"
-    >
-      <div className="flex gap-4 p-4">
+    <div className="group relative overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]">
+      <Link to={`/recipe/${recipe.id}`} className="flex gap-4 p-4">
         {recipe.coverImage ? (
           <img src={recipe.coverImage} alt={recipe.name} loading="lazy" className="h-20 w-20 shrink-0 rounded-xl object-cover" />
         ) : (
@@ -248,7 +256,17 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
             <span>{recipe.servings}人份</span>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+      <button
+        onClick={handleToggleFavorite}
+        aria-label={isFavorited ? '取消收藏' : '收藏'}
+        className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-bg)]/80 backdrop-blur-sm transition-all duration-200 hover:scale-110 active:scale-90"
+      >
+        <Heart
+          size={16}
+          className={isFavorited ? 'fill-red-500 text-red-500' : 'text-[var(--color-text-muted)]'}
+        />
+      </button>
+    </div>
   )
 }

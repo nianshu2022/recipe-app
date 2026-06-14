@@ -1,0 +1,178 @@
+@import '@/styles/variables.scss';
+@import '@/styles/mixins.scss';
+
+.shopping-page {
+  padding-bottom: $space-8;
+}
+
+.shopping-header {
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky;
+  background: $color-bg-transparent;
+  padding: $space-4 $space-5 $space-2;
+
+  &__top {
+    @include flex-between;
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+    font-weight: 700;
+    color: $color-text;
+  }
+
+  &__count {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    margin-left: $space-2;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $space-2;
+    margin-left: auto;
+  }
+
+  &__btn {
+    @include icon-button;
+  }
+}
+
+.shopping-progress {
+  margin-top: $space-3;
+
+  &__bar {
+    height: 8rpx;
+    background: $color-bg-subtle;
+    border-radius: $radius-full;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    background: $color-success;
+    border-radius: $radius-full;
+    transition: width 0.3s ease;
+  }
+}
+
+.shopping-add {
+  display: flex;
+  gap: $space-2;
+  padding: $space-3 $space-5;
+
+  &__input {
+    flex: 1;
+    height: 80rpx;
+    padding: 0 $space-4;
+    background: $color-bg-subtle;
+    border-radius: $radius-2xl;
+    font-size: $font-size-base;
+  }
+
+  &__btn {
+    @include flex-center;
+    height: 80rpx;
+    padding: 0 $space-4;
+    background: $color-primary;
+    color: #ffffff;
+    border-radius: $radius-2xl;
+    font-weight: 500;
+  }
+
+  &__close {
+    @include flex-center;
+    width: 80rpx;
+    height: 80rpx;
+  }
+}
+
+.shopping-list {
+  padding: 0 $space-5;
+}
+
+.shopping-category {
+  margin-bottom: $space-3;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 0;
+  }
+
+  &__name {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  &__badge {
+    @include badge($color-bg-subtle, $color-text-muted);
+  }
+
+  &__items {
+    @include card;
+    overflow: hidden;
+  }
+}
+
+.shopping-item {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3;
+
+  &:not(:last-child) {
+    border-bottom: 2rpx solid $color-border-subtle;
+  }
+
+  &__checkbox {
+    @include flex-center;
+    width: 48rpx;
+    height: 48rpx;
+    border-radius: $radius-md;
+    border: 2rpx solid $color-border;
+    flex-shrink: 0;
+    transition: $transition-fast;
+
+    &--checked {
+      background: $color-success;
+      border-color: $color-success;
+    }
+  }
+
+  &__name {
+    flex: 1;
+    font-size: $font-size-base;
+    color: $color-text;
+
+    &--checked {
+      text-decoration: line-through;
+      color: $color-text-muted;
+    }
+  }
+
+  &__amount {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+
+  &__delete {
+    @include flex-center;
+    width: 48rpx;
+    height: 48rpx;
+    opacity: 0.5;
+  }
+}
+
+.shopping-footer {
+  @include flex-center;
+  padding: $space-5;
+
+  &__text {
+    font-size: $font-size-sm;
+    color: $color-danger;
+  }
+}

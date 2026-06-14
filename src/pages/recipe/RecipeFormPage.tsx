@@ -14,7 +14,7 @@ const inputCls =
 export function RecipeFormPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { recipes, addRecipe, updateRecipe, loadRecipes } = useRecipeStore()
+  const { recipes, addRecipe, updateRecipe } = useRecipeStore()
   const showToast = useUIStore((s) => s.showToast)
   const isEditing = !!id
 
@@ -30,10 +30,6 @@ export function RecipeFormPage() {
   ])
   const [steps, setSteps] = useState<Step[]>([{ order: 1, description: '' }])
   const [errors, setErrors] = useState<{ name?: string; ingredients?: string; steps?: string }>({})
-
-  useEffect(() => {
-    if (isEditing) loadRecipes()
-  }, [isEditing, loadRecipes])
 
   useEffect(() => {
     if (isEditing && recipes.length > 0) {

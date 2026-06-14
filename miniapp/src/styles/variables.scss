@@ -1,0 +1,100 @@
+// 知味 Design System - matching web app's warm terracotta palette
+
+// Colors
+$color-bg: #faf9f7;
+$color-bg-card: #ffffff;
+$color-bg-subtle: #f5f3ef;
+$color-bg-elevated: #ffffff;
+$color-bg-transparent: rgba(250, 249, 247, 0.92);
+$color-text: #252220;
+$color-text-secondary: #6b6355;
+$color-text-muted: #a8a08e;
+$color-border: #e8e4de;
+$color-border-subtle: #f5f3ef;
+$color-overlay: rgba(0, 0, 0, 0.5);
+
+$color-primary: #c9583a;
+$color-primary-light: #e47a4e;
+$color-primary-dark: #a8432d;
+$color-primary-bg: #fdf4f0;
+
+$color-success: #5a7a54;
+$color-success-bg: #f0fdf4;
+$color-warning: #c49a3c;
+$color-warning-bg: #fffbeb;
+$color-danger: #c44b4b;
+$color-danger-bg: #fef2f2;
+
+// Difficulty colors
+$color-easy: #059669;
+$color-easy-bg: #ecfdf5;
+$color-medium: #d97706;
+$color-medium-bg: #fffbeb;
+$color-hard: #dc2626;
+$color-hard-bg: #fef2f2;
+
+// Meal slot colors
+$color-breakfast: #d97706;
+$color-breakfast-bg: #fffbeb;
+$color-lunch: #059669;
+$color-lunch-bg: #ecfdf5;
+$color-dinner: #2563eb;
+$color-dinner-bg: #eff6ff;
+$color-snack: #9333ea;
+$color-snack-bg: #faf5ff;
+
+// Macro nutrient colors
+$color-macro-protein: #60a5fa;
+$color-macro-carbs: #fbbf24;
+$color-macro-fat: #fb7185;
+
+// Font sizes
+$font-size-xs: 22rpx;
+$font-size-sm: 24rpx;
+$font-size-base: 28rpx;
+$font-size-lg: 32rpx;
+$font-size-xl: 36rpx;
+$font-size-2xl: 44rpx;
+$font-size-3xl: 56rpx;
+
+// Spacing
+$space-0-5: 4rpx;
+$space-1: 8rpx;
+$space-1-5: 12rpx;
+$space-2: 16rpx;
+$space-3: 24rpx;
+$space-4: 32rpx;
+$space-5: 40rpx;
+$space-6: 48rpx;
+$space-8: 64rpx;
+
+// Border radius
+$radius-sm: 8rpx;
+$radius-md: 12rpx;
+$radius-lg: 16rpx;
+$radius-xl: 20rpx;
+$radius-2xl: 24rpx;
+$radius-full: 9999px;
+
+// Shadows
+$shadow-xs: 0 1rpx 2rpx rgba(37, 34, 32, 0.04);
+$shadow-sm: 0 2rpx 8rpx rgba(37, 34, 32, 0.06);
+$shadow-md: 0 4rpx 16rpx rgba(37, 34, 32, 0.08);
+$shadow-lg: 0 8rpx 32rpx rgba(37, 34, 32, 0.10);
+
+// Z-index
+$z-sticky: 40;
+$z-overlay: 50;
+$z-modal: 60;
+$z-toast: 200;
+
+// Button
+$btn-height: 88rpx;
+$btn-height-sm: 72rpx;
+
+// Touch target minimum
+$touch-min: 88rpx;
+
+// Transition
+$transition-fast: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+$transition-base: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);

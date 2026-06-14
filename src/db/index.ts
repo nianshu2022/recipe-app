@@ -1,5 +1,5 @@
 import { openDB, type IDBPDatabase } from 'idb'
-import type { Recipe, Collection, Menu, MealPlan, ShoppingList, FridgeItem, CookingRecord } from '@/types'
+import type { Recipe, Collection, Menu, MealPlan, ShoppingList, CookingRecord } from '@/types'
 
 const DB_NAME = 'recipe-app'
 const DB_VERSION = 1
@@ -30,11 +30,6 @@ interface RecipeAppDB {
     value: ShoppingList
     indexes: { 'by-updated': string }
   }
-  fridgeItems: {
-    key: string
-    value: FridgeItem
-    indexes: { 'by-category': string; 'by-expiry': string }
-  }
   cookingRecords: {
     key: string
     value: CookingRecord
@@ -63,10 +58,6 @@ function getDB() {
 
         const shoppingListStore = db.createObjectStore('shoppingLists', { keyPath: 'id' })
         shoppingListStore.createIndex('by-updated', 'updatedAt')
-
-        const fridgeStore = db.createObjectStore('fridgeItems', { keyPath: 'id' })
-        fridgeStore.createIndex('by-category', 'category')
-        fridgeStore.createIndex('by-expiry', 'expiryDate')
 
         const cookingStore = db.createObjectStore('cookingRecords', { keyPath: 'id' })
         cookingStore.createIndex('by-date', 'date')
@@ -137,17 +128,6 @@ export const db = {
   },
   async putShoppingList(list: ShoppingList) {
     return (await getDB()).put('shoppingLists', list)
-  },
-
-  // Fridge Items
-  async getAllFridgeItems() {
-    return (await getDB()).getAll('fridgeItems')
-  },
-  async getFridgeItem(id: string) {
-    return (await getDB()).get('fridgeItems', id)
-  },
-  async putFridgeItem(item: FridgeItem) {
-    return (await getDB()).put('fridgeItems', item)
   },
 
   // Meal Plans

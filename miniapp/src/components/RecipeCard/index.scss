@@ -1,0 +1,83 @@
+@import '../../styles/variables.scss';
+
+.recipe-card {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  margin-bottom: $space-3;
+}
+
+.recipe-card-image {
+  width: 200rpx;
+  height: 200rpx;
+  flex-shrink: 0;
+}
+
+.recipe-card-placeholder {
+  width: 200rpx;
+  height: 200rpx;
+  flex-shrink: 0;
+  background: $color-bg-subtle;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recipe-card-placeholder-icon {
+  font-size: 64rpx;
+}
+
+.recipe-card-body {
+  flex: 1;
+  padding: $space-3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.recipe-card-name {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: $color-text;
+  margin-bottom: $space-1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recipe-card-meta {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+  margin-bottom: $space-1;
+}
+
+.recipe-card-badge {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  background: $color-bg-subtle;
+  padding: 2rpx 12rpx;
+  border-radius: $radius-full;
+}
+
+.recipe-card-time {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.recipe-card-tags {
+  display: flex;
+  gap: $space-1;
+  flex-wrap: wrap;
+}
+
+.recipe-card-tag {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  background: $color-primary-bg;
+  padding: 2rpx 12rpx;
+  border-radius: $radius-full;
+}

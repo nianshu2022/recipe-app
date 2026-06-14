@@ -5,7 +5,6 @@ import {
   ChefHat, Mic, MicOff, Maximize, Minimize, Play, Pause, RotateCcw,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
-import { useCalendarStore } from '@/stores/calendarStore'
 import { useVoiceControl, matchCommand } from '@/hooks/useVoiceControl'
 import { useTimer, formatTime } from '@/hooks/useTimer'
 import { useFullscreen } from '@/hooks/useFullscreen'
@@ -14,13 +13,11 @@ import type { Recipe } from '@/types'
 
 export function CookingPage() {
   const { id } = useParams<{ id: string }>()
-  const { recipes, loadRecipes } = useRecipeStore()
-  const { addRecord } = useCalendarStore()
+  const { recipes } = useRecipeStore()
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [currentStep, setCurrentStep] = useState(0)
   const [completed, setCompleted] = useState(false)
   const [voiceEnabled, setVoiceEnabled] = useState(false)
-  const [recordSaved, setRecordSaved] = useState(false)
 
   const timer = useTimer()
   const { isFullscreen, toggle: toggleFullscreen } = useFullscreen()
@@ -59,19 +56,6 @@ export function CookingPage() {
       prepareForStep(recipe.steps[currentStep]?.timer)
     }
   }, [currentStep, recipe, completed, prepareForStep])
-
-  useEffect(() => {
-    if (completed && recipe && !recordSaved) {
-      addRecord(recipe.id, recipe.servings).catch((e) => {
-        console.error('Failed to save cooking record:', e)
-      })
-      setRecordSaved(true)
-    }
-  }, [completed, recipe, recordSaved, addRecord])
-
-  useEffect(() => {
-    loadRecipes()
-  }, [loadRecipes])
 
   useEffect(() => {
     const found = recipes.find((r) => r.id === id)
@@ -118,7 +102,6 @@ export function CookingPage() {
         </div>
         <h2 className="font-display text-3xl font-semibold tracking-tight text-[var(--color-text)]">大功告成</h2>
         <p className="mt-2 text-sm text-[var(--color-text-muted)]">{recipe.name} 做好了</p>
-        <p className="mt-1 text-xs text-[var(--color-text-muted)]">已自动记录到做菜日历</p>
         <Link
           to={`/recipe/${recipe.id}`}
           replace

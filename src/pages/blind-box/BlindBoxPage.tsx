@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Package, Clock, Users, RotateCcw, ArrowRight, Sparkles, Save,
@@ -14,15 +14,11 @@ type Source = 'local' | 'recommend'
 
 export function BlindBoxPage() {
   const navigate = useNavigate()
-  const { recipes, loading, loadRecipes, addRecipe } = useRecipeStore()
+  const { recipes, loading, addRecipe } = useRecipeStore()
   const [phase, setPhase] = useState<Phase>('idle')
   const [result, setResult] = useState<Recipe | null>(null)
   const [source, setSource] = useState<Source>('local')
   const [saved, setSaved] = useState(false)
-
-  useEffect(() => {
-    loadRecipes()
-  }, [loadRecipes])
 
   const draw = () => {
     if (recipes.length === 0) return

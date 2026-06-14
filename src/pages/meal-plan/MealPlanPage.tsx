@@ -20,7 +20,7 @@ const slotColors: Record<MealSlot, string> = {
 export function MealPlanPage() {
   const { currentPlan, loading, loadCurrentWeek, setMeals, removeMeal, clearPlan, cleanupStaleRecipes, getWeekDates, getSlotLabel, getDayLabel } =
     useMealPlanStore()
-  const { recipes, loadRecipes } = useRecipeStore()
+  const { recipes } = useRecipeStore()
   const { generateFromRecipes } = useShoppingStore()
   const navigate = useNavigate()
 
@@ -42,8 +42,7 @@ export function MealPlanPage() {
 
   useEffect(() => {
     loadCurrentWeek()
-    loadRecipes()
-  }, [loadCurrentWeek, loadRecipes])
+  }, [loadCurrentWeek])
 
   useEffect(() => {
     if (currentPlan && recipes.length > 0) {

@@ -1,7 +1,7 @@
 import { db } from '@/db'
 import type {
   Recipe, Collection, CookingRecord,
-  ShoppingList, FridgeItem, MealPlan,
+  ShoppingList, MealPlan,
 } from '@/types'
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://recipe-api.nianshu2022.cn'
@@ -67,11 +67,6 @@ const TABLE_CONFIG: Record<string, DBMethods> = {
     getAll: () => db.getAllShoppingLists() as Promise<SyncableRecord[]>,
     get: (id) => db.getShoppingList(id) as Promise<SyncableRecord | undefined>,
     put: (r) => db.putShoppingList(r as ShoppingList),
-  },
-  fridge_items: {
-    getAll: () => db.getAllFridgeItems() as Promise<SyncableRecord[]>,
-    get: (id) => db.getFridgeItem(id) as Promise<SyncableRecord | undefined>,
-    put: (r) => db.putFridgeItem(r as FridgeItem),
   },
   meal_plans: {
     getAll: () => db.getAllMealPlans() as Promise<SyncableRecord[]>,

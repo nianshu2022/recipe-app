@@ -12,13 +12,13 @@ import { exportRecipeAsImage } from '@/utils/share'
 import { estimateNutrition, getCalorieLevel, getMacroPercentages } from '@/utils/nutrition'
 import { getAllRecipes } from '@/data/chineseRecipes'
 import { scaleIngredients, formatAmount } from '@/utils/scaling'
-import { difficultyConfig } from '@/constants/categories'
+import { difficultyConfig, categoryIcons } from '@/constants/categories'
 import type { Recipe } from '@/types'
 
 export function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { recipes, loadRecipes, deleteRecipe } = useRecipeStore()
+  const { recipes, deleteRecipe } = useRecipeStore()
   const { collections, loadCollections, toggleRecipeInCollection } = useCollectionStore()
   const { generateFromRecipe } = useShoppingStore()
   const showConfirm = useUIStore((s) => s.showConfirm)
@@ -57,9 +57,8 @@ export function RecipeDetailPage() {
   }
 
   useEffect(() => {
-    loadRecipes()
     loadCollections()
-  }, [loadRecipes, loadCollections])
+  }, [loadCollections])
 
   const [loading, setLoading] = useState(true)
 
@@ -160,7 +159,10 @@ export function RecipeDetailPage() {
           <img src={recipe.coverImage} alt={recipe.name} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <ChefHat size={48} className="text-[var(--color-text-muted)]" />
+            {(() => {
+              const CategoryIcon = categoryIcons[recipe.category]
+              return <CategoryIcon size={48} className="text-[var(--color-text-muted)]" />
+            })()}
           </div>
         )}
       </div>

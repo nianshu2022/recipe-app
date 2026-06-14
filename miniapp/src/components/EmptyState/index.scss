@@ -1,0 +1,53 @@
+@import '@/styles/variables.scss';
+@import '@/styles/mixins.scss';
+
+.empty-state {
+  @include flex-center;
+  flex-direction: column;
+  padding: $space-8 $space-5;
+  gap: $space-3;
+
+  &__icon {
+    @include flex-center;
+    width: 128rpx;
+    height: 128rpx;
+    border-radius: $radius-2xl;
+    background: $color-bg-subtle;
+    margin-bottom: $space-2;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  &__desc {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    text-align: center;
+    max-width: 480rpx;
+  }
+
+  &__action {
+    @include btn-primary;
+    width: 320rpx;
+    margin-top: $space-3;
+  }
+
+  &__action-text {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  &__secondary {
+    @include btn-secondary;
+    width: 320rpx;
+    margin-top: $space-2;
+  }
+
+  &__secondary-text {
+    color: $color-text;
+    font-weight: 500;
+  }
+}
