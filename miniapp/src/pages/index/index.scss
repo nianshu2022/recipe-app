@@ -2,15 +2,15 @@
 @import '@/styles/mixins.scss';
 
 .home-page {
-  padding-bottom: $space-8;
+  padding-bottom: $space-10;
+  min-height: 100vh;
 }
 
+// ========== Header ==========
 .home-header {
-  position: sticky;
-  top: 0;
-  z-index: $z-sticky;
-  background: $color-bg-transparent;
-  padding: $space-4 $space-5 $space-2;
+  @include sticky-header;
+  padding: $space-4 $space-5 $space-3;
+  border-bottom: 1rpx solid rgba(232, 228, 222, 0.5);
 
   &__top {
     @include flex-between;
@@ -19,15 +19,22 @@
 
   &__title {
     font-size: $font-size-3xl;
-    font-weight: 700;
+    font-weight: 800;
     color: $color-text;
-    letter-spacing: -1rpx;
+    letter-spacing: -2rpx;
+    line-height: 1.1;
   }
 
   &__count {
-    font-size: $font-size-sm;
-    color: $color-text-muted;
+    display: inline-block;
+    font-size: $font-size-xs;
+    color: $color-primary;
+    background: $color-primary-bg;
+    padding: 4rpx 14rpx;
+    border-radius: $radius-full;
+    font-weight: 600;
     margin-left: $space-2;
+    vertical-align: super;
   }
 
   &__actions {
@@ -39,20 +46,15 @@
     @include icon-button;
 
     &--primary {
-      background: $color-primary;
-      box-shadow: $shadow-md;
+      background: $color-primary-gradient;
+      box-shadow: $shadow-primary;
     }
   }
 }
 
+// ========== Search ==========
 .home-search {
-  display: flex;
-  align-items: center;
-  gap: $space-2;
-  height: 80rpx;
-  padding: 0 $space-4;
-  background: $color-bg-subtle;
-  border-radius: $radius-2xl;
+  @include search-input;
   margin-bottom: $space-3;
 
   &__input {
@@ -65,9 +67,17 @@
     @include flex-center;
     width: 48rpx;
     height: 48rpx;
+    border-radius: $radius-full;
+    background: $color-bg-subtle;
+    transition: $transition-fast;
+
+    &:active {
+      background: $color-border;
+    }
   }
 }
 
+// ========== Filters ==========
 .home-filters {
   margin-bottom: $space-2;
   white-space: nowrap;
@@ -87,28 +97,30 @@
   }
 }
 
-// Recipe Card
+// ========== Recipe Card ==========
 .recipe-card {
   display: flex;
   gap: $space-3;
-  padding: $space-4;
+  padding: $space-3;
   margin: 0 $space-5 $space-3;
   background: $color-bg-card;
   border-radius: $radius-2xl;
   box-shadow: $shadow-xs;
-  transition: $transition-fast;
+  transition: $transition-base;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 
   &:active {
-    transform: scale(0.99);
-    box-shadow: $shadow-sm;
+    transform: scale(0.98);
+    box-shadow: $shadow-md;
   }
 
   &__cover {
-    width: 160rpx;
-    height: 160rpx;
+    width: 180rpx;
+    height: 180rpx;
     border-radius: $radius-xl;
     overflow: hidden;
     flex-shrink: 0;
+    position: relative;
   }
 
   &__img {
@@ -116,12 +128,17 @@
     height: 100%;
     background-size: cover;
     background-position: center;
+    transition: $transition-base;
+
+    .recipe-card:active & {
+      transform: scale(1.05);
+    }
   }
 
   &__placeholder {
     width: 100%;
     height: 100%;
-    background: $color-bg-subtle;
+    background: linear-gradient(135deg, $color-bg-subtle 0%, darken($color-bg-subtle, 3%) 100%);
     @include flex-center;
   }
 
@@ -131,6 +148,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    padding: $space-1 0;
   }
 
   &__header {
@@ -140,25 +158,32 @@
 
   &__name {
     font-size: $font-size-lg;
-    font-weight: 600;
+    font-weight: 700;
     color: $color-text;
     @include text-clamp(1);
     flex: 1;
     margin-right: $space-2;
+    letter-spacing: -0.5rpx;
   }
 
   &__fav {
     @include flex-center;
-    width: 56rpx;
-    height: 56rpx;
+    width: 60rpx;
+    height: 60rpx;
     flex-shrink: 0;
+    border-radius: $radius-full;
+    transition: $transition-bounce;
+
+    &:active {
+      transform: scale(0.85);
+    }
   }
 
   &__tags {
     display: flex;
     flex-wrap: wrap;
     gap: $space-1;
-    margin-top: $space-1;
+    margin-top: $space-1-5;
   }
 
   &__badge {
@@ -168,29 +193,30 @@
     &--easy { @include badge($color-easy-bg, $color-easy); }
     &--medium { @include badge($color-medium-bg, $color-medium); }
     &--hard { @include badge($color-hard-bg, $color-hard); }
-    &--category { @include badge($color-primary-bg, $color-primary); }
+    &--category { @include badge-gradient($color-primary-gradient); }
     &--tag { @include badge($color-bg-subtle, $color-text-muted); }
   }
 
   &__meta {
     display: flex;
     gap: $space-3;
-    margin-top: $space-1;
+    margin-top: $space-1-5;
   }
 
   &__meta-item {
     display: flex;
     align-items: center;
-    gap: 4rpx;
+    gap: 6rpx;
   }
 
   &__meta-text {
     font-size: $font-size-xs;
     color: $color-text-muted;
+    font-weight: 500;
   }
 }
 
-// Skeleton
+// ========== Skeleton ==========
 .skeleton-list {
   padding: 0 $space-5;
 }
@@ -198,16 +224,17 @@
 .skeleton-card {
   display: flex;
   gap: $space-3;
-  padding: $space-4;
+  padding: $space-3;
   margin-bottom: $space-3;
   background: $color-bg-card;
   border-radius: $radius-2xl;
+  box-shadow: $shadow-xs;
 
   &__cover {
-    width: 160rpx;
-    height: 160rpx;
+    width: 180rpx;
+    height: 180rpx;
     border-radius: $radius-xl;
-    background: $color-bg-subtle;
+    background: linear-gradient(135deg, $color-bg-subtle 0%, darken($color-bg-subtle, 2%) 100%);
     animation: pulse 1.5s ease-in-out infinite;
   }
 
@@ -228,9 +255,4 @@
     &--long { width: 80%; }
     &--short { width: 50%; }
   }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
 }

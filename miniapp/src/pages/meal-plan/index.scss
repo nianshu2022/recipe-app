@@ -8,10 +8,7 @@
 }
 
 .meal-plan-header {
-  position: sticky;
-  top: 0;
-  z-index: $z-sticky;
-  background: $color-bg-transparent;
+  @include sticky-header;
   padding: $space-4 $space-5 $space-2;
 
   &__top {
@@ -21,16 +18,21 @@
 
   &__title {
     font-size: $font-size-3xl;
-    font-weight: 700;
+    font-weight: 800;
     color: $color-text;
     display: block;
+    letter-spacing: -2rpx;
   }
 
   &__count {
-    font-size: $font-size-sm;
-    color: $color-text-muted;
-    display: block;
-    margin-top: 4rpx;
+    display: inline-block;
+    font-size: $font-size-xs;
+    color: $color-primary;
+    background: $color-primary-bg;
+    padding: 4rpx 14rpx;
+    border-radius: $radius-full;
+    font-weight: 600;
+    margin-top: 6rpx;
   }
 
   &__actions {
@@ -49,35 +51,47 @@
 
   &__btn {
     @include flex-center;
-    width: 64rpx;
-    height: 64rpx;
-    border-radius: $radius-lg;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: $radius-xl;
+    background: $color-bg-card;
+    box-shadow: $shadow-xs;
+    transition: $transition-fast;
 
     &:active {
       background: $color-bg-subtle;
+      transform: scale(0.92);
     }
   }
 
   &__label {
     font-size: $font-size-base;
-    font-weight: 500;
-    color: $color-text-secondary;
+    font-weight: 600;
+    color: $color-text;
   }
 }
 
 .meal-plan-content {
   flex: 1;
-  padding: 0 $space-5 $space-8;
+  padding: 0 $space-5 $space-10;
 }
 
 .day-card {
   @include card;
   margin-bottom: $space-3;
   padding: $space-3;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+
+  @for $i from 1 through 7 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.05}s;
+    }
+  }
 
   &--today {
     border: 2rpx solid $color-primary;
-    box-shadow: 0 0 0 4rpx $color-primary-bg;
+    box-shadow: $shadow-primary;
+    background: linear-gradient(135deg, #ffffff 0%, $color-primary-bg 100%);
   }
 
   &__header {
@@ -91,17 +105,18 @@
 
   &__label {
     font-size: $font-size-lg;
-    font-weight: 600;
+    font-weight: 700;
     color: $color-text;
   }
 
   &__date {
     font-size: $font-size-sm;
     color: $color-text-muted;
+    font-weight: 500;
   }
 
   &__today-badge {
-    @include badge($color-primary-bg, $color-primary);
+    @include badge-gradient($color-primary-gradient);
     margin-left: auto;
   }
 
@@ -115,16 +130,18 @@
 .meal-slot {
   display: flex;
   gap: $space-2;
-  min-height: 64rpx;
+  min-height: 72rpx;
+  align-items: flex-start;
 
   &__label {
-    width: 80rpx;
+    width: 88rpx;
     height: 48rpx;
     @include flex-center;
     border-radius: $radius-full;
     font-size: $font-size-xs;
-    font-weight: 500;
+    font-weight: 600;
     flex-shrink: 0;
+    letter-spacing: 0.5rpx;
   }
 
   &__content {
@@ -142,11 +159,16 @@
   &__recipe {
     display: flex;
     align-items: center;
-    gap: 4rpx;
-    padding: 4rpx $space-2;
+    gap: 6rpx;
+    padding: 8rpx $space-2;
     border-radius: $radius-full;
     font-size: $font-size-xs;
-    font-weight: 500;
+    font-weight: 600;
+    transition: $transition-fast;
+
+    &:active {
+      transform: scale(0.95);
+    }
   }
 
   &__recipe-name {
@@ -160,38 +182,50 @@
     @include flex-center;
     width: 32rpx;
     height: 32rpx;
+    border-radius: $radius-full;
+    transition: $transition-fast;
+
+    &:active {
+      background: rgba(0, 0, 0, 0.1);
+    }
   }
 
   &__add {
     @include flex-center;
-    width: 48rpx;
-    height: 48rpx;
+    width: 52rpx;
+    height: 52rpx;
     border-radius: $radius-full;
     border: 2rpx dashed $color-border;
+    transition: $transition-fast;
 
     &:active {
       background: $color-bg-subtle;
+      border-color: $color-primary;
+      transform: scale(0.92);
     }
   }
 
   &__empty {
     @include flex-center;
-    height: 48rpx;
+    height: 56rpx;
     border-radius: $radius-lg;
     border: 2rpx dashed $color-border;
+    transition: $transition-fast;
 
     &:active {
       background: $color-bg-subtle;
+      border-color: $color-primary;
     }
   }
 
   &__empty-text {
     font-size: $font-size-xs;
     color: $color-text-muted;
+    font-weight: 500;
   }
 }
 
-// Recipe Picker
+// ========== Recipe Picker ==========
 .picker-overlay {
   position: fixed;
   top: 0;
@@ -200,7 +234,7 @@
   bottom: 0;
   z-index: $z-modal;
   background: $color-overlay;
-  animation: fade-in 0.15s ease;
+  animation: fadeIn 0.2s ease;
 }
 
 .picker-sheet {
@@ -208,40 +242,43 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 75vh;
+  height: 80vh;
   background: $color-bg-card;
-  border-radius: $radius-2xl $radius-2xl 0 0;
+  border-radius: $radius-3xl $radius-3xl 0 0;
   display: flex;
   flex-direction: column;
-  animation: slide-up 0.25s ease;
+  animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 
   &__header {
     @include flex-between;
-    padding: $space-4 $space-5;
-    border-bottom: 2rpx solid $color-border-subtle;
+    padding: $space-5 $space-5 $space-3;
   }
 
   &__title {
     font-size: $font-size-xl;
-    font-weight: 600;
+    font-weight: 700;
     color: $color-text;
   }
 
   &__close {
     @include flex-center;
-    width: 56rpx;
-    height: 56rpx;
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: $radius-full;
+    background: $color-bg-subtle;
+    transition: $transition-fast;
+
+    &:active {
+      background: $color-border;
+      transform: scale(0.92);
+    }
   }
 
   &__search {
-    display: flex;
-    align-items: center;
-    gap: $space-2;
-    height: 72rpx;
-    margin: $space-3 $space-5;
-    padding: 0 $space-3;
-    background: $color-bg-subtle;
-    border-radius: $radius-2xl;
+    @include search-input;
+    margin: 0 $space-5 $space-3;
+    height: 80rpx;
   }
 
   &__search-input {
@@ -261,7 +298,7 @@
 
   &__list {
     flex: 1;
-    padding: 0 $space-5;
+    padding: 0 $space-5 $space-8;
   }
 }
 
@@ -277,19 +314,23 @@
   display: flex;
   align-items: center;
   gap: $space-3;
-  padding: $space-3 0;
-  border-bottom: 2rpx solid $color-border-subtle;
+  padding: $space-3;
+  margin-bottom: $space-2;
+  border-radius: $radius-xl;
+  transition: $transition-fast;
 
   &:active {
     background: $color-bg-subtle;
+    transform: scale(0.98);
   }
 
   &__cover {
-    width: 80rpx;
-    height: 80rpx;
+    width: 88rpx;
+    height: 88rpx;
     border-radius: $radius-lg;
     overflow: hidden;
     flex-shrink: 0;
+    box-shadow: $shadow-xs;
   }
 
   &__img {
@@ -302,14 +343,14 @@
   &__placeholder {
     width: 100%;
     height: 100%;
-    background: $color-bg-subtle;
+    background: linear-gradient(135deg, $color-bg-subtle 0%, darken($color-bg-subtle, 3%) 100%);
     @include flex-center;
   }
 
   &__name {
     flex: 1;
     font-size: $font-size-base;
-    font-weight: 500;
+    font-weight: 600;
     color: $color-text;
     @include text-truncate;
   }
@@ -317,15 +358,16 @@
   &__meta {
     font-size: $font-size-sm;
     color: $color-text-muted;
+    font-weight: 500;
   }
 }
 
-@keyframes fade-in {
+@keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes slide-up {
+@keyframes slideUpSheet {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }

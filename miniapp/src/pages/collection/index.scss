@@ -2,15 +2,13 @@
 @import '@/styles/mixins.scss';
 
 .collection-page {
-  padding-bottom: $space-8;
+  padding-bottom: $space-10;
+  min-height: 100vh;
 }
 
 .collection-header {
-  position: sticky;
-  top: 0;
-  z-index: $z-sticky;
-  background: $color-bg-transparent;
-  padding: $space-4 $space-5 $space-2;
+  @include sticky-header;
+  padding: $space-4 $space-5 $space-3;
 
   &__top {
     @include flex-between;
@@ -18,16 +16,21 @@
 
   &__title {
     font-size: $font-size-3xl;
-    font-weight: 700;
+    font-weight: 800;
     color: $color-text;
     display: block;
+    letter-spacing: -2rpx;
   }
 
   &__count {
-    font-size: $font-size-sm;
-    color: $color-text-muted;
-    display: block;
-    margin-top: 4rpx;
+    display: inline-block;
+    font-size: $font-size-xs;
+    color: $color-primary;
+    background: $color-primary-bg;
+    padding: 4rpx 14rpx;
+    border-radius: $radius-full;
+    font-weight: 600;
+    margin-top: 6rpx;
   }
 
   &__actions {
@@ -44,29 +47,44 @@
   display: flex;
   gap: $space-2;
   margin-top: $space-3;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
   &__input {
     flex: 1;
-    height: 80rpx;
+    height: 88rpx;
     padding: 0 $space-4;
-    background: $color-bg-subtle;
+    background: $color-bg-card;
+    border: 2rpx solid $color-border;
     border-radius: $radius-2xl;
     font-size: $font-size-base;
+    color: $color-text;
+    transition: $transition-base;
+
+    &:focus {
+      border-color: $color-primary;
+      box-shadow: 0 0 0 4rpx rgba(201, 88, 58, 0.1);
+    }
   }
 
   &__btn {
     @include flex-center;
-    height: 80rpx;
-    padding: 0 $space-4;
-    background: $color-primary;
+    height: 88rpx;
+    padding: 0 $space-5;
+    background: $color-primary-gradient;
     color: #ffffff;
     border-radius: $radius-2xl;
-    font-weight: 500;
+    font-weight: 700;
+    box-shadow: $shadow-primary;
+    transition: $transition-base;
+
+    &:active {
+      transform: scale(0.96);
+    }
   }
 }
 
 .collection-list {
-  padding: $space-4 $space-5;
+  padding: $space-3 $space-5;
   display: flex;
   flex-direction: column;
   gap: $space-3;
@@ -79,15 +97,23 @@
   background: $color-bg-card;
   border-radius: $radius-2xl;
   box-shadow: $shadow-xs;
-  transition: $transition-fast;
+  transition: $transition-base;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+
+  @for $i from 1 through 20 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.05}s;
+    }
+  }
 
   &:active {
-    transform: scale(0.99);
+    transform: scale(0.98);
+    box-shadow: $shadow-md;
   }
 
   &__cover {
-    width: 120rpx;
-    height: 120rpx;
+    width: 140rpx;
+    height: 140rpx;
     border-radius: $radius-xl;
     overflow: hidden;
     flex-shrink: 0;
@@ -98,12 +124,17 @@
     height: 100%;
     background-size: cover;
     background-position: center;
+    transition: $transition-base;
+
+    .collection-card:active & {
+      transform: scale(1.05);
+    }
   }
 
   &__placeholder {
     width: 100%;
     height: 100%;
-    background: $color-bg-subtle;
+    background: linear-gradient(135deg, $color-bg-subtle 0%, darken($color-bg-subtle, 3%) 100%);
     @include flex-center;
   }
 
@@ -118,20 +149,22 @@
 
   &__name {
     font-size: $font-size-lg;
-    font-weight: 600;
+    font-weight: 700;
     color: $color-text;
     @include text-truncate;
+    letter-spacing: -0.5rpx;
   }
 
   &__meta {
     display: flex;
     align-items: center;
-    gap: 4rpx;
+    gap: 6rpx;
   }
 
   &__meta-text {
     font-size: $font-size-sm;
     color: $color-text-muted;
+    font-weight: 500;
   }
 
   &__unfav {
@@ -139,5 +172,11 @@
     width: 72rpx;
     height: 72rpx;
     flex-shrink: 0;
+    border-radius: $radius-full;
+    transition: $transition-bounce;
+
+    &:active {
+      transform: scale(0.85);
+    }
   }
 }

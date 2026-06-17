@@ -69,7 +69,7 @@ export default function HomePage() {
     Taro.navigateTo({ url: `/pages/recipe/detail?id=${recipe.id}` })
   }
 
-  const renderRecipeCard = (recipe: Recipe) => {
+  const renderRecipeCard = (recipe: Recipe, index: number) => {
     const difficultyOption = DIFFICULTY_OPTIONS.find((d) => d.value === recipe.difficulty)
     const categoryOption = CATEGORY_OPTIONS.find((c) => c.value === recipe.category)
     const categoryIcon = CATEGORY_ICONS[recipe.category] || 'chefHat'
@@ -78,6 +78,7 @@ export default function HomePage() {
       <View
         key={recipe.id}
         className='recipe-card'
+        style={{ animationDelay: `${index * 0.06}s` }}
         onClick={() => handleRecipeClick(recipe)}
       >
         <View className='recipe-card__cover'>

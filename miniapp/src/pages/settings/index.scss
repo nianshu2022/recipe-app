@@ -2,7 +2,8 @@
 @import '@/styles/mixins.scss';
 
 .settings-page {
-  padding-bottom: $space-8;
+  padding-bottom: $space-10;
+  min-height: 100vh;
 }
 
 .settings-header {
@@ -10,8 +11,9 @@
 
   &__title {
     font-size: $font-size-3xl;
-    font-weight: 700;
+    font-weight: 800;
     color: $color-text;
+    letter-spacing: -2rpx;
   }
 }
 
@@ -23,14 +25,16 @@
   padding: $space-4;
   background: $color-bg-card;
   border-radius: $radius-2xl;
-  box-shadow: $shadow-xs;
+  box-shadow: $shadow-sm;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 
   &__avatar {
     @include flex-center;
-    width: 96rpx;
-    height: 96rpx;
-    border-radius: 50%;
-    background: $color-primary-bg;
+    width: 104rpx;
+    height: 104rpx;
+    border-radius: $radius-2xl;
+    background: linear-gradient(135deg, $color-primary-bg 0%, lighten($color-primary, 40%) 100%);
+    box-shadow: 0 4rpx 16rpx rgba(201, 88, 58, 0.15);
   }
 
   &__info {
@@ -40,7 +44,7 @@
 
   &__name {
     font-size: $font-size-lg;
-    font-weight: 600;
+    font-weight: 700;
     color: $color-text;
     display: block;
   }
@@ -54,35 +58,48 @@
 
   &__login {
     @include flex-center;
-    height: 64rpx;
-    padding: 0 $space-4;
-    background: $color-primary;
+    height: 72rpx;
+    padding: 0 $space-5;
+    background: $color-primary-gradient;
     color: #ffffff;
     border-radius: $radius-2xl;
-    font-weight: 500;
+    font-weight: 700;
     font-size: $font-size-sm;
+    box-shadow: $shadow-primary;
+    transition: $transition-base;
+
+    &:active {
+      transform: scale(0.96);
+    }
   }
 
   &__sync {
     @include flex-center;
-    width: 72rpx;
-    height: 72rpx;
+    width: 80rpx;
+    height: 80rpx;
     border-radius: $radius-xl;
-    background: $color-bg;
-    box-shadow: $shadow-xs;
+    background: $color-bg-subtle;
     flex-shrink: 0;
+    transition: $transition-base;
+
+    &:active {
+      transform: scale(0.92) rotate(180deg);
+    }
   }
 }
 
 .settings-theme {
   margin: $space-4 $space-5;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
 
   &__title {
-    font-size: $font-size-sm;
-    font-weight: 500;
+    font-size: $font-size-xs;
+    font-weight: 600;
     color: $color-text-muted;
     display: block;
     margin-bottom: $space-2;
+    text-transform: uppercase;
+    letter-spacing: 1rpx;
   }
 
   &__options {
@@ -95,38 +112,43 @@
     @include flex-center;
     flex-direction: column;
     gap: $space-1;
-    padding: $space-3;
+    padding: $space-3 $space-2;
     background: $color-bg-card;
     border-radius: $radius-xl;
     box-shadow: $shadow-xs;
     border: 2rpx solid transparent;
-    transition: $transition-fast;
+    transition: $transition-base;
 
     &--active {
       border-color: $color-primary;
       background: $color-primary-bg;
+      box-shadow: $shadow-primary;
     }
 
     &:active {
-      transform: scale(0.97);
+      transform: scale(0.96);
     }
   }
 
   &__label {
     font-size: $font-size-xs;
     color: $color-text-secondary;
+    font-weight: 600;
   }
 }
 
 .settings-group {
   margin: $space-4 $space-5;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.15s backwards;
 
   &__title {
-    font-size: $font-size-sm;
-    font-weight: 500;
+    font-size: $font-size-xs;
+    font-weight: 600;
     color: $color-text-muted;
     display: block;
     margin-bottom: $space-2;
+    text-transform: uppercase;
+    letter-spacing: 1rpx;
   }
 
   &__card {
@@ -152,10 +174,19 @@
     background: $color-bg-subtle;
   }
 
+  &__icon {
+    @include flex-center;
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: $radius-lg;
+    flex-shrink: 0;
+  }
+
   &__label {
     flex: 1;
     font-size: $font-size-base;
     color: $color-text;
+    font-weight: 500;
   }
 }
 
@@ -169,22 +200,24 @@
   border-radius: $radius-2xl;
   background: $color-bg-card;
   box-shadow: $shadow-xs;
-  transition: $transition-fast;
+  transition: $transition-base;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;
 
   &:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
+    background: $color-danger-bg;
   }
 
   &__text {
     font-size: $font-size-base;
-    font-weight: 500;
+    font-weight: 600;
     color: $color-danger;
   }
 }
 
 .settings-footer {
   @include flex-center;
-  padding: $space-4;
+  padding: $space-6;
 
   &__text {
     font-size: $font-size-xs;
