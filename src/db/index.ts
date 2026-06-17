@@ -1,8 +1,8 @@
 import { openDB, type IDBPDatabase } from 'idb'
-import type { Recipe, Collection, Menu, MealPlan, ShoppingList, CookingRecord } from '@/types'
+import type { Recipe, Collection, Menu, MealPlan, ShoppingList, CookingRecord, FridgeItem } from '@/types'
 
 const DB_NAME = 'recipe-app'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 interface RecipeAppDB {
   recipes: {
@@ -35,6 +35,11 @@ interface RecipeAppDB {
     value: CookingRecord
     indexes: { 'by-date': string; 'by-recipe': string }
   }
+  fridgeItems: {
+    key: string
+    value: FridgeItem
+    indexes: { 'by-expiry': string; 'by-category': string }
+  }
 }
 
 let dbPromise: Promise<IDBPDatabase<RecipeAppDB>> | null = null
@@ -62,6 +67,10 @@ function getDB() {
         const cookingStore = db.createObjectStore('cookingRecords', { keyPath: 'id' })
         cookingStore.createIndex('by-date', 'date')
         cookingStore.createIndex('by-recipe', 'recipeId')
+
+        const fridgeStore = db.createObjectStore('fridgeItems', { keyPath: 'id' })
+        fridgeStore.createIndex('by-expiry', 'expiryDate')
+        fridgeStore.createIndex('by-category', 'category')
       },
     })
   }
@@ -139,5 +148,19 @@ export const db = {
   },
   async putMealPlan(plan: MealPlan) {
     return (await getDB()).put('mealPlans', plan)
+  },
+
+  // Fridge Items
+  async getAllFridgeItems() {
+    return (await getDB()).getAll('fridgeItems')
+  },
+  async getFridgeItem(id: string) {
+    return (await getDB()).get('fridgeItems', id)
+  },
+  async putFridgeItem(item: FridgeItem) {
+    return (await getDB()).put('fridgeItems', item)
+  },
+  async deleteFridgeItem(id: string) {
+    return (await getDB()).delete('fridgeItems', id)
   },
 }

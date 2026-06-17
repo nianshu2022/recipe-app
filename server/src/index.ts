@@ -8,6 +8,7 @@ import { handleAuth } from './routes/auth'
 import { handleRecipes } from './routes/recipes'
 import { handleCollections } from './routes/collections'
 import { handleSync } from './routes/sync'
+import { handleMedia } from './routes/media'
 import { authenticate } from './middleware/auth'
 import { getCorsHeaders, errorResponse, checkRateLimit } from './utils/response'
 
@@ -55,6 +56,9 @@ export default {
       }
       if (path === '/api/sync') {
         return await handleSync(request, env, user)
+      }
+      if (path.startsWith('/api/media')) {
+        return await handleMedia(request, env, user, path)
       }
 
       return errorResponse('Not found', 404, request)

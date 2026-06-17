@@ -1,7 +1,7 @@
 import { db } from '@/db'
 import type {
   Recipe, Collection, CookingRecord,
-  ShoppingList, MealPlan,
+  ShoppingList, MealPlan, FridgeItem,
 } from '@/types'
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://recipe-api.nianshu2022.cn'
@@ -72,6 +72,11 @@ const TABLE_CONFIG: Record<string, DBMethods> = {
     getAll: () => db.getAllMealPlans() as Promise<SyncableRecord[]>,
     get: (id) => db.getMealPlan(id) as Promise<SyncableRecord | undefined>,
     put: (r) => db.putMealPlan(r as MealPlan),
+  },
+  fridge_items: {
+    getAll: () => db.getAllFridgeItems() as Promise<SyncableRecord[]>,
+    get: (id) => db.getFridgeItem(id) as Promise<SyncableRecord | undefined>,
+    put: (r) => db.putFridgeItem(r as FridgeItem),
   },
 }
 
@@ -258,7 +263,15 @@ export async function pullChanges(): Promise<void> {
       if (!mapped.id || typeof mapped.id !== 'string') continue
 
       const localRecord = await config.get(mapped.id as string)
-      if (localRecord && localRecord.syncStatus === 'pending') continue
+      if (localRecord && localRecord.syncStatus === 'pending') {
+        const localUpdated = new Date((localRecord as Record<string, unknown>).updatedAt as string).getTime()
+        const remoteUpdated = new Date(mapped.updatedAt as string).getTime()
+        if (remoteUpdated > localUpdated) {
+          mapped.syncStatus = 'conflict'
+          await config.put(mapped as unknown as SyncableRecord)
+        }
+        continue
+      }
 
       await config.put(mapped as unknown as SyncableRecord)
     }
