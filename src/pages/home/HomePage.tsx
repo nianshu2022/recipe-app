@@ -6,7 +6,6 @@ import {
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useCollectionStore } from '@/stores/collectionStore'
 import { useDebounce } from '@/hooks/useDebounce'
-import { getRandomChineseRecipes } from '@/data/chineseRecipes'
 import { BrandLoading } from '@/components/ui/BrandLoading'
 import { VirtualList } from '@/components/ui/VirtualList'
 import { categoryIcons, categoryLabels, difficultyConfig } from '@/constants/categories'
@@ -41,15 +40,6 @@ export function HomePage() {
       setInputValue(q)
     }
   }, [searchParams, inputValue])
-
-  const handleImportSamples = async () => {
-    const { db } = await import('@/db')
-    const samples = getRandomChineseRecipes(5)
-    for (const recipe of samples) {
-      await db.putRecipe(recipe)
-    }
-    await loadRecipes()
-  }
 
   const categories = Object.entries(categoryLabels) as [Category, string][]
 
@@ -168,20 +158,12 @@ export function HomePage() {
           </div>
           <h3 className="mb-2 text-lg font-medium text-[var(--color-text)]">还没有菜谱</h3>
           <p className="mb-8 text-sm text-[var(--color-text-muted)]">快来创建你的第一道拿手菜吧</p>
-          <div className="flex gap-3">
-            <Link
-              to="/recipe/new"
-              className="rounded-2xl bg-[var(--color-primary)] px-8 py-3 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
-            >
-              创建菜谱
-            </Link>
-            <button
-              onClick={handleImportSamples}
-              className="rounded-2xl bg-[var(--color-bg-card)] px-8 py-3 text-sm font-medium text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
-            >
-              导入示例菜谱
-            </button>
-          </div>
+          <Link
+            to="/recipe/new"
+            className="rounded-2xl bg-[var(--color-primary)] px-8 py-3 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
+          >
+            创建菜谱
+          </Link>
         </div>
       ) : recipes.length > VIRTUAL_THRESHOLD ? (
         <VirtualList
