@@ -19,6 +19,7 @@ const ShoppingListPage = lazy(() => import('@/pages/shopping/ShoppingListPage').
 const LoginPage = lazy(() => import('@/pages/settings/LoginPage').then(m => ({ default: m.LoginPage })))
 const DataManagementPage = lazy(() => import('@/pages/settings/DataManagementPage').then(m => ({ default: m.DataManagementPage })))
 const BlindBoxPage = lazy(() => import('@/pages/blind-box/BlindBoxPage').then(m => ({ default: m.BlindBoxPage })))
+const PrivacyPage = lazy(() => import('@/pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })))
 
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
@@ -55,6 +56,7 @@ function AnimatedRoutes() {
           <Route path="/collection" element={<PageSuspense><CollectionPage /></PageSuspense>} />
           <Route path="/shopping" element={<PageSuspense><ShoppingListPage /></PageSuspense>} />
           <Route path="/blind-box" element={<PageSuspense><BlindBoxPage /></PageSuspense>} />
+          <Route path="/privacy" element={<PageSuspense><PrivacyPage /></PageSuspense>} />
 
           <Route path="*" element={<PageSuspense><NotFoundPage /></PageSuspense>} />
         </Route>
