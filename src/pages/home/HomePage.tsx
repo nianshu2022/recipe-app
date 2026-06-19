@@ -22,7 +22,6 @@ export function HomePage() {
     setSearchQuery,
     setCategoryFilter,
     setDifficultyFilter,
-    loadRecipes,
     filteredRecipes: recipes,
   } = useRecipeStore()
 
