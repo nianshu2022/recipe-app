@@ -57,7 +57,7 @@ export function SettingsPage() {
       const reader = response.body?.getReader()
       const contentLength = Number(response.headers.get('Content-Length'))
       let receivedLength = 0
-      const chunks: Uint8Array[] = []
+      const chunks: BlobPart[] = []
       
       if (reader) {
         while (true) {
