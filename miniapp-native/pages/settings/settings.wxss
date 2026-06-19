@@ -1,0 +1,99 @@
+.page {
+  min-height: 100vh;
+  background-color: #faf9f7;
+}
+
+/* 用户卡片 */
+.user-card {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 40rpx;
+  margin-bottom: 20rpx;
+}
+
+.avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c9583a, #e47a4e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+}
+
+.avatar-text {
+  font-size: 40rpx;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.nickname {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #252220;
+  margin-bottom: 8rpx;
+}
+
+.user-id {
+  font-size: 24rpx;
+  color: #a8a08e;
+}
+
+.login-btn {
+  padding: 12rpx 32rpx;
+  background-color: #c9583a;
+  color: #ffffff;
+  border-radius: 32rpx;
+  font-size: 24rpx;
+}
+
+/* 菜单组 */
+.menu-group {
+  background-color: #ffffff;
+  margin-bottom: 20rpx;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 32rpx 40rpx;
+  border-bottom: 1rpx solid #f5f3ef;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-item:active {
+  background-color: #f5f3ef;
+}
+
+.menu-icon {
+  font-size: 36rpx;
+  margin-right: 24rpx;
+}
+
+.menu-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #252220;
+}
+
+.menu-arrow {
+  font-size: 28rpx;
+  color: #a8a08e;
+}
+
+/* 版本号 */
+.version {
+  text-align: center;
+  padding: 40rpx;
+  font-size: 24rpx;
+  color: #a8a08e;
+}

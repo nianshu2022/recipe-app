@@ -1,0 +1,62 @@
+<view class="page">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input">
+      <image class="search-icon" src="/assets/icons/search.png" mode="aspectFit" />
+      <input 
+        placeholder="搜索菜谱" 
+        value="{{searchKey}}" 
+        bindinput="onSearchInput"
+        confirm-type="search"
+      />
+    </view>
+    <view class="add-btn" bindtap="onAddTap">
+      <image class="add-icon" src="/assets/icons/plus.png" mode="aspectFit" />
+    </view>
+  </view>
+
+  <!-- 分类标签 -->
+  <scroll-view class="categories" scroll-x>
+    <view 
+      wx:for="{{categories}}" 
+      wx:key="id"
+      class="category-tag {{currentCategory === item.id ? 'active' : ''}}"
+      data-category="{{item.id}}"
+      bindtap="onCategoryTap"
+    >
+      {{item.name}}
+    </view>
+  </scroll-view>
+
+  <!-- 菜谱列表 -->
+  <view class="recipe-list">
+    <view 
+      wx:for="{{recipes}}" 
+      wx:key="id"
+      class="recipe-card"
+      data-id="{{item.id}}"
+      bindtap="onRecipeTap"
+    >
+      <view class="recipe-cover">
+        <view class="recipe-emoji">{{item.name[0]}}</view>
+      </view>
+      <view class="recipe-info">
+        <view class="recipe-name">{{item.name}}</view>
+        <view class="recipe-meta">
+          <text class="recipe-tag">{{item.categoryText}}</text>
+          <text class="recipe-difficulty">{{item.difficultyText}}</text>
+          <text class="recipe-duration">{{item.duration}}分钟</text>
+        </view>
+        <view class="recipe-tags">
+          <text wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag" class="tag">{{tag}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{recipes.length === 0}}" class="empty-state">
+    <text class="empty-text">暂无菜谱</text>
+    <text class="empty-sub">点击右上角 + 创建第一道菜</text>
+  </view>
+</view>

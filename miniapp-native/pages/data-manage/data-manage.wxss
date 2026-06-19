@@ -1,0 +1,81 @@
+.page {
+  min-height: 100vh;
+  background-color: #faf9f7;
+}
+
+/* 统计 */
+.stats {
+  display: flex;
+  background-color: #ffffff;
+  padding: 32rpx;
+  margin-bottom: 20rpx;
+}
+
+.stat-item {
+  flex: 1;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #252220;
+  display: block;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #a8a08e;
+  margin-top: 8rpx;
+  display: block;
+}
+
+/* 操作 */
+.actions {
+  background-color: #ffffff;
+  margin: 0 32rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1rpx solid #f5f3ef;
+}
+
+.action-item:last-child {
+  border-bottom: none;
+}
+
+.action-item:active {
+  background-color: #f5f3ef;
+}
+
+.action-item.danger .action-title {
+  color: #e74c3c;
+}
+
+.action-icon {
+  font-size: 40rpx;
+  margin-right: 24rpx;
+}
+
+.action-info {
+  flex: 1;
+}
+
+.action-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #252220;
+  display: block;
+}
+
+.action-desc {
+  font-size: 24rpx;
+  color: #a8a08e;
+  margin-top: 8rpx;
+  display: block;
+}

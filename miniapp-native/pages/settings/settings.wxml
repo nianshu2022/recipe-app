@@ -1,0 +1,37 @@
+<view class="page">
+  <!-- 用户信息 -->
+  <view class="user-card">
+    <view class="avatar">
+      <text class="avatar-text">{{userInfo ? userInfo.nickname[0] : '?'}}</text>
+    </view>
+    <view class="user-info">
+      <view class="nickname">{{userInfo ? userInfo.nickname : '未登录'}}</view>
+      <view class="user-id">{{userInfo ? userInfo.email : '登录后可同步数据'}}</view>
+    </view>
+    <view class="login-btn" bindtap="{{userInfo ? 'onLogout' : 'onLogin'}}">
+      {{userInfo ? '退出' : '登录'}}
+    </view>
+  </view>
+
+  <!-- 菜单项 -->
+  <view class="menu-group">
+    <view class="menu-item" bindtap="onDataManage">
+      <text class="menu-icon">📦</text>
+      <text class="menu-text">数据管理</text>
+      <text class="menu-arrow">></text>
+    </view>
+    <view class="menu-item" bindtap="onClearData">
+      <text class="menu-icon">🗑️</text>
+      <text class="menu-text">清除数据</text>
+      <text class="menu-arrow">></text>
+    </view>
+    <view class="menu-item" bindtap="onAbout">
+      <text class="menu-icon">ℹ️</text>
+      <text class="menu-text">关于</text>
+      <text class="menu-arrow">></text>
+    </view>
+  </view>
+
+  <!-- 版本号 -->
+  <view class="version">知味 v{{version}}</view>
+</view>

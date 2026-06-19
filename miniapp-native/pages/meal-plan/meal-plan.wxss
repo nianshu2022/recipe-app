@@ -1,0 +1,83 @@
+.page {
+  min-height: 100vh;
+  background-color: #faf9f7;
+}
+
+.header {
+  padding: 32rpx;
+  text-align: center;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #252220;
+  display: block;
+}
+
+.subtitle {
+  font-size: 24rpx;
+  color: #a8a08e;
+  margin-top: 8rpx;
+  display: block;
+}
+
+.plan-grid {
+  display: flex;
+  overflow-x: auto;
+  padding: 0 16rpx 32rpx;
+}
+
+.day-column {
+  min-width: 200rpx;
+  margin: 0 8rpx;
+}
+
+.day-header {
+  text-align: center;
+  padding: 16rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #6b6355;
+  background-color: #f5f3ef;
+  border-radius: 12rpx 12rpx 0 0;
+}
+
+.day-header.today {
+  background-color: #c9583a;
+  color: #ffffff;
+}
+
+.meal-slot {
+  background-color: #ffffff;
+  padding: 16rpx;
+  margin-top: 4rpx;
+}
+
+.meal-slot:active {
+  background-color: #f5f3ef;
+}
+
+.slot-label {
+  font-size: 20rpx;
+  color: #a8a08e;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.slot-content {
+  min-height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slot-text {
+  font-size: 24rpx;
+  color: #252220;
+}
+
+.slot-empty {
+  font-size: 32rpx;
+  color: #e8e4de;
+}

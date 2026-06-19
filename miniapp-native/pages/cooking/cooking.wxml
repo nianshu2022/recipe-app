@@ -1,0 +1,46 @@
+<view class="page">
+  <block wx:if="{{recipe}}">
+    <!-- 进度条 -->
+    <view class="progress">
+      <view class="progress-bar" style="width: {{(currentStep + 1) / recipe.steps.length * 100}}%"></view>
+    </view>
+
+    <!-- 步骤信息 -->
+    <view class="step-info">
+      <text class="step-label">步骤 {{currentStep + 1}} / {{recipe.steps.length}}</text>
+    </view>
+
+    <!-- 步骤内容 -->
+    <view class="step-content">
+      <text class="step-text">{{recipe.steps[currentStep]}}</text>
+    </view>
+
+    <!-- 计时器 -->
+    <view class="timer">
+      <text class="timer-text">{{timerText}}</text>
+      <view class="timer-actions">
+        <view class="timer-btn" bindtap="onStartTimer">
+          {{isTimerRunning ? '暂停' : '开始'}}
+        </view>
+        <view class="timer-btn" bindtap="onResetTimer">重置</view>
+      </view>
+    </view>
+
+    <!-- 导航按钮 -->
+    <view class="nav-buttons">
+      <button 
+        class="btn btn-secondary" 
+        disabled="{{currentStep === 0}}"
+        bindtap="onPrevStep"
+      >
+        上一步
+      </button>
+      <block wx:if="{{currentStep < recipe.steps.length - 1}}">
+        <button class="btn btn-primary" bindtap="onNextStep">下一步</button>
+      </block>
+      <block wx:else>
+        <button class="btn btn-primary" bindtap="onFinish">完成</button>
+      </block>
+    </view>
+  </block>
+</view>

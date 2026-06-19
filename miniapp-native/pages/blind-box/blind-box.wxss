@@ -1,0 +1,100 @@
+.page {
+  min-height: 100vh;
+  background-color: #faf9f7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header {
+  text-align: center;
+  padding: 60rpx 32rpx 40rpx;
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #252220;
+  display: block;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #a8a08e;
+  margin-top: 16rpx;
+  display: block;
+}
+
+.card-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+}
+
+.card {
+  width: 500rpx;
+  background-color: #ffffff;
+  border-radius: 32rpx;
+  padding: 48rpx;
+  box-shadow: 0 8px 32px rgba(37, 34, 32, 0.1);
+  text-align: center;
+}
+
+.card.shaking {
+  animation: shake 0.8s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  10% { transform: translateX(-20rpx) rotate(-5deg); }
+  20% { transform: translateX(20rpx) rotate(5deg); }
+  30% { transform: translateX(-15rpx) rotate(-3deg); }
+  40% { transform: translateX(15rpx) rotate(3deg); }
+  50% { transform: translateX(-10rpx) rotate(-2deg); }
+  60% { transform: translateX(10rpx) rotate(2deg); }
+  70% { transform: translateX(-5rpx) rotate(-1deg); }
+  80% { transform: translateX(5rpx) rotate(1deg); }
+}
+
+.card-cover {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c9583a, #e47a4e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 32rpx;
+}
+
+.emoji {
+  font-size: 80rpx;
+}
+
+.recipe-name {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #252220;
+  margin-bottom: 16rpx;
+}
+
+.recipe-meta {
+  display: flex;
+  justify-content: center;
+  gap: 24rpx;
+  font-size: 24rpx;
+  color: #a8a08e;
+}
+
+.actions {
+  display: flex;
+  gap: 24rpx;
+  padding: 40rpx 32rpx 80rpx;
+  width: 100%;
+}
+
+.actions .btn {
+  flex: 1;
+}

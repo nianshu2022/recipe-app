@@ -1,0 +1,25 @@
+<view class="page">
+  <view class="list">
+    <view 
+      wx:for="{{collections}}" 
+      wx:key="id"
+      class="item"
+      data-id="{{item.id}}"
+      bindtap="onCollectionTap"
+    >
+      <view class="cover">
+        <view class="emoji">{{item.name[0]}}</view>
+      </view>
+      <view class="info">
+        <view class="name">{{item.name}}</view>
+        <view class="meta">{{item.category}} · {{item.duration}}分钟</view>
+      </view>
+      <view class="remove-btn" data-index="{{index}}" catchtap="onRemove">取消收藏</view>
+    </view>
+  </view>
+
+  <view wx:if="{{collections.length === 0}}" class="empty-state">
+    <text class="empty-text">暂无收藏</text>
+    <text class="empty-sub">收藏喜欢的菜谱方便查找</text>
+  </view>
+</view>

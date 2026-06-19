@@ -1,0 +1,108 @@
+<view class="page">
+  <!-- 查看模式 -->
+  <block wx:if="{{!isEditing && recipe}}">
+    <view class="header">
+      <view class="cover">
+        <view class="emoji">{{recipe.name[0]}}</view>
+      </view>
+      <view class="header-info">
+        <view class="name">{{recipe.name}}</view>
+        <view class="meta">
+          <text>{{recipe.categoryText || recipe.category}}</text>
+          <text>{{recipe.difficultyText || recipe.difficulty}}</text>
+          <text>{{recipe.duration}}分钟</text>
+          <text>{{recipe.servings}}人份</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">食材</view>
+      <view class="ingredient-list">
+        <view wx:for="{{recipe.ingredients}}" wx:key="name" class="ingredient-item">
+          <text class="ingredient-name">{{item.name}}</text>
+          <text class="ingredient-amount">{{item.amount}}{{item.unit}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">步骤</view>
+      <view class="step-list">
+        <view wx:for="{{recipe.steps}}" wx:key="*this" class="step-item">
+          <view class="step-number">{{index + 1}}</view>
+          <text class="step-text">{{item}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="actions">
+      <button class="btn btn-secondary" bindtap="onEdit">编辑</button>
+      <button class="btn btn-primary" bindtap="onStartCooking">开始做菜</button>
+    </view>
+  </block>
+
+  <!-- 编辑模式 -->
+  <block wx:if="{{isEditing}}">
+    <view class="form">
+      <view class="form-item">
+        <text class="label">菜名</text>
+        <input class="input" value="{{formData.name}}" data-field="name" bindinput="onInputChange" placeholder="输入菜名" />
+      </view>
+
+      <view class="form-item">
+        <text class="label">分类</text>
+        <picker range="{{categories}}" range-key="name" bindchange="onCategoryChange">
+          <view class="picker">{{formData.category}}</view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="label">难度</text>
+        <picker range="{{difficulties}}" range-key="name" bindchange="onDifficultyChange">
+          <view class="picker">{{formData.difficulty}}</view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="label">时长(分钟)</text>
+        <input class="input" type="number" value="{{formData.duration}}" data-field="duration" bindinput="onNumberChange" />
+      </view>
+
+      <view class="form-item">
+        <text class="label">份数</text>
+        <input class="input" type="number" value="{{formData.servings}}" data-field="servings" bindinput="onNumberChange" />
+      </view>
+
+      <view class="form-section">
+        <view class="form-section-header">
+          <text class="label">食材</text>
+          <text class="add-btn" bindtap="onAddIngredient">+ 添加</text>
+        </view>
+        <view wx:for="{{formData.ingredients}}" wx:key="index" class="ingredient-form">
+          <input class="input flex-1" placeholder="食材名" value="{{item.name}}" data-index="{{index}}" data-field="name" bindinput="onIngredientInput" />
+          <input class="input small" type="number" placeholder="量" value="{{item.amount}}" data-index="{{index}}" data-field="amount" bindinput="onIngredientInput" />
+          <input class="input small" placeholder="单位" value="{{item.unit}}" data-index="{{index}}" data-field="unit" bindinput="onIngredientInput" />
+          <text class="delete-btn" data-index="{{index}}" bindtap="onDeleteIngredient">×</text>
+        </view>
+      </view>
+
+      <view class="form-section">
+        <view class="form-section-header">
+          <text class="label">步骤</text>
+          <text class="add-btn" bindtap="onAddStep">+ 添加</text>
+        </view>
+        <view wx:for="{{formData.steps}}" wx:key="index" class="step-form">
+          <view class="step-num">{{index + 1}}</view>
+          <textarea class="textarea" placeholder="描述步骤" value="{{item}}" data-index="{{index}}" bindinput="onStepInput" />
+          <text class="delete-btn" data-index="{{index}}" bindtap="onDeleteStep">×</text>
+        </view>
+      </view>
+
+      <view class="actions">
+        <button class="btn btn-secondary" bindtap="onCancel">取消</button>
+        <button class="btn btn-primary" bindtap="onSave">保存</button>
+      </view>
+    </view>
+  </block>
+</view>

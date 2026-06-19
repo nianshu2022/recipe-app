@@ -1,0 +1,144 @@
+.page {
+  min-height: 100vh;
+  background-color: #faf9f7;
+  padding-bottom: 120rpx;
+}
+
+/* 输入框 */
+.input-bar {
+  display: flex;
+  padding: 24rpx 32rpx;
+  gap: 16rpx;
+  background-color: #ffffff;
+  margin-bottom: 20rpx;
+}
+
+.input {
+  flex: 1;
+  height: 80rpx;
+  padding: 0 24rpx;
+  background-color: #f5f3ef;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+}
+
+.add-btn {
+  height: 80rpx;
+  padding: 0 32rpx;
+  background-color: #c9583a;
+  color: #ffffff;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.add-btn:active {
+  opacity: 0.8;
+}
+
+/* 列表 */
+.list {
+  background-color: #ffffff;
+  margin: 0 32rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  border-bottom: 1rpx solid #f5f3ef;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item.checked .item-name {
+  text-decoration: line-through;
+  color: #a8a08e;
+}
+
+.checkbox {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  border: 2rpx solid #e8e4de;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.item.checked .checkbox {
+  background-color: #c9583a;
+  border-color: #c9583a;
+}
+
+.check-icon {
+  font-size: 24rpx;
+  color: #ffffff;
+}
+
+.item-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: #252220;
+}
+
+.delete-btn {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  color: #a8a08e;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 40rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #a8a08e;
+  margin-bottom: 16rpx;
+}
+
+.empty-sub {
+  font-size: 24rpx;
+  color: #a8a08e;
+}
+
+/* 底部 */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 32rpx;
+  background-color: #ffffff;
+  border-top: 1rpx solid #f5f3ef;
+}
+
+.footer-text {
+  font-size: 24rpx;
+  color: #a8a08e;
+}
+
+.clear-btn {
+  font-size: 24rpx;
+  color: #c9583a;
+}
