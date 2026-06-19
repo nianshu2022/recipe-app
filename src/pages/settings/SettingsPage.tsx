@@ -2,10 +2,9 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ChevronRight, Heart, ShoppingCart, ChefHat, Moon, Sun, Monitor, Database, LogIn, LogOut, RefreshCw,
-  Download,
+  Download, X,
 } from 'lucide-react'
 import { Capacitor } from '@capacitor/core'
-import { Filesystem, Directory } from '@capacitor/filesystem'
 import { Browser } from '@capacitor/browser'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
@@ -17,6 +16,7 @@ export function SettingsPage() {
   const { theme, setTheme } = useThemeStore()
   const showToast = useUIStore((s) => s.showToast)
   const [syncing, setSyncing] = useState(false)
+  const [showUpdateModal, setShowUpdateModal] = useState(false)
   const [checkingUpdate, setCheckingUpdate] = useState(false)
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
   const [downloading, setDownloading] = useState(false)
@@ -30,18 +30,24 @@ export function SettingsPage() {
 
   const handleCheckUpdate = async () => {
     setCheckingUpdate(true)
+    setShowUpdateModal(true)
+    setUpdateInfo(null)
+    
     try {
       const info = await checkForUpdate()
       if (info) {
         setUpdateInfo(info)
         if (!info.hasUpdate) {
           showToast('已是最新版本', 'success')
+          setShowUpdateModal(false)
         }
       } else {
         showToast('检查更新失败，请稍后重试', 'error')
+        setShowUpdateModal(false)
       }
     } catch {
       showToast('检查更新失败', 'error')
+      setShowUpdateModal(false)
     } finally {
       setCheckingUpdate(false)
     }
@@ -55,28 +61,10 @@ export function SettingsPage() {
     
     try {
       if (Capacitor.isNativePlatform()) {
-        showToast('正在下载...', 'info')
-        
-        // 下载文件到本地
-        const fileName = `zhivei-${updateInfo.latestVersion}-android.apk`
-        await Filesystem.downloadFile({
-          path: fileName,
-          url: updateInfo.downloadUrl,
-          directory: Directory.Cache,
-          progress: true,
-        })
-        
-        setDownloadProgress(100)
-        showToast('下载完成，正在安装...', 'success')
-        
-        // 获取文件 URI 并打开安装
-        const fileUri = await Filesystem.getUri({
-          path: fileName,
-          directory: Directory.Cache,
-        })
-        
-        // 使用 Browser 插件打开 APK 文件触发安装
-        await Browser.open({ url: fileUri.uri })
+        // Android: 直接用浏览器打开下载链接
+        await Browser.open({ url: updateInfo.downloadUrl })
+        showToast('正在打开下载...', 'info')
+        setShowUpdateModal(false)
       } else {
         // Web: 使用 fetch 下载
         const response = await fetch(updateInfo.downloadUrl)
@@ -110,9 +98,9 @@ export function SettingsPage() {
         URL.revokeObjectURL(url)
         
         showToast('下载完成，请安装新版本', 'success')
+        setShowUpdateModal(false)
       }
-    } catch (e) {
-      console.error('Download error:', e)
+    } catch {
       showToast('下载失败，请稍后重试', 'error')
     } finally {
       setDownloading(false)
@@ -244,7 +232,7 @@ export function SettingsPage() {
 
       {/* About */}
       <div className="pb-4 pt-2 text-center">
-        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.1.0</p>
+        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.1.1</p>
         <p className="mt-1 text-xs text-[var(--color-text-muted)]">你的私人美食管家</p>
         
         <div className="mt-3 flex items-center justify-center gap-4">
@@ -261,39 +249,74 @@ export function SettingsPage() {
             隐私政策
           </Link>
         </div>
-
-        {updateInfo?.hasUpdate && (
-          <div className="mx-auto mt-4 max-w-sm rounded-2xl bg-[var(--color-bg-card)] p-4 text-left shadow-xs">
-            <p className="text-sm font-medium text-[var(--color-text)]">
-              发现新版本 v{updateInfo.latestVersion}
-            </p>
-            <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-              当前版本：v{updateInfo.currentVersion}
-            </p>
-            {downloading ? (
-              <div className="mt-3">
-                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-bg-subtle)]">
-                  <div
-                    className="h-full bg-[var(--color-primary)] transition-all duration-300"
-                    style={{ width: `${downloadProgress}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-center text-xs text-[var(--color-text-muted)]">
-                  下载中 {downloadProgress}%
-                </p>
-              </div>
-            ) : (
-              <button
-                onClick={handleDownload}
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)]"
-              >
-                <Download size={16} />
-                下载新版本
-              </button>
-            )}
-          </div>
-        )}
       </div>
+
+      {/* Update Modal */}
+      {showUpdateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => !downloading && setShowUpdateModal(false)}>
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--color-bg-card)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-[var(--color-text)]">
+                {checkingUpdate ? '检查更新' : updateInfo?.hasUpdate ? '发现新版本' : '检查更新'}
+              </h3>
+              {!downloading && (
+                <button
+                  onClick={() => setShowUpdateModal(false)}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--color-bg-subtle)]"
+                >
+                  <X size={18} className="text-[var(--color-text-muted)]" />
+                </button>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="mt-4">
+              {checkingUpdate ? (
+                <div className="flex flex-col items-center py-4">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-primary)]" />
+                  <p className="mt-3 text-sm text-[var(--color-text-muted)]">正在检查更新...</p>
+                </div>
+              ) : updateInfo?.hasUpdate ? (
+                <div>
+                  <p className="text-sm text-[var(--color-text-secondary)]">
+                    发现新版本 <span className="font-semibold text-[var(--color-text)]">v{updateInfo.latestVersion}</span>
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                    当前版本：v{updateInfo.currentVersion}
+                  </p>
+                  
+                  {downloading ? (
+                    <div className="mt-4">
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-bg-subtle)]">
+                        <div
+                          className="h-full bg-[var(--color-primary)] transition-all duration-300"
+                          style={{ width: `${downloadProgress}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 text-center text-xs text-[var(--color-text-muted)]">
+                        下载中 {downloadProgress}%
+                      </p>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleDownload}
+                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)] active:scale-[0.98]"
+                    >
+                      <Download size={16} />
+                      下载新版本
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <p className="py-4 text-center text-sm text-[var(--color-text-muted)]">
+                  当前已是最新版本
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
