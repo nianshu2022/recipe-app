@@ -29,7 +29,7 @@ export async function checkForUpdate(): Promise<UpdateInfo | null> {
     if (!res) return null
 
     const data = await res.json()
-    const currentVersion = '1.1.2'
+    const currentVersion = '1.1.3'
     const latestVersion = data.tag_name?.replace('v', '') || ''
 
     if (!latestVersion) return null

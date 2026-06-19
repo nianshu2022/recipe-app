@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { Capacitor } from '@capacitor/core'
 import { Browser } from '@capacitor/browser'
+import { Filesystem, Directory } from '@capacitor/filesystem'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
 import { checkForUpdate, type UpdateInfo } from '@/utils/updater'
@@ -61,9 +62,59 @@ export function SettingsPage() {
     
     try {
       if (Capacitor.isNativePlatform()) {
-        // Android: 直接用浏览器打开下载链接
-        await Browser.open({ url: updateInfo.downloadUrl })
-        showToast('正在打开下载...', 'info')
+        showToast('正在下载...', 'info')
+        
+        // 使用 fetch 下载文件
+        const response = await fetch(updateInfo.downloadUrl)
+        if (!response.ok) throw new Error('Download failed')
+        
+        const contentLength = Number(response.headers.get('Content-Length'))
+        const reader = response.body?.getReader()
+        let receivedLength = 0
+        const chunks: Uint8Array[] = []
+        
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            chunks.push(value)
+            receivedLength += value.length
+            if (contentLength) {
+              setDownloadProgress(Math.round((receivedLength / contentLength) * 100))
+            }
+          }
+        }
+        
+        // 合并数据
+        const allChunks = new Uint8Array(receivedLength)
+        let position = 0
+        for (const chunk of chunks) {
+          allChunks.set(chunk, position)
+          position += chunk.length
+        }
+        
+        // 转换为 base64
+        const base64 = btoa(String.fromCharCode(...allChunks))
+        
+        // 保存到文件系统
+        const fileName = `zhivei-${updateInfo.latestVersion}.apk`
+        await Filesystem.writeFile({
+          path: fileName,
+          data: base64,
+          directory: Directory.Cache,
+        })
+        
+        setDownloadProgress(100)
+        showToast('下载完成，正在安装...', 'success')
+        
+        // 获取文件 URI
+        const fileUri = await Filesystem.getUri({
+          path: fileName,
+          directory: Directory.Cache,
+        })
+        
+        // 打开文件进行安装
+        await Browser.open({ url: fileUri.uri })
         setShowUpdateModal(false)
       } else {
         // Web: 使用 fetch 下载
@@ -100,7 +151,8 @@ export function SettingsPage() {
         showToast('下载完成，请安装新版本', 'success')
         setShowUpdateModal(false)
       }
-    } catch {
+    } catch (e) {
+      console.error('Download error:', e)
       showToast('下载失败，请稍后重试', 'error')
     } finally {
       setDownloading(false)
@@ -232,7 +284,7 @@ export function SettingsPage() {
 
       {/* About */}
       <div className="pb-4 pt-2 text-center">
-        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.1.2</p>
+        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.1.3</p>
         <p className="mt-1 text-xs text-[var(--color-text-muted)]">你的私人美食管家</p>
         
         <div className="mt-3 flex items-center justify-center gap-4">
