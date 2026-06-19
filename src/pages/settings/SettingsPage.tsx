@@ -93,8 +93,14 @@ export function SettingsPage() {
           position += chunk.length
         }
         
-        // 转换为 base64
-        const base64 = btoa(String.fromCharCode(...allChunks))
+        // 分块转换为 base64（避免栈溢出）
+        let binary = ''
+        const chunkSize = 8192
+        for (let i = 0; i < allChunks.length; i += chunkSize) {
+          const slice = allChunks.subarray(i, i + chunkSize)
+          binary += String.fromCharCode.apply(null, Array.from(slice))
+        }
+        const base64 = btoa(binary)
         
         // 保存到文件系统
         const fileName = `zhivei-${updateInfo.latestVersion}.apk`
@@ -284,7 +290,7 @@ export function SettingsPage() {
 
       {/* About */}
       <div className="pb-4 pt-2 text-center">
-        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.1.4</p>
+        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.1.5</p>
         <p className="mt-1 text-xs text-[var(--color-text-muted)]">你的私人美食管家</p>
         
         <div className="mt-3 flex items-center justify-center gap-4">
