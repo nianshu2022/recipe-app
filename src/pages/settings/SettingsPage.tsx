@@ -16,6 +16,8 @@ export function SettingsPage() {
   const [syncing, setSyncing] = useState(false)
   const [checkingUpdate, setCheckingUpdate] = useState(false)
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
+  const [downloading, setDownloading] = useState(false)
+  const [downloadProgress, setDownloadProgress] = useState(0)
 
   const handleSync = async () => {
     setSyncing(true)
@@ -39,6 +41,52 @@ export function SettingsPage() {
       showToast('检查更新失败', 'error')
     } finally {
       setCheckingUpdate(false)
+    }
+  }
+
+  const handleDownload = async () => {
+    if (!updateInfo?.downloadUrl) return
+    
+    setDownloading(true)
+    setDownloadProgress(0)
+    
+    try {
+      const response = await fetch(updateInfo.downloadUrl)
+      if (!response.ok) throw new Error('Download failed')
+      
+      const reader = response.body?.getReader()
+      const contentLength = Number(response.headers.get('Content-Length'))
+      let receivedLength = 0
+      const chunks: Uint8Array[] = []
+      
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          chunks.push(value)
+          receivedLength += value.length
+          if (contentLength) {
+            setDownloadProgress(Math.round((receivedLength / contentLength) * 100))
+          }
+        }
+      }
+      
+      const blob = new Blob(chunks)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `zhivei-${updateInfo.latestVersion}-android.apk`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      
+      showToast('下载完成，请安装新版本', 'success')
+    } catch {
+      showToast('下载失败，请稍后重试', 'error')
+    } finally {
+      setDownloading(false)
+      setDownloadProgress(0)
     }
   }
 
@@ -169,14 +217,20 @@ export function SettingsPage() {
         <p className="text-xs text-[var(--color-text-muted)]">知味 v1.0.0</p>
         <p className="mt-1 text-xs text-[var(--color-text-muted)]">你的私人美食管家</p>
         
-        <button
-          onClick={handleCheckUpdate}
-          disabled={checkingUpdate}
-          className="mt-3 inline-flex items-center gap-1.5 text-xs text-[var(--color-primary)] hover:underline disabled:opacity-50"
-        >
-          <Download size={14} className={checkingUpdate ? 'animate-bounce' : ''} />
-          {checkingUpdate ? '检查中...' : '检查更新'}
-        </button>
+        <div className="mt-3 flex items-center justify-center gap-4">
+          <button
+            onClick={handleCheckUpdate}
+            disabled={checkingUpdate}
+            className="inline-flex items-center gap-1.5 text-xs text-[var(--color-primary)] hover:underline disabled:opacity-50"
+          >
+            <Download size={14} className={checkingUpdate ? 'animate-bounce' : ''} />
+            {checkingUpdate ? '检查中...' : '检查更新'}
+          </button>
+
+          <Link to="/privacy" className="text-xs text-[var(--color-primary)] hover:underline">
+            隐私政策
+          </Link>
+        </div>
 
         {updateInfo?.hasUpdate && (
           <div className="mx-auto mt-4 max-w-sm rounded-2xl bg-[var(--color-bg-card)] p-4 text-left shadow-xs">
@@ -186,21 +240,29 @@ export function SettingsPage() {
             <p className="mt-1 text-xs text-[var(--color-text-muted)]">
               当前版本：v{updateInfo.currentVersion}
             </p>
-            <a
-              href={updateInfo.downloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)]"
-            >
-              <Download size={16} />
-              下载新版本
-            </a>
+            {downloading ? (
+              <div className="mt-3">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-bg-subtle)]">
+                  <div
+                    className="h-full bg-[var(--color-primary)] transition-all duration-300"
+                    style={{ width: `${downloadProgress}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-center text-xs text-[var(--color-text-muted)]">
+                  下载中 {downloadProgress}%
+                </p>
+              </div>
+            ) : (
+              <button
+                onClick={handleDownload}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)]"
+              >
+                <Download size={16} />
+                下载新版本
+              </button>
+            )}
           </div>
         )}
-
-        <Link to="/privacy" className="mt-2 inline-block text-xs text-[var(--color-primary)] hover:underline">
-          隐私政策
-        </Link>
       </div>
     </div>
   )
