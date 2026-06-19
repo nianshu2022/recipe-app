@@ -33,7 +33,13 @@ async function hmacSign(message: string, secret: string): Promise<string> {
 export async function signJWT(payload: Record<string, unknown>, secret: string, expiresInSec: number): Promise<string> {
   const header = base64UrlEncode(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))
   const now = Math.floor(Date.now() / 1000)
-  const body = base64UrlEncode(JSON.stringify({ ...payload, iat: now, exp: now + expiresInSec }))
+  const body = base64UrlEncode(JSON.stringify({
+    ...payload,
+    iat: now,
+    exp: now + expiresInSec,
+    iss: 'recipe-app',
+    aud: 'recipe-client',
+  }))
   const signature = await hmacSign(`${header}.${body}`, secret)
   return `${header}.${body}.${signature}`
 }
@@ -66,6 +72,8 @@ export async function verifyJWT(token: string, secret: string): Promise<Record<s
 
     const payload = JSON.parse(base64UrlDecode(body))
     if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null
+    if (payload.iss && payload.iss !== 'recipe-app') return null
+    if (payload.aud && payload.aud !== 'recipe-client') return null
 
     return payload
   } catch {

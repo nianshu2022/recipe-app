@@ -1,6 +1,6 @@
 import type { Env } from '../index'
 import type { User } from '../middleware/auth'
-import { jsonResponse, errorResponse } from '../utils/response'
+import { jsonResponse, errorResponse, getCorsHeaders } from '../utils/response'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
@@ -10,6 +10,26 @@ const EXT_MAP: Record<string, string> = {
   'image/png': 'png',
   'image/webp': 'webp',
   'image/gif': 'gif',
+}
+
+// Magic bytes for file type validation
+const MAGIC_BYTES: Record<string, number[][]> = {
+  'image/jpeg': [[0xFF, 0xD8, 0xFF]],
+  'image/png': [[0x89, 0x50, 0x4E, 0x47]],
+  'image/gif': [[0x47, 0x49, 0x46, 0x38]],
+  'image/webp': [[0x52, 0x49, 0x46, 0x46]], // RIFF header (first 4 bytes)
+}
+
+async function validateMagicBytes(blob: Blob, expectedType: string): Promise<boolean> {
+  const signatures = MAGIC_BYTES[expectedType]
+  if (!signatures) return true // No signature to check
+
+  const buffer = await blob.slice(0, 8).arrayBuffer()
+  const bytes = new Uint8Array(buffer)
+
+  return signatures.some(sig =>
+    sig.every((byte, i) => bytes[i] === byte)
+  )
 }
 
 export async function handleMedia(
@@ -46,6 +66,11 @@ export async function handleMedia(
       return errorResponse('File too large. Maximum size: 5MB', 400, request)
     }
 
+    // Validate magic bytes to prevent file type spoofing
+    if (!await validateMagicBytes(blob, fileType)) {
+      return errorResponse('File content does not match declared type', 400, request)
+    }
+
     const ext = EXT_MAP[fileType] ?? 'bin'
     const key = `uploads/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
@@ -79,7 +104,13 @@ export async function handleMedia(
       headers.set('Content-Type', object.httpMetadata.contentType)
     }
     headers.set('Cache-Control', 'public, max-age=31536000, immutable')
-    headers.set('Access-Control-Allow-Origin', '*')
+    
+    // Use origin-specific CORS instead of wildcard
+    const origin = request.headers.get('Origin')
+    const corsHeaders = getCorsHeaders(origin)
+    if (corsHeaders['Access-Control-Allow-Origin']) {
+      headers.set('Access-Control-Allow-Origin', corsHeaders['Access-Control-Allow-Origin'])
+    }
 
     return new Response(object.body, { headers })
   }
