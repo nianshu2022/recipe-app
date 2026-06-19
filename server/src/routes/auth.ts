@@ -71,7 +71,7 @@ export async function handleAuth(request: Request, env: Env): Promise<Response> 
 
   // Rate limit: 5 attempts per minute per IP for auth endpoints
   const clientIp = request.headers.get('CF-Connecting-IP') ?? 'unknown'
-  const rateResult = checkRateLimit(`auth:${clientIp}`, 5, 60_000)
+  const rateResult = await checkRateLimit(`auth:${clientIp}`, 5, 60_000, env)
   const extraHeaders = rateLimitHeaders(rateResult)
   if (!rateResult.allowed) {
     return jsonResponse({ error: 'Too many requests, please try again later' }, 429, request)

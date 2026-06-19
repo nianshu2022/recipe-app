@@ -55,6 +55,12 @@ export async function verifyJWT(token: string, secret: string): Promise<Record<s
     if (parts.length !== 3) return null
 
     const [header, body, signature] = parts
+
+    // Decode and validate header
+    const headerObj = JSON.parse(base64UrlDecode(header))
+    if (headerObj.alg === 'none') return null // Reject "none" algorithm
+    if (headerObj.alg !== 'HS256') return null // Only allow HS256
+
     const expectedSig = await hmacSign(`${header}.${body}`, secret)
     if (!timingSafeEqual(signature, expectedSig)) return null
 

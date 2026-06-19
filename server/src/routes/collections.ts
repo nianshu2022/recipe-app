@@ -1,6 +1,6 @@
 import type { Env } from '../index'
 import type { User } from '../middleware/auth'
-import { jsonResponse } from '../utils/response'
+import { jsonResponse, validateString } from '../utils/response'
 
 type CreateCollectionBody = {
   id?: string
@@ -47,6 +47,23 @@ export async function handleCollections(
       return jsonResponse({ error: 'Missing required collection fields' }, 400, request)
     }
 
+    if (!validateString(body.name, 100)) {
+      return jsonResponse({ error: 'Collection name must be 1-100 characters' }, 400, request)
+    }
+
+    if (body.cover_image !== undefined && typeof body.cover_image !== 'string') {
+      return jsonResponse({ error: 'Invalid cover_image' }, 400, request)
+    }
+
+    if (body.recipe_ids !== undefined) {
+      if (!Array.isArray(body.recipe_ids) || body.recipe_ids.length > 500) {
+        return jsonResponse({ error: 'recipe_ids must be an array with max 500 items' }, 400, request)
+      }
+      if (!body.recipe_ids.every((id: unknown) => typeof id === 'string' && id.length <= 50)) {
+        return jsonResponse({ error: 'Invalid recipe_id format' }, 400, request)
+      }
+    }
+
     const now = new Date().toISOString()
     await env.DB.prepare(
       'INSERT INTO collections (id, user_id, name, cover_image, recipe_ids, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -63,6 +80,23 @@ export async function handleCollections(
       body = await request.json() as UpdateCollectionBody
     } catch {
       return jsonResponse({ error: 'Invalid JSON body' }, 400, request)
+    }
+
+    if (body.name !== undefined && !validateString(body.name, 100)) {
+      return jsonResponse({ error: 'Collection name must be 1-100 characters' }, 400, request)
+    }
+
+    if (body.cover_image !== undefined && typeof body.cover_image !== 'string') {
+      return jsonResponse({ error: 'Invalid cover_image' }, 400, request)
+    }
+
+    if (body.recipe_ids !== undefined) {
+      if (!Array.isArray(body.recipe_ids) || body.recipe_ids.length > 500) {
+        return jsonResponse({ error: 'recipe_ids must be an array with max 500 items' }, 400, request)
+      }
+      if (!body.recipe_ids.every((id: unknown) => typeof id === 'string' && id.length <= 50)) {
+        return jsonResponse({ error: 'Invalid recipe_id format' }, 400, request)
+      }
     }
 
     const now = new Date().toISOString()

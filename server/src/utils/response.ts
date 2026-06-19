@@ -37,12 +37,38 @@ export function errorResponse(message: string, status = 400, request?: Request) 
 // Rate limiting using in-memory store (resets on Worker restart)
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>()
 
-export function checkRateLimit(
+export async function checkRateLimit(
   key: string,
   limit: number,
   windowMs: number,
-): { allowed: boolean; remaining: number; resetAt: number } {
+  env?: { RATE_LIMIT_KV?: KVNamespace },
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
   const now = Date.now()
+
+  // Try KV-based rate limiting if available (persistent across isolates)
+  if (env?.RATE_LIMIT_KV) {
+    try {
+      const kvKey = `ratelimit:${key}`
+      const stored = await env.RATE_LIMIT_KV.get(kvKey, { type: 'json' }) as { count: number; resetAt: number } | null
+      const entry = stored || { count: 0, resetAt: now + windowMs }
+
+      if (now > entry.resetAt) {
+        entry.count = 1
+        entry.resetAt = now + windowMs
+      } else if (entry.count >= limit) {
+        return { allowed: false, remaining: 0, resetAt: entry.resetAt }
+      } else {
+        entry.count++
+      }
+
+      await env.RATE_LIMIT_KV.put(kvKey, JSON.stringify(entry), { expirationTtl: Math.ceil(windowMs / 1000) + 10 })
+      return { allowed: true, remaining: limit - entry.count, resetAt: entry.resetAt }
+    } catch {
+      // Fall through to in-memory if KV fails
+    }
+  }
+
+  // Fallback: in-memory rate limiting
   const entry = rateLimitStore.get(key)
 
   if (!entry || now > entry.resetAt) {

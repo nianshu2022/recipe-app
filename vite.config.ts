@@ -43,7 +43,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/recipe-app-api\..*\.workers\.dev\/api\/.*/i,
+            urlPattern: /^https:\/\/recipe-app-api\..*\.workers\.dev\/api\/(?!auth\/).*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',

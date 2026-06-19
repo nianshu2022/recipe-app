@@ -34,7 +34,7 @@ export async function handleRecipes(
   const id = idMatch?.[1]
 
   // Rate limit: 60 requests per minute per user
-  const rateResult = checkRateLimit(`recipes:${user.id}`, 60, 60_000)
+  const rateResult = await checkRateLimit(`recipes:${user.id}`, 60, 60_000, env)
   const extraHeaders = rateLimitHeaders(rateResult)
   if (!rateResult.allowed) {
     return jsonResponse({ error: 'Too many requests' }, 429, request)

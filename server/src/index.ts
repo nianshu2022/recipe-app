@@ -2,6 +2,7 @@ export interface Env {
   DB: D1Database
   MEDIA: R2Bucket
   JWT_SECRET: string
+  RATE_LIMIT_KV?: KVNamespace
 }
 
 import { handleAuth } from './routes/auth'
@@ -26,7 +27,7 @@ export default {
 
     // Global rate limit: 100 requests per minute per IP
     const clientIp = request.headers.get('CF-Connecting-IP') ?? 'unknown'
-    const globalRate = checkRateLimit(`global:${clientIp}`, 100, 60_000)
+    const globalRate = await checkRateLimit(`global:${clientIp}`, 100, 60_000, env)
     if (!globalRate.allowed) {
       return jsonResponse({ error: 'Too many requests' }, 429, request)
     }
@@ -48,24 +49,30 @@ export default {
         return errorResponse('Unauthorized', 401, request)
       }
 
+      let response: Response
+
       if (path.startsWith('/api/recipes')) {
-        return await handleRecipes(request, env, user, path)
-      }
-      if (path.startsWith('/api/collections')) {
-        return await handleCollections(request, env, user, path)
-      }
-      if (path === '/api/sync') {
-        return await handleSync(request, env, user)
-      }
-      if (path.startsWith('/api/media')) {
-        return await handleMedia(request, env, user, path)
+        response = await handleRecipes(request, env, user, path)
+      } else if (path.startsWith('/api/collections')) {
+        response = await handleCollections(request, env, user, path)
+      } else if (path === '/api/sync') {
+        response = await handleSync(request, env, user)
+      } else if (path.startsWith('/api/media')) {
+        response = await handleMedia(request, env, user, path)
+      } else {
+        response = errorResponse('Not found', 404, request)
       }
 
-      return errorResponse('Not found', 404, request)
+      // Add security headers
+      response.headers.set('X-Content-Type-Options', 'nosniff')
+      response.headers.set('X-Frame-Options', 'DENY')
+      response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+      response.headers.set('X-XSS-Protection', '1; mode=block')
+
+      return response
     } catch (e) {
       console.error('Unhandled error:', e)
-      const message = e instanceof Error ? e.message : 'Internal server error'
-      return errorResponse(message, 500, request)
+      return errorResponse('Internal server error', 500, request)
     }
   },
 }

@@ -64,6 +64,11 @@ export async function handleMedia(
       return errorResponse('Missing key', 400, request)
     }
 
+    // Validate key format to prevent path traversal
+    if (key.includes('..') || !key.startsWith('uploads/')) {
+      return errorResponse('Invalid key', 400, request)
+    }
+
     const object = await env.MEDIA.get(key)
     if (!object) {
       return errorResponse('Not found', 404, request)
