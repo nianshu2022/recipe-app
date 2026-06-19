@@ -4,6 +4,8 @@ import {
   ChevronRight, Heart, ShoppingCart, ChefHat, Moon, Sun, Monitor, Database, LogIn, LogOut, RefreshCw,
   Download,
 } from 'lucide-react'
+import { Capacitor } from '@capacitor/core'
+import { Browser } from '@capacitor/browser'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
 import { checkForUpdate, type UpdateInfo } from '@/utils/updater'
@@ -51,37 +53,44 @@ export function SettingsPage() {
     setDownloadProgress(0)
     
     try {
-      const response = await fetch(updateInfo.downloadUrl)
-      if (!response.ok) throw new Error('Download failed')
-      
-      const contentLength = Number(response.headers.get('Content-Length'))
-      const reader = response.body?.getReader()
-      let receivedLength = 0
-      const chunks: BlobPart[] = []
-      
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          chunks.push(value)
-          receivedLength += value.length
-          if (contentLength) {
-            setDownloadProgress(Math.round((receivedLength / contentLength) * 100))
+      if (Capacitor.isNativePlatform()) {
+        // Android/iOS: 使用系统浏览器下载
+        await Browser.open({ url: updateInfo.downloadUrl })
+        showToast('正在打开下载...', 'info')
+      } else {
+        // Web: 使用 fetch 下载
+        const response = await fetch(updateInfo.downloadUrl)
+        if (!response.ok) throw new Error('Download failed')
+        
+        const contentLength = Number(response.headers.get('Content-Length'))
+        const reader = response.body?.getReader()
+        let receivedLength = 0
+        const chunks: BlobPart[] = []
+        
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            chunks.push(value)
+            receivedLength += value.length
+            if (contentLength) {
+              setDownloadProgress(Math.round((receivedLength / contentLength) * 100))
+            }
           }
         }
+        
+        const blob = new Blob(chunks)
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `zhivei-${updateInfo.latestVersion}-android.apk`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        
+        showToast('下载完成，请安装新版本', 'success')
       }
-      
-      const blob = new Blob(chunks)
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `zhivei-${updateInfo.latestVersion}-android.apk`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-      
-      showToast('下载完成，请安装新版本', 'success')
     } catch {
       showToast('下载失败，请稍后重试', 'error')
     } finally {
@@ -214,7 +223,7 @@ export function SettingsPage() {
 
       {/* About */}
       <div className="pb-4 pt-2 text-center">
-        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.0.5</p>
+        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.0.6</p>
         <p className="mt-1 text-xs text-[var(--color-text-muted)]">你的私人美食管家</p>
         
         <div className="mt-3 flex items-center justify-center gap-4">
