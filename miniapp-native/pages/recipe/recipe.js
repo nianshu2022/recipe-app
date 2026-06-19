@@ -1,195 +1,113 @@
 const app = getApp()
-const { recipes } = require('../../data/recipes')
-const { getDifficultyText, getCategoryText, showToast, showConfirm } = require('../../utils/util')
+const { recipes: builtInRecipes } = require('../../data/recipes')
+const { getDifficultyText, getDifficultyColor, getCategoryText, getCategoryIcon, showToast, showConfirm } = require('../../utils/util')
+const { scaleIngredients } = require('../../utils/db')
 
 Page({
   data: {
     recipe: null,
-    mode: 'view', // view 或 add
-    isEditing: false,
-    formData: {
-      name: '',
-      category: 'hot-dish',
-      difficulty: 'easy',
-      duration: 30,
-      servings: 2,
-      ingredients: [],
-      steps: []
-    },
-    categories: [
-      { id: 'hot-dish', name: '热菜' },
-      { id: 'cold-dish', name: '凉菜' },
-      { id: 'soup', name: '汤品' },
-      { id: 'staple', name: '主食' },
-      { id: 'dessert', name: '甜品' }
-    ],
-    difficulties: [
-      { id: 'easy', name: '简单' },
-      { id: 'medium', name: '中等' },
-      { id: 'hard', name: '困难' }
-    ]
+    servings: 2,
+    scaledIngredients: [],
+    isFavorited: false,
+    loading: true
   },
 
   onLoad(options) {
-    if (options.mode === 'add') {
-      this.setData({ mode: 'add', isEditing: true })
-      wx.setNavigationBarTitle({ title: '创建菜谱' })
-    } else if (options.id) {
-      this.loadRecipe(options.id)
-    }
+    if (options.id) this.loadRecipe(options.id)
   },
 
   loadRecipe(id) {
-    const allRecipes = app.globalData.recipes.length > 0 ? app.globalData.recipes : recipes
+    const userRecipes = app.globalData.recipes || []
+    const allRecipes = [...userRecipes, ...builtInRecipes]
     const recipe = allRecipes.find(r => r.id === id)
     if (recipe) {
+      const isFavorited = (app.globalData.collections || []).some(c => (c.recipeIds || []).includes(recipe.id))
       this.setData({
         recipe,
-        formData: {
-          name: recipe.name,
-          category: recipe.category,
-          difficulty: recipe.difficulty,
-          duration: recipe.duration,
-          servings: recipe.servings,
-          ingredients: recipe.ingredients || [],
-          steps: recipe.steps || []
-        }
+        servings: recipe.servings,
+        scaledIngredients: recipe.ingredients,
+        isFavorited,
+        loading: false
       })
       wx.setNavigationBarTitle({ title: recipe.name })
-    }
-  },
-
-  onEdit() {
-    this.setData({ isEditing: true })
-  },
-
-  onCancel() {
-    if (this.data.mode === 'add') {
-      wx.navigateBack()
     } else {
-      this.setData({ isEditing: false })
-      this.loadRecipe(this.data.recipe.id)
+      this.setData({ loading: false })
     }
   },
 
-  onSave() {
-    const { formData, mode } = this.data
-    
-    if (!formData.name.trim()) {
-      showToast('请输入菜名')
-      return
-    }
+  onServingsChange(e) {
+    const delta = Number(e.currentTarget.dataset.delta)
+    const newServings = Math.max(1, Math.min(20, this.data.servings + delta))
+    const scaled = scaleIngredients(this.data.recipe.ingredients, this.data.recipe.servings, newServings)
+    this.setData({ servings: newServings, scaledIngredients: scaled })
+  },
 
-    const recipe = {
-      id: mode === 'add' ? 'recipe_' + Date.now() : this.data.recipe.id,
-      ...formData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+  onToggleFavorite() {
+    const { recipe } = this.data
+    const collections = app.globalData.collections || []
+    let col = collections[0]
+    if (!col) {
+      col = { id: 'col_' + Date.now(), userId: 'local', name: '我的收藏', recipeIds: [], syncStatus: 'pending', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+      collections.push(col)
     }
+    const idx = col.recipeIds.indexOf(recipe.id)
+    if (idx === -1) col.recipeIds.push(recipe.id)
+    else col.recipeIds.splice(idx, 1)
+    app.globalData.collections = collections
+    app.saveCollections()
+    this.setData({ isFavorited: idx === -1 })
+    showToast(idx === -1 ? '已收藏' : '已取消收藏')
+  },
 
-    if (mode === 'add') {
-      app.globalData.recipes.unshift(recipe)
-    } else {
-      const index = app.globalData.recipes.findIndex(r => r.id === recipe.id)
-      if (index !== -1) {
-        app.globalData.recipes[index] = recipe
-      }
+  onAddToShopping() {
+    const { recipe, scaledIngredients } = this.data
+    const lists = app.globalData.shoppingLists || []
+    let list = lists[0]
+    if (!list) {
+      list = { id: 'list_' + Date.now(), userId: 'local', sourceRecipeIds: [], items: [], syncStatus: 'pending', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+      lists.push(list)
     }
-    
-    app.saveRecipes()
-    showToast('保存成功')
-    
-    setTimeout(() => {
-      if (mode === 'add') {
-        wx.navigateBack()
+    for (const ing of scaledIngredients) {
+      const existing = list.items.find(i => i.name === ing.name && i.unit === ing.unit)
+      if (existing) {
+        existing.amount += ing.amount
       } else {
-        this.setData({ isEditing: false, recipe })
-      }
-    }, 1500)
-  },
-
-  async onDelete() {
-    const confirmed = await showConfirm('确定删除这个菜谱吗？')
-    if (confirmed) {
-      const index = app.globalData.recipes.findIndex(r => r.id === this.data.recipe.id)
-      if (index !== -1) {
-        app.globalData.recipes.splice(index, 1)
-        app.saveRecipes()
-        showToast('已删除')
-        setTimeout(() => wx.navigateBack(), 1500)
+        list.items.push({ id: 'item_' + Date.now() + Math.random().toString(36).substr(2, 4), name: ing.name, amount: ing.amount, unit: ing.unit, category: '其他', checked: false })
       }
     }
-  },
-
-  onInputChange(e) {
-    const { field } = e.currentTarget.dataset
-    this.setData({
-      [`formData.${field}`]: e.detail.value
-    })
-  },
-
-  onNumberChange(e) {
-    const { field } = e.currentTarget.dataset
-    this.setData({
-      [`formData.${field}`]: Number(e.detail.value)
-    })
-  },
-
-  onCategoryChange(e) {
-    this.setData({
-      'formData.category': this.data.categories[e.detail.value].id
-    })
-  },
-
-  onDifficultyChange(e) {
-    this.setData({
-      'formData.difficulty': this.data.difficulties[e.detail.value].id
-    })
-  },
-
-  onAddIngredient() {
-    const ingredients = [...this.data.formData.ingredients]
-    ingredients.push({ name: '', amount: 0, unit: '克' })
-    this.setData({ 'formData.ingredients': ingredients })
-  },
-
-  onIngredientInput(e) {
-    const { index, field } = e.currentTarget.dataset
-    const ingredients = [...this.data.formData.ingredients]
-    ingredients[index][field] = field === 'amount' ? Number(e.detail.value) : e.detail.value
-    this.setData({ 'formData.ingredients': ingredients })
-  },
-
-  onDeleteIngredient(e) {
-    const { index } = e.currentTarget.dataset
-    const ingredients = [...this.data.formData.ingredients]
-    ingredients.splice(index, 1)
-    this.setData({ 'formData.ingredients': ingredients })
-  },
-
-  onAddStep() {
-    const steps = [...this.data.formData.steps]
-    steps.push('')
-    this.setData({ 'formData.steps': steps })
-  },
-
-  onStepInput(e) {
-    const { index } = e.currentTarget.dataset
-    const steps = [...this.data.formData.steps]
-    steps[index] = e.detail.value
-    this.setData({ 'formData.steps': steps })
-  },
-
-  onDeleteStep(e) {
-    const { index } = e.currentTarget.dataset
-    const steps = [...this.data.formData.steps]
-    steps.splice(index, 1)
-    this.setData({ 'formData.steps': steps })
+    if (!list.sourceRecipeIds.includes(recipe.id)) list.sourceRecipeIds.push(recipe.id)
+    list.updatedAt = new Date().toISOString()
+    app.globalData.shoppingLists = lists
+    app.saveShoppingLists()
+    showToast('已添加到购物清单')
   },
 
   onStartCooking() {
-    wx.navigateTo({
-      url: `/pages/cooking/cooking?id=${this.data.recipe.id}`
-    })
+    wx.navigateTo({ url: `/pages/cooking/cooking?id=${this.data.recipe.id}` })
+  },
+
+  onEdit() {
+    wx.navigateTo({ url: `/pages/recipe-form/recipe-form?id=${this.data.recipe.id}` })
+  },
+
+  async onDelete() {
+    const confirmed = await showConfirm(`确定要删除「${this.data.recipe.name}」吗？`)
+    if (!confirmed) return
+    const idx = app.globalData.recipes.findIndex(r => r.id === this.data.recipe.id)
+    if (idx !== -1) {
+      app.globalData.recipes.splice(idx, 1)
+      app.saveRecipes()
+      showToast('菜谱已删除')
+      setTimeout(() => wx.navigateBack(), 1500)
+    }
+  },
+
+  onShare() {
+    wx.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage', 'shareTimeline'] })
+  },
+
+  onShareAppMessage() {
+    const { recipe } = this.data
+    return { title: recipe.name, path: `/pages/recipe/recipe?id=${recipe.id}` }
   }
 })

@@ -9,13 +9,8 @@ Page({
     shoppingListsCount: 0
   },
 
-  onLoad() {
-    this.updateCounts()
-  },
-
-  onShow() {
-    this.updateCounts()
-  },
+  onLoad() { this.updateCounts() },
+  onShow() { this.updateCounts() },
 
   updateCounts() {
     this.setData({
@@ -34,35 +29,25 @@ Page({
       shoppingLists: app.globalData.shoppingLists,
       exportTime: new Date().toISOString()
     }
-
     wx.setClipboardData({
       data: JSON.stringify(data, null, 2),
-      success() {
-        showToast('数据已复制到剪贴板')
-      }
+      success() { showToast('数据已复制到剪贴板') }
     })
   },
 
   async onImport() {
     const confirmed = await showConfirm('导入将覆盖现有数据，确定继续吗？')
     if (!confirmed) return
-
     wx.getClipboardData({
-      success(res) {
+      success: (res) => {
         try {
           const data = JSON.parse(res.data)
-          if (data.recipes) app.globalData.recipes = data.recipes
-          if (data.collections) app.globalData.collections = data.collections
-          if (data.mealPlans) app.globalData.mealPlans = data.mealPlans
-          if (data.shoppingLists) app.globalData.shoppingLists = data.shoppingLists
-
-          app.saveRecipes()
-          app.saveCollections()
-          app.saveMealPlans()
-          app.saveShoppingLists()
-
-          showToast('导入成功')
+          if (data.recipes) { app.globalData.recipes = data.recipes; app.saveRecipes() }
+          if (data.collections) { app.globalData.collections = data.collections; app.saveCollections() }
+          if (data.mealPlans) { app.globalData.mealPlans = data.mealPlans; app.saveMealPlans() }
+          if (data.shoppingLists) { app.globalData.shoppingLists = data.shoppingLists; app.saveShoppingLists() }
           this.updateCounts()
+          showToast('导入成功')
         } catch (e) {
           showToast('导入失败，数据格式错误')
         }
@@ -73,17 +58,14 @@ Page({
   async onClearAll() {
     const confirmed = await showConfirm('确定清除所有数据吗？此操作不可恢复。')
     if (!confirmed) return
-
     app.globalData.recipes = []
     app.globalData.collections = []
     app.globalData.mealPlans = []
     app.globalData.shoppingLists = []
-
     app.saveRecipes()
     app.saveCollections()
     app.saveMealPlans()
     app.saveShoppingLists()
-
     this.updateCounts()
     showToast('数据已清除')
   }

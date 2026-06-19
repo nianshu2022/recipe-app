@@ -1,0 +1,75 @@
+<view class="page">
+  <!-- Name -->
+  <view class="form-group">
+    <text class="form-label">菜名</text>
+    <input class="form-input" placeholder="输入菜名" value="{{name}}" bindinput="onNameInput" />
+  </view>
+
+  <!-- Category -->
+  <view class="form-group">
+    <text class="form-label">分类</text>
+    <picker range="{{categories}}" range-key="label" value="{{categoryIndex}}" bindchange="onCategoryChange">
+      <view class="form-picker">{{categories[categoryIndex].label}} ▾</view>
+    </picker>
+  </view>
+
+  <!-- Difficulty -->
+  <view class="form-group">
+    <text class="form-label">难度</text>
+    <picker range="{{difficulties}}" range-key="label" value="{{difficultyIndex}}" bindchange="onDifficultyChange">
+      <view class="form-picker">{{difficulties[difficultyIndex].label}} ▾</view>
+    </picker>
+  </view>
+
+  <!-- Duration & Servings -->
+  <view class="form-row">
+    <view class="form-group flex-1">
+      <text class="form-label">时长(分钟)</text>
+      <input class="form-input" type="number" value="{{duration}}" bindinput="onDurationInput" />
+    </view>
+    <view class="form-group flex-1">
+      <text class="form-label">份数</text>
+      <input class="form-input" type="number" value="{{servings}}" bindinput="onServingsInput" />
+    </view>
+  </view>
+
+  <!-- Tags -->
+  <view class="form-group">
+    <text class="form-label">标签</text>
+    <input class="form-input" placeholder="用顿号分隔，如：家常菜、快手菜" value="{{tags}}" bindinput="onTagsInput" />
+  </view>
+
+  <!-- Ingredients -->
+  <view class="form-section">
+    <view class="form-section-header">
+      <text class="form-label">食材</text>
+      <view class="add-btn" bindtap="onAddIngredient">＋ 添加</view>
+    </view>
+    <view wx:for="{{ingredients}}" wx:key="id" class="ingredient-row">
+      <input class="form-input flex-2" placeholder="食材名" value="{{item.name}}" data-idx="{{index}}" bindinput="onIngNameInput" />
+      <input class="form-input flex-1" type="digit" placeholder="量" value="{{item.amount}}" data-idx="{{index}}" bindinput="onIngAmountInput" />
+      <picker range="{{unitOptions}}" data-idx="{{index}}" bindchange="onIngUnitChange">
+        <view class="form-picker small">{{item.unit}}</view>
+      </picker>
+      <view class="remove-btn" data-idx="{{index}}" bindtap="onRemoveIngredient">×</view>
+    </view>
+  </view>
+
+  <!-- Steps -->
+  <view class="form-section">
+    <view class="form-section-header">
+      <text class="form-label">步骤</text>
+      <view class="add-btn" bindtap="onAddStep">＋ 添加</view>
+    </view>
+    <view wx:for="{{steps}}" wx:key="order" class="step-row">
+      <view class="step-num">{{item.order}}</view>
+      <textarea class="form-textarea" placeholder="描述步骤" value="{{item.description}}" data-idx="{{index}}" bindinput="onStepInput" auto-height maxlength="500" />
+      <view class="remove-btn" data-idx="{{index}}" bindtap="onRemoveStep">×</view>
+    </view>
+  </view>
+
+  <!-- Save button -->
+  <view class="save-btn" bindtap="onSave">
+    <text>{{isEdit ? '保存修改' : '创建菜谱'}}</text>
+  </view>
+</view>

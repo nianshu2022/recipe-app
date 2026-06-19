@@ -1,46 +1,35 @@
-<view class="page">
-  <block wx:if="{{recipe}}">
-    <!-- 进度条 -->
-    <view class="progress">
-      <view class="progress-bar" style="width: {{(currentStep + 1) / recipe.steps.length * 100}}%"></view>
-    </view>
+<view class="page" wx:if="{{recipe}}">
+  <!-- Progress -->
+  <view class="progress-bar">
+    <view class="progress-fill" style="width: {{(currentStep + 1) / totalSteps * 100}}%"></view>
+  </view>
 
-    <!-- 步骤信息 -->
-    <view class="step-info">
-      <text class="step-label">步骤 {{currentStep + 1}} / {{recipe.steps.length}}</text>
-    </view>
+  <!-- Step info -->
+  <view class="step-info">
+    <text class="step-label">步骤 {{currentStep + 1}} / {{totalSteps}}</text>
+  </view>
 
-    <!-- 步骤内容 -->
-    <view class="step-content">
-      <text class="step-text">{{recipe.steps[currentStep]}}</text>
-    </view>
+  <!-- Step content -->
+  <view class="step-content">
+    <text class="step-text">{{recipe.steps[currentStep].description}}</text>
+    <text wx:if="{{recipe.steps[currentStep].timer}}" class="step-hint">⏱ 建议时间：{{recipe.steps[currentStep].timer}}分钟</text>
+  </view>
 
-    <!-- 计时器 -->
-    <view class="timer">
-      <text class="timer-text">{{timerText}}</text>
-      <view class="timer-actions">
-        <view class="timer-btn" bindtap="onStartTimer">
-          {{isTimerRunning ? '暂停' : '开始'}}
-        </view>
-        <view class="timer-btn" bindtap="onResetTimer">重置</view>
+  <!-- Timer -->
+  <view class="timer-section">
+    <text class="timer-text">{{timerText}}</text>
+    <view class="timer-actions">
+      <view class="timer-btn {{timerRunning ? 'active' : ''}}" bindtap="onToggleTimer">
+        {{timerRunning ? '⏸ 暂停' : '▶ 开始'}}
       </view>
+      <view class="timer-btn" bindtap="onResetTimer">↺ 重置</view>
     </view>
+  </view>
 
-    <!-- 导航按钮 -->
-    <view class="nav-buttons">
-      <button 
-        class="btn btn-secondary" 
-        disabled="{{currentStep === 0}}"
-        bindtap="onPrevStep"
-      >
-        上一步
-      </button>
-      <block wx:if="{{currentStep < recipe.steps.length - 1}}">
-        <button class="btn btn-primary" bindtap="onNextStep">下一步</button>
-      </block>
-      <block wx:else>
-        <button class="btn btn-primary" bindtap="onFinish">完成</button>
-      </block>
-    </view>
-  </block>
+  <!-- Navigation -->
+  <view class="nav-actions">
+    <view class="btn btn-secondary {{currentStep === 0 ? 'disabled' : ''}}" bindtap="onPrevStep">上一步</view>
+    <view wx:if="{{currentStep < totalSteps - 1}}" class="btn btn-primary" bindtap="onNextStep">下一步</view>
+    <view wx:else class="btn btn-primary" bindtap="onFinish">完成 ✓</view>
+  </view>
 </view>

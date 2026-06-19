@@ -1,90 +1,25 @@
-.page {
-  min-height: 100vh;
-  background-color: #faf9f7;
-  display: flex;
-  flex-direction: column;
-}
+.page { min-height: 100vh; background: var(--color-bg); display: flex; flex-direction: column; }
 
-/* 进度条 */
-.progress {
-  height: 8rpx;
-  background-color: #f5f3ef;
-}
+.progress-bar { height: 8rpx; background: var(--color-bg-subtle); }
+.progress-fill { height: 100%; background: var(--color-primary); transition: width 0.3s; }
 
-.progress-bar {
-  height: 100%;
-  background-color: #c9583a;
-  transition: width 0.3s ease;
-}
+.step-info { text-align: center; padding: 32rpx; }
+.step-label { font-size: 28rpx; color: var(--color-text-muted); }
 
-/* 步骤信息 */
-.step-info {
-  padding: 32rpx;
-  text-align: center;
-}
+.step-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48rpx; }
+.step-text { font-size: 36rpx; color: var(--color-text); line-height: 1.8; text-align: center; }
+.step-hint { margin-top: 24rpx; font-size: 24rpx; color: var(--color-primary); }
 
-.step-label {
-  font-size: 28rpx;
-  color: #a8a08e;
-}
+.timer-section { text-align: center; padding: 40rpx; }
+.timer-text { font-size: 120rpx; font-weight: 700; color: var(--color-text); font-variant-numeric: tabular-nums; }
+.timer-actions { display: flex; justify-content: center; gap: 24rpx; margin-top: 24rpx; }
+.timer-btn { padding: 16rpx 40rpx; background: var(--color-bg-card); border-radius: 999rpx; font-size: 26rpx; color: var(--color-text-secondary); border: 1rpx solid var(--color-border); }
+.timer-btn:active { background: var(--color-bg-subtle); }
+.timer-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
 
-/* 步骤内容 */
-.step-content {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40rpx;
-}
-
-.step-text {
-  font-size: 36rpx;
-  color: #252220;
-  line-height: 1.8;
-  text-align: center;
-}
-
-/* 计时器 */
-.timer {
-  text-align: center;
-  padding: 40rpx;
-}
-
-.timer-text {
-  font-size: 72rpx;
-  font-weight: 700;
-  color: #252220;
-  font-variant-numeric: tabular-nums;
-}
-
-.timer-actions {
-  display: flex;
-  justify-content: center;
-  gap: 24rpx;
-  margin-top: 24rpx;
-}
-
-.timer-btn {
-  padding: 16rpx 40rpx;
-  background-color: #ffffff;
-  border-radius: 32rpx;
-  font-size: 28rpx;
-  color: #6b6355;
-  border: 1rpx solid #e8e4de;
-}
-
-.timer-btn:active {
-  background-color: #f5f3ef;
-}
-
-/* 导航按钮 */
-.nav-buttons {
-  display: flex;
-  gap: 24rpx;
-  padding: 32rpx;
-  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
-}
-
-.nav-buttons .btn {
-  flex: 1;
-}
+.nav-actions { display: flex; gap: 16rpx; padding: 24rpx 32rpx; padding-bottom: calc(24rpx + env(safe-area-inset-bottom)); }
+.btn { flex: 1; height: 88rpx; border-radius: 24rpx; display: flex; align-items: center; justify-content: center; font-size: 28rpx; font-weight: 600; }
+.btn:active { transform: scale(0.98); }
+.btn-secondary { background: var(--color-bg-card); color: var(--color-text); border: 1rpx solid var(--color-border); }
+.btn-primary { background: var(--color-primary); color: #fff; }
+.btn-disabled { opacity: 0.4; pointer-events: none; }

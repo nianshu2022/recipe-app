@@ -1,28 +1,67 @@
 <view class="page">
+  <!-- Header -->
   <view class="header">
-    <text class="title">一周餐食计划</text>
-    <text class="subtitle">规划你的美味一周</text>
+    <view class="header-left">
+      <text class="header-title">七日餐事</text>
+      <text class="header-sub">{{plannedCount > 0 ? '已安排 ' + plannedCount + ' 道菜' : '规划一周的美味'}}</text>
+    </view>
+    <view wx:if="{{plannedCount > 0}}" class="header-right">
+      <view class="header-btn" bindtap="onGenerateShopping">🛒</view>
+      <view class="header-btn" bindtap="onClearPlan">🗑️</view>
+    </view>
   </view>
 
-  <view class="plan-grid">
-    <view wx:for="{{weekDays}}" wx:key="*this" wx:for-item="day" wx:for-index="dayIndex" class="day-column">
-      <view class="day-header {{dayIndex === 0 ? 'today' : ''}}">{{day}}</view>
-      <view 
-        wx:for="{{mealSlots}}" 
-        wx:key="*this" 
-        wx:for-item="slot" 
-        wx:for-index="slotIndex"
-        class="meal-slot"
-        data-day="{{dayIndex}}"
-        data-slot="{{slotIndex}}"
-        bindtap="onDaySlotTap"
-      >
-        <text class="slot-label">{{slot}}</text>
-        <view class="slot-content">
-          <text wx:if="{{currentPlan.days[dayIndex][slotIndex]}}" class="slot-text">
-            {{currentPlan.days[dayIndex][slotIndex]}}
-          </text>
-          <text wx:else class="slot-empty">+</text>
+  <!-- Week grid -->
+  <view class="week-grid">
+    <view wx:for="{{weekDates}}" wx:key="index" class="day-card {{index === 0 ? 'today' : ''}}">
+      <view class="day-header">
+        <text class="day-label {{index === 0 ? 'today-label' : ''}}">{{dayLabels[index]}}</text>
+        <text class="day-date">{{item.getMonth() + 1}}/{{item.getDate()}}</text>
+        <text wx:if="{{index === 0}}" class="today-badge">今天</text>
+      </view>
+      <view class="day-slots">
+        <view wx:for="{{slotLabels}}" wx:for-item="slotLabel" wx:for-index="slotIdx" wx:key="*this"
+          class="meal-slot" data-day="{{index}}" data-slot="{{slotIdx}}" bindtap="onSlotTap">
+          <text class="slot-label">{{slotLabel}}</text>
+          <view class="slot-content">
+            <block wx:if="{{currentPlan.days[index][['breakfast','lunch','dinner','snack'][slotIdx]]}}">
+              <view wx:for="{{currentPlan.days[index][['breakfast','lunch','dinner','snack'][slotIdx]]}}" wx:for-item="recipeId" wx:key="*this" class="slot-recipe">
+                <text class="recipe-name-text">{{recipeId}}</text>
+                <view class="remove-recipe" data-day="{{index}}" data-slot="{{slotIdx}}" data-recipe="{{recipeId}}" catchtap="onRemoveMeal">×</view>
+              </view>
+            </block>
+            <text wx:else class="slot-empty">+</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Recipe picker modal -->
+  <view wx:if="{{selecting}}" class="modal-overlay" bindtap="onClosePicker">
+    <view class="modal-sheet" catchtap="">
+      <view class="modal-header">
+        <text class="modal-title">选择菜谱 · {{slotLabels[selecting.slot]}}</text>
+        <view class="modal-close" bindtap="onClosePicker">×</view>
+      </view>
+      <view class="picker-search">
+        <input class="search-input" placeholder="搜索菜谱" value="{{pickerSearch}}" bindinput="onPickerSearch" />
+      </view>
+      <scroll-view class="picker-list" scroll-y>
+        <view wx:for="{{pickerRecipes}}" wx:key="id" class="picker-item {{selectedIds.indexOf(item.id) >= 0 ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="onToggleRecipe">
+          <view class="picker-check {{selectedIds.indexOf(item.id) >= 0 ? 'active' : ''}}">
+            <text wx:if="{{selectedIds.indexOf(item.id) >= 0}}">✓</text>
+            <text wx:else>{{item.name[0]}}</text>
+          </view>
+          <view class="picker-info">
+            <text class="picker-name">{{item.name}}</text>
+            <text class="picker-meta">{{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}} · {{item.duration}}分钟</text>
+          </view>
+        </view>
+      </scroll-view>
+      <view class="modal-footer">
+        <view class="confirm-btn {{selectedIds.length === 0 ? 'disabled' : ''}}" bindtap="onConfirmSelect">
+          确认添加{{selectedIds.length > 0 ? '（' + selectedIds.length + ' 道）' : ''}}
         </view>
       </view>
     </view>

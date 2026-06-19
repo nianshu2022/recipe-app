@@ -1,26 +1,78 @@
 <view class="page">
+  <!-- Header -->
   <view class="header">
-    <text class="title">味遇</text>
-    <text class="subtitle">今天吃什么？让命运决定</text>
+    <text class="header-title">今天吃什么</text>
+    <text class="header-sub">
+      {{phase === 'idle' ? '让盲盒帮你决定' : phase === 'shaking' ? (source === 'recommend' ? '正在随机推荐中...' : '正在抽取中...') : (source === 'recommend' ? '随机推荐揭晓！' : '盲盒揭晓！')}}
+    </text>
   </view>
 
-  <view class="card-container">
-    <view class="card {{isAnimating ? 'shaking' : ''}}" bindtap="onShake">
-      <view class="card-cover">
-        <view class="emoji">{{currentRecipe ? currentRecipe.name[0] : '?'}}</view>
+  <!-- No recipes state -->
+  <view wx:if="{{!hasRecipes && phase === 'idle'}}" class="empty-state">
+    <text class="empty-icon">📦</text>
+    <text class="empty-title">还没有菜谱</text>
+    <text class="empty-desc">先去添加几道菜谱，或试试随机推荐</text>
+    <view class="empty-actions">
+      <view class="btn btn-primary" bindtap="onCreateRecipe">创建菜谱</view>
+      <view class="btn btn-secondary" bindtap="onDrawGlobal">✨ 随机推荐</view>
+    </view>
+  </view>
+
+  <!-- Blind box card -->
+  <view wx:if="{{hasRecipes || phase !== 'idle'}}" class="card-container">
+    <!-- Front face -->
+    <view wx:if="{{phase !== 'revealed'}}" class="blind-card {{phase === 'shaking' ? 'animate-shake' : ''}}">
+      <view class="card-icon-wrap">
+        <text class="card-icon">{{source === 'recommend' ? '✨' : '📦'}}</text>
       </view>
-      <view class="card-info">
-        <view class="recipe-name">{{currentRecipe ? currentRecipe.name : '摇一摇'}}</view>
-        <view class="recipe-meta">
-          <text>{{currentRecipe ? currentRecipe.category : ''}}</text>
-          <text>{{currentRecipe ? currentRecipe.duration + '分钟' : ''}}</text>
+      <text class="card-sparkle">✨</text>
+      <text class="card-text">
+        {{phase === 'shaking' ? (source === 'recommend' ? '正在挑选中...' : '摇一摇...') : '点击下方按钮抽取'}}
+      </text>
+      <text class="card-hint">
+        {{source === 'recommend' ? '内置中式菜谱推荐' : '共 ' + (hasRecipes ? '多' : '0') + ' 道菜谱等待被抽中'}}
+      </text>
+    </view>
+
+    <!-- Back face -->
+    <view wx:if="{{phase === 'revealed' && result}}" class="result-card">
+      <view class="result-cover">
+        <image wx:if="{{result.coverImage}}" src="{{result.coverImage}}" mode="aspectFill" class="result-img" />
+        <view wx:else class="result-placeholder">
+          <text class="result-emoji">{{result.categoryIcon}}</text>
+        </view>
+      </view>
+      <view class="result-info">
+        <view class="result-header">
+          <text class="result-name">{{result.name}}</text>
+          <text wx:if="{{source === 'recommend'}}" class="result-badge">推荐</text>
+        </view>
+        <view class="result-tags">
+          <text class="tag {{result.difficultyColor}}">{{result.difficultyText}}</text>
+          <text class="tag tag-default">{{result.categoryText}}</text>
+          <text wx:for="{{result.tagsStr}}" wx:for-item="tag" wx:key="*this" class="tag tag-default">{{tag}}</text>
+        </view>
+        <view class="result-meta">
+          <text>⏱ {{result.duration}}分钟</text>
+          <text>👤 {{result.servings}}人份</text>
+          <text>{{result.ingredients.length}}种食材</text>
         </view>
       </view>
     </view>
   </view>
 
+  <!-- Action buttons -->
   <view class="actions">
-    <button class="btn btn-secondary" bindtap="onSkip">换一个</button>
-    <button class="btn btn-primary" bindtap="onCook">就它了</button>
+    <block wx:if="{{phase === 'idle' && hasRecipes}}">
+      <view class="btn btn-primary large" bindtap="onDrawLocal">📦 从我的菜谱抽取</view>
+      <view class="btn btn-secondary" bindtap="onDrawGlobal">✨ 不知道吃什么？随机推荐</view>
+    </block>
+
+    <block wx:if="{{phase === 'revealed' && result}}">
+      <view wx:if="{{source === 'recommend' && !saved}}" class="btn btn-success large" bindtap="onSave">💾 保存到我的菜谱</view>
+      <view wx:if="{{source === 'recommend' && saved}}" class="btn btn-success-disabled large">已保存</view>
+      <view wx:if="{{source === 'local'}}" class="btn btn-primary large" bindtap="onViewDetail">查看详情 →</view>
+      <view class="btn btn-secondary" bindtap="onRedraw">↺ 再抽一次</view>
+    </block>
   </view>
 </view>

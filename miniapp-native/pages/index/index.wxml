@@ -1,62 +1,90 @@
 <view class="page">
-  <!-- 搜索栏 -->
-  <view class="search-bar">
-    <view class="search-input">
-      <image class="search-icon" src="/assets/icons/search.png" mode="aspectFit" />
-      <input 
-        placeholder="搜索菜谱" 
-        value="{{searchKey}}" 
-        bindinput="onSearchInput"
-        confirm-type="search"
-      />
+  <!-- Header -->
+  <view class="header">
+    <view class="header-left">
+      <text class="header-title">寻味</text>
+      <text class="header-sub">{{filteredRecipes.length > 0 ? filteredRecipes.length + ' 道拿手菜' : '记录你的拿手好菜'}}</text>
     </view>
-    <view class="add-btn" bindtap="onAddTap">
-      <image class="add-icon" src="/assets/icons/plus.png" mode="aspectFit" />
+    <view class="header-right">
+      <view class="header-btn" bindtap="onBlindBoxTap">
+        <text class="icon-text">🎲</text>
+      </view>
+      <view class="header-btn primary" bindtap="onAddTap">
+        <text class="icon-text">＋</text>
+      </view>
     </view>
   </view>
 
-  <!-- 分类标签 -->
-  <scroll-view class="categories" scroll-x>
-    <view 
-      wx:for="{{categories}}" 
-      wx:key="id"
-      class="category-tag {{currentCategory === item.id ? 'active' : ''}}"
-      data-category="{{item.id}}"
-      bindtap="onCategoryTap"
-    >
-      {{item.name}}
+  <!-- Search -->
+  <view class="search-bar">
+    <text class="search-icon">🔍</text>
+    <input class="search-input" placeholder="搜索菜谱、食材、标签..." value="{{searchKey}}" bindinput="onSearchInput" />
+  </view>
+
+  <!-- Category filters -->
+  <scroll-view class="filter-scroll" scroll-x enable-flex>
+    <view class="filter-row">
+      <view wx:for="{{categories}}" wx:key="value" 
+        class="filter-tag {{categoryFilter === item.value ? 'active' : ''}}" 
+        data-value="{{item.value}}" bindtap="onCategoryTap">
+        <text wx:if="{{item.icon}}" class="filter-icon">{{item.icon}}</text>
+        <text>{{item.label}}</text>
+      </view>
     </view>
   </scroll-view>
 
-  <!-- 菜谱列表 -->
-  <view class="recipe-list">
-    <view 
-      wx:for="{{recipes}}" 
-      wx:key="id"
-      class="recipe-card"
-      data-id="{{item.id}}"
-      bindtap="onRecipeTap"
-    >
+  <!-- Difficulty filters -->
+  <view class="difficulty-row">
+    <view wx:for="{{difficulties}}" wx:key="value"
+      class="difficulty-tag {{difficultyFilter === item.value ? 'active' : ''}}"
+      data-value="{{item.value}}" bindtap="onDifficultyTap">
+      <text>{{item.label}}</text>
+    </view>
+  </view>
+
+  <!-- Recipe list -->
+  <view wx:if="{{!loading && filteredRecipes.length > 0}}" class="recipe-list">
+    <view wx:for="{{filteredRecipes}}" wx:key="id" class="recipe-card" data-id="{{item.id}}" bindtap="onRecipeTap">
       <view class="recipe-cover">
-        <view class="recipe-emoji">{{item.name[0]}}</view>
+        <image wx:if="{{item.coverImage}}" src="{{item.coverImage}}" mode="aspectFill" class="cover-img" />
+        <view wx:else class="cover-placeholder">
+          <text class="cover-emoji">{{item.categoryIcon}}</text>
+        </view>
       </view>
       <view class="recipe-info">
-        <view class="recipe-name">{{item.name}}</view>
-        <view class="recipe-meta">
-          <text class="recipe-tag">{{item.categoryText}}</text>
-          <text class="recipe-difficulty">{{item.difficultyText}}</text>
-          <text class="recipe-duration">{{item.duration}}分钟</text>
-        </view>
+        <text class="recipe-name">{{item.name}}</text>
         <view class="recipe-tags">
-          <text wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag" class="tag">{{tag}}</text>
+          <text class="tag {{item.difficultyColor}}">{{item.difficultyText}}</text>
+          <text wx:for="{{item.tagsStr}}" wx:for-item="tag" wx:key="*this" class="tag tag-default">{{tag}}</text>
         </view>
+        <view class="recipe-meta">
+          <text class="meta-item">⏱ {{item.duration}}分钟</text>
+          <text class="meta-item">{{item.servings}}人份</text>
+        </view>
+      </view>
+      <view class="favorite-btn" data-id="{{item.id}}" catchtap="onToggleFavorite">
+        <text class="heart {{item.isFavorited ? 'active' : ''}}">♥</text>
       </view>
     </view>
   </view>
 
-  <!-- 空状态 -->
-  <view wx:if="{{recipes.length === 0}}" class="empty-state">
-    <text class="empty-text">暂无菜谱</text>
-    <text class="empty-sub">点击右上角 + 创建第一道菜</text>
+  <!-- Loading -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-card" wx:for="{{[1,2,3]}}" wx:key="*this">
+      <view class="loading-cover"></view>
+      <view class="loading-info">
+        <view class="loading-line long"></view>
+        <view class="loading-line short"></view>
+        <view class="loading-line medium"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Empty state -->
+  <view wx:if="{{!loading && filteredRecipes.length === 0}}" class="empty-state">
+    <text class="empty-icon">👨‍🍳</text>
+    <text class="empty-title">还没有菜谱</text>
+    <text class="empty-desc">快来创建你的第一道拿手菜吧</text>
+    <view class="empty-btn" bindtap="onAddTap">创建菜谱</view>
   </view>
 </view>

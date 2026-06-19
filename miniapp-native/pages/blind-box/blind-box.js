@@ -1,42 +1,78 @@
 const app = getApp()
-const { recipes } = require('../../data/recipes')
-const { showToast } = require('../../utils/util')
+const { recipes: builtInRecipes } = require('../../data/recipes')
+const { getDifficultyText, getDifficultyColor, getCategoryText, getCategoryIcon, showToast } = require('../../utils/util')
 
 Page({
   data: {
-    currentRecipe: null,
-    isAnimating: false
+    phase: 'idle',
+    source: 'local',
+    result: null,
+    saved: false,
+    hasRecipes: false
   },
 
   onLoad() {
-    this.getRandomRecipe()
+    this.setData({ hasRecipes: (app.globalData.recipes || []).length > 0 })
   },
 
-  getRandomRecipe() {
-    const allRecipes = app.globalData.recipes.length > 0 ? app.globalData.recipes : recipes
-    const randomIndex = Math.floor(Math.random() * allRecipes.length)
-    this.setData({ currentRecipe: allRecipes[randomIndex] })
+  onShow() {
+    this.setData({ hasRecipes: (app.globalData.recipes || []).length > 0 })
   },
 
-  onShake() {
-    if (this.data.isAnimating) return
-    
-    this.setData({ isAnimating: true })
-    
+  onDrawLocal() {
+    const recipes = app.globalData.recipes || []
+    if (recipes.length === 0) return
+    this.setData({ phase: 'shaking', source: 'local', result: null, saved: false })
     setTimeout(() => {
-      this.getRandomRecipe()
-      this.setData({ isAnimating: false })
-    }, 800)
+      const picked = recipes[Math.floor(Math.random() * recipes.length)]
+      this.setData({ phase: 'revealed', result: this.mapRecipe(picked) })
+    }, 850)
   },
 
-  onCook() {
-    if (!this.data.currentRecipe) return
-    wx.navigateTo({
-      url: `/pages/cooking/cooking?id=${this.data.currentRecipe.id}`
-    })
+  onDrawGlobal() {
+    this.setData({ phase: 'shaking', source: 'recommend', result: null, saved: false })
+    setTimeout(() => {
+      const picked = builtInRecipes[Math.floor(Math.random() * builtInRecipes.length)]
+      this.setData({ phase: 'revealed', result: this.mapRecipe(picked) })
+    }, 850)
   },
 
-  onSkip() {
-    this.onShake()
+  mapRecipe(r) {
+    return {
+      ...r,
+      difficultyText: getDifficultyText(r.difficulty),
+      difficultyColor: getDifficultyColor(r.difficulty),
+      categoryText: getCategoryText(r.category),
+      categoryIcon: getCategoryIcon(r.category),
+      tagsStr: (r.tags || []).slice(0, 3)
+    }
+  },
+
+  onRedraw() {
+    if (this.data.source === 'recommend') this.onDrawGlobal()
+    else this.onDrawLocal()
+  },
+
+  onSave() {
+    const { result } = this.data
+    if (!result) return
+    const recipe = { ...result, id: 'recipe_' + Date.now(), userId: 'local', syncStatus: 'pending', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+    delete recipe.difficultyText
+    delete recipe.difficultyColor
+    delete recipe.categoryText
+    delete recipe.categoryIcon
+    delete recipe.tagsStr
+    app.globalData.recipes.unshift(recipe)
+    app.saveRecipes()
+    this.setData({ saved: true })
+    showToast('已保存')
+  },
+
+  onViewDetail() {
+    wx.navigateTo({ url: `/pages/recipe/recipe?id=${this.data.result.id}` })
+  },
+
+  onCreateRecipe() {
+    wx.navigateTo({ url: '/pages/recipe-form/recipe-form' })
   }
 })

@@ -2,6 +2,7 @@
   "pages": [
     "pages/index/index",
     "pages/recipe/recipe",
+    "pages/recipe-form/recipe-form",
     "pages/cooking/cooking",
     "pages/meal-plan/meal-plan",
     "pages/shopping/shopping",
@@ -9,7 +10,8 @@
     "pages/blind-box/blind-box",
     "pages/settings/settings",
     "pages/login/login",
-    "pages/data-manage/data-manage"
+    "pages/data-manage/data-manage",
+    "pages/privacy/privacy"
   ],
   "window": {
     "navigationBarBackgroundColor": "#faf9f7",
@@ -56,5 +58,6 @@
       }
     ]
   },
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
 }

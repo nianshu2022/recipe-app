@@ -1,37 +1,60 @@
 <view class="page">
-  <!-- 用户信息 -->
-  <view class="user-card">
+  <!-- Profile card -->
+  <view class="profile-card">
     <view class="avatar">
       <text class="avatar-text">{{userInfo ? userInfo.nickname[0] : '?'}}</text>
     </view>
-    <view class="user-info">
-      <view class="nickname">{{userInfo ? userInfo.nickname : '未登录'}}</view>
-      <view class="user-id">{{userInfo ? userInfo.email : '登录后可同步数据'}}</view>
+    <view class="profile-info">
+      <text class="nickname">{{userInfo ? userInfo.nickname : '未登录'}}</text>
+      <text class="user-email">{{userInfo ? userInfo.email : '登录后可同步数据到云端'}}</text>
     </view>
     <view class="login-btn" bindtap="{{userInfo ? 'onLogout' : 'onLogin'}}">
       {{userInfo ? '退出' : '登录'}}
     </view>
   </view>
 
-  <!-- 菜单项 -->
+  <!-- Menu: 我的内容 -->
   <view class="menu-group">
-    <view class="menu-item" bindtap="onDataManage">
-      <text class="menu-icon">📦</text>
-      <text class="menu-text">数据管理</text>
-      <text class="menu-arrow">></text>
+    <text class="menu-title">我的内容</text>
+    <view class="menu-item" bindtap="onCollectionTap">
+      <text class="menu-icon">♥</text>
+      <text class="menu-text">我的收藏夹</text>
+      <text class="menu-arrow">›</text>
     </view>
-    <view class="menu-item" bindtap="onClearData">
-      <text class="menu-icon">🗑️</text>
-      <text class="menu-text">清除数据</text>
-      <text class="menu-arrow">></text>
-    </view>
-    <view class="menu-item" bindtap="onAbout">
-      <text class="menu-icon">ℹ️</text>
-      <text class="menu-text">关于</text>
-      <text class="menu-arrow">></text>
+    <view class="menu-item" bindtap="onShoppingTap">
+      <text class="menu-icon">🛒</text>
+      <text class="menu-text">购物清单</text>
+      <text class="menu-arrow">›</text>
     </view>
   </view>
 
-  <!-- 版本号 -->
-  <view class="version">知味 v{{version}}</view>
+  <!-- Menu: 设置 -->
+  <view class="menu-group">
+    <text class="menu-title">设置</text>
+    <view wx:if="{{!userInfo}}" class="menu-item" bindtap="onLogin">
+      <text class="menu-icon">🔐</text>
+      <text class="menu-text">登录 / 注册</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="onDataManageTap">
+      <text class="menu-icon">📦</text>
+      <text class="menu-text">数据管理</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- Logout -->
+  <view wx:if="{{userInfo}}" class="logout-btn" bindtap="onLogout">
+    <text>退出登录</text>
+  </view>
+
+  <!-- About -->
+  <view class="about">
+    <text class="about-version">知味 v{{version}}</text>
+    <text class="about-desc">你的私人美食管家</text>
+    <view class="about-links">
+      <text class="about-link" bindtap="onAbout">关于</text>
+      <text class="about-link" bindtap="onPrivacyTap">隐私政策</text>
+    </view>
+  </view>
 </view>

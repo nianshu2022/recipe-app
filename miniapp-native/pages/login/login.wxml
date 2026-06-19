@@ -3,29 +3,20 @@
     <text class="title">知味</text>
     <text class="subtitle">{{isRegister ? '创建账号' : '欢迎回来'}}</text>
   </view>
-
   <view class="form">
-    <view class="form-item">
-      <text class="label">邮箱</text>
-      <input class="input" placeholder="输入邮箱" value="{{email}}" bindinput="onEmailInput" />
+    <view class="form-group">
+      <text class="form-label">邮箱</text>
+      <input class="form-input" placeholder="输入邮箱" value="{{email}}" bindinput="onEmailInput" />
     </view>
-
-    <view class="form-item">
-      <text class="label">密码</text>
-      <input class="input" placeholder="输入密码" password value="{{password}}" bindinput="onPasswordInput" />
+    <view class="form-group">
+      <text class="form-label">密码</text>
+      <input class="form-input" placeholder="输入密码" password value="{{password}}" bindinput="onPasswordInput" />
     </view>
-
-    <view wx:if="{{isRegister}}" class="form-item">
-      <text class="label">昵称</text>
-      <input class="input" placeholder="输入昵称" value="{{nickname}}" bindinput="onNicknameInput" />
+    <view wx:if="{{isRegister}}" class="form-group">
+      <text class="form-label">昵称</text>
+      <input class="form-input" placeholder="输入昵称" value="{{nickname}}" bindinput="onNicknameInput" />
     </view>
-
-    <button class="btn btn-primary" bindtap="onSubmit">
-      {{isRegister ? '注册' : '登录'}}
-    </button>
-
-    <view class="toggle" bindtap="onToggleMode">
-      {{isRegister ? '已有账号？去登录' : '没有账号？去注册'}}
-    </view>
+    <view class="submit-btn" bindtap="onSubmit">{{isRegister ? '注册' : '登录'}}</view>
+    <view class="toggle" bindtap="onToggleMode">{{isRegister ? '已有账号？去登录' : '没有账号？去注册'}}</view>
   </view>
 </view>

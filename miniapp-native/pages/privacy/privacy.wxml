@@ -1,0 +1,37 @@
+<view class="page">
+  <text class="title">隐私政策</text>
+  <text class="date">最后更新：2026年6月19日</text>
+
+  <view class="section">
+    <text class="section-title">一、信息收集</text>
+    <text class="text">当您使用本应用时，我们可能收集以下信息：</text>
+    <text class="item">• 账户信息：邮箱地址、昵称</text>
+    <text class="item">• 食谱数据：您创建的食谱、食材、步骤</text>
+    <text class="item">• 使用数据：购物清单、用餐计划、收藏</text>
+  </view>
+
+  <view class="section">
+    <text class="section-title">二、信息使用</text>
+    <text class="text">我们收集的信息用于：</text>
+    <text class="item">• 提供食谱管理、购物清单等核心功能</text>
+    <text class="item">• 在您登录的设备间同步数据</text>
+  </view>
+
+  <view class="section">
+    <text class="section-title">三、信息存储</text>
+    <text class="item">• 本地存储：数据存储在您的设备本地</text>
+    <text class="item">• 云端同步：登录后数据会加密传输并存储在服务器</text>
+  </view>
+
+  <view class="section">
+    <text class="section-title">四、您的权利</text>
+    <text class="item">• 访问、修改或删除您的个人信息</text>
+    <text class="item">• 导出您的所有数据</text>
+    <text class="item">• 注销账户并删除所有云端数据</text>
+  </view>
+
+  <view class="section">
+    <text class="section-title">五、联系我们</text>
+    <text class="text">如有疑问，请联系：nianshu2022@163.com</text>
+  </view>
+</view>
