@@ -1,5 +1,10 @@
 const GITHUB_API = 'https://api.github.com/repos/nianshu2022/recipe-app/releases/latest'
-const GITHUB_MIRROR = 'https://ghproxy.com/' // 国内 GitHub 代理
+const GITHUB_PROXIES = [
+  'https://ghfast.top/',
+  'https://ghproxy.net/',
+  'https://mirror.ghproxy.com/',
+  '', // 直接访问
+]
 
 export interface UpdateInfo {
   hasUpdate: boolean
@@ -10,24 +15,28 @@ export interface UpdateInfo {
   publishedAt: string
 }
 
+async function fetchWithProxy(url: string): Promise<Response | null> {
+  for (const proxy of GITHUB_PROXIES) {
+    try {
+      const res = await fetch(`${proxy}${url}`, {
+        headers: { Accept: 'application/vnd.github.v3+json' },
+        signal: AbortSignal.timeout(5000),
+      })
+      if (res.ok) return res
+    } catch {
+      continue
+    }
+  }
+  return null
+}
+
 export async function checkForUpdate(): Promise<UpdateInfo | null> {
   try {
-    // 尝试直接访问 GitHub API
-    let res = await fetch(GITHUB_API, {
-      headers: { Accept: 'application/vnd.github.v3+json' },
-    })
-    
-    // 如果失败，尝试使用代理
-    if (!res.ok) {
-      res = await fetch(`${GITHUB_MIRROR}${GITHUB_API}`, {
-        headers: { Accept: 'application/vnd.github.v3+json' },
-      })
-    }
-    
-    if (!res.ok) return null
+    const res = await fetchWithProxy(GITHUB_API)
+    if (!res) return null
 
     const data = await res.json()
-    const currentVersion = '1.0.2' // 需要与 build.gradle 中的版本一致
+    const currentVersion = '1.0.2'
     const latestVersion = data.tag_name?.replace('v', '') || ''
 
     if (!latestVersion) return null
@@ -38,10 +47,13 @@ export async function checkForUpdate(): Promise<UpdateInfo | null> {
       a.name.endsWith('.apk')
     )
 
-    // 为国内用户使用代理下载
+    // 选择可用的代理下载
     let downloadUrl = apkAsset?.browser_download_url || data.html_url
-    if (downloadUrl && !downloadUrl.includes('ghproxy.com')) {
-      downloadUrl = `${GITHUB_MIRROR}${downloadUrl}`
+    for (const proxy of GITHUB_PROXIES) {
+      if (proxy) {
+        downloadUrl = `${proxy}${apkAsset?.browser_download_url || data.html_url}`
+        break
+      }
     }
 
     return {
