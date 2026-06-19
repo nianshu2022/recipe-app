@@ -2,19 +2,43 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ChevronRight, Heart, ShoppingCart, ChefHat, Moon, Sun, Monitor, Database, LogIn, LogOut, RefreshCw,
+  Download,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
+import { checkForUpdate, type UpdateInfo } from '@/utils/updater'
+import { showToast } from '@/components/ui/Toast'
 
 export function SettingsPage() {
   const { isLoggedIn, user, logout, syncNow } = useAuthStore()
   const { theme, setTheme } = useThemeStore()
   const [syncing, setSyncing] = useState(false)
+  const [checkingUpdate, setCheckingUpdate] = useState(false)
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
 
   const handleSync = async () => {
     setSyncing(true)
     await syncNow()
     setSyncing(false)
+  }
+
+  const handleCheckUpdate = async () => {
+    setCheckingUpdate(true)
+    try {
+      const info = await checkForUpdate()
+      if (info) {
+        setUpdateInfo(info)
+        if (!info.hasUpdate) {
+          showToast('已是最新版本', 'success')
+        }
+      } else {
+        showToast('检查更新失败，请稍后重试', 'error')
+      }
+    } catch {
+      showToast('检查更新失败', 'error')
+    } finally {
+      setCheckingUpdate(false)
+    }
   }
 
   const themeOptions = [
@@ -143,6 +167,36 @@ export function SettingsPage() {
       <div className="pb-4 pt-2 text-center">
         <p className="text-xs text-[var(--color-text-muted)]">知味 v1.0.0</p>
         <p className="mt-1 text-xs text-[var(--color-text-muted)]">你的私人美食管家</p>
+        
+        <button
+          onClick={handleCheckUpdate}
+          disabled={checkingUpdate}
+          className="mt-3 inline-flex items-center gap-1.5 text-xs text-[var(--color-primary)] hover:underline disabled:opacity-50"
+        >
+          <Download size={14} className={checkingUpdate ? 'animate-bounce' : ''} />
+          {checkingUpdate ? '检查中...' : '检查更新'}
+        </button>
+
+        {updateInfo?.hasUpdate && (
+          <div className="mx-auto mt-4 max-w-sm rounded-2xl bg-[var(--color-bg-card)] p-4 text-left shadow-xs">
+            <p className="text-sm font-medium text-[var(--color-text)]">
+              发现新版本 v{updateInfo.latestVersion}
+            </p>
+            <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+              当前版本：v{updateInfo.currentVersion}
+            </p>
+            <a
+              href={updateInfo.downloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)]"
+            >
+              <Download size={16} />
+              下载新版本
+            </a>
+          </div>
+        )}
+
         <Link to="/privacy" className="mt-2 inline-block text-xs text-[var(--color-primary)] hover:underline">
           隐私政策
         </Link>
