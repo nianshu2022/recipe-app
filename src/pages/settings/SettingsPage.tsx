@@ -5,6 +5,7 @@ import {
   Download,
 } from 'lucide-react'
 import { Capacitor } from '@capacitor/core'
+import { Filesystem, Directory } from '@capacitor/filesystem'
 import { Browser } from '@capacitor/browser'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
@@ -54,9 +55,28 @@ export function SettingsPage() {
     
     try {
       if (Capacitor.isNativePlatform()) {
-        // Android/iOS: 使用系统浏览器下载
-        await Browser.open({ url: updateInfo.downloadUrl })
-        showToast('正在打开下载...', 'info')
+        showToast('正在下载...', 'info')
+        
+        // 下载文件到本地
+        const fileName = `zhivei-${updateInfo.latestVersion}-android.apk`
+        await Filesystem.downloadFile({
+          path: fileName,
+          url: updateInfo.downloadUrl,
+          directory: Directory.Cache,
+          progress: true,
+        })
+        
+        setDownloadProgress(100)
+        showToast('下载完成，正在安装...', 'success')
+        
+        // 获取文件 URI 并打开安装
+        const fileUri = await Filesystem.getUri({
+          path: fileName,
+          directory: Directory.Cache,
+        })
+        
+        // 使用 Browser 插件打开 APK 文件触发安装
+        await Browser.open({ url: fileUri.uri })
       } else {
         // Web: 使用 fetch 下载
         const response = await fetch(updateInfo.downloadUrl)
@@ -91,7 +111,8 @@ export function SettingsPage() {
         
         showToast('下载完成，请安装新版本', 'success')
       }
-    } catch {
+    } catch (e) {
+      console.error('Download error:', e)
       showToast('下载失败，请稍后重试', 'error')
     } finally {
       setDownloading(false)
@@ -223,7 +244,7 @@ export function SettingsPage() {
 
       {/* About */}
       <div className="pb-4 pt-2 text-center">
-        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.0.8</p>
+        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.0.9</p>
         <p className="mt-1 text-xs text-[var(--color-text-muted)]">你的私人美食管家</p>
         
         <div className="mt-3 flex items-center justify-center gap-4">
