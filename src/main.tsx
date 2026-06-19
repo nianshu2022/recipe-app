@@ -6,6 +6,15 @@ import { initStatusBar } from './utils/statusbar'
 
 initStatusBar()
 
+// 检查 Service Worker 更新
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistration().then((reg) => {
+    if (reg) {
+      reg.update()
+    }
+  })
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

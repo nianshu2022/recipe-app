@@ -232,7 +232,7 @@ export function SettingsPage() {
 
       {/* About */}
       <div className="pb-4 pt-2 text-center">
-        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.1.1</p>
+        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.1.2</p>
         <p className="mt-1 text-xs text-[var(--color-text-muted)]">你的私人美食管家</p>
         
         <div className="mt-3 flex items-center justify-center gap-4">
