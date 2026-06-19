@@ -54,15 +54,9 @@ export function SettingsPage() {
     
     try {
       if (Capacitor.isNativePlatform()) {
-        // Android/iOS: 尝试使用系统浏览器下载
-        try {
-          await Browser.open({ url: updateInfo.downloadUrl })
-          showToast('正在打开下载...', 'info')
-        } catch {
-          // 如果代理链接失败，使用原始链接
-          await Browser.open({ url: updateInfo.fallbackUrl })
-          showToast('正在打开下载...', 'info')
-        }
+        // Android/iOS: 使用系统浏览器下载
+        await Browser.open({ url: updateInfo.downloadUrl })
+        showToast('正在打开下载...', 'info')
       } else {
         // Web: 使用 fetch 下载
         const response = await fetch(updateInfo.downloadUrl)

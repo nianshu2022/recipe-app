@@ -1,39 +1,31 @@
 const GITHUB_API = 'https://api.github.com/repos/nianshu2022/recipe-app/releases/latest'
-const GITHUB_PROXIES = [
-  'https://ghfast.top/',
-  'https://ghproxy.net/',
-  'https://mirror.ghproxy.com/',
-  '',
-]
+const R2_BASE = 'https://pub-e0895a39a1f746bcbbaefc526fa28c4a.r2.dev'
 
 export interface UpdateInfo {
   hasUpdate: boolean
   currentVersion: string
   latestVersion: string
   downloadUrl: string
-  fallbackUrl: string
   releaseNotes: string
   publishedAt: string
 }
 
-async function fetchWithProxy(url: string): Promise<Response | null> {
-  for (const proxy of GITHUB_PROXIES) {
-    try {
-      const res = await fetch(`${proxy}${url}`, {
-        headers: { Accept: 'application/vnd.github.v3+json' },
-        signal: AbortSignal.timeout(5000),
-      })
-      if (res.ok) return res
-    } catch {
-      continue
-    }
+async function fetchWithTimeout(url: string, timeout = 5000): Promise<Response | null> {
+  try {
+    const res = await fetch(url, {
+      headers: { Accept: 'application/vnd.github.v3+json' },
+      signal: AbortSignal.timeout(timeout),
+    })
+    if (res.ok) return res
+  } catch {
+    // ignore
   }
   return null
 }
 
 export async function checkForUpdate(): Promise<UpdateInfo | null> {
   try {
-    const res = await fetchWithProxy(GITHUB_API)
+    const res = await fetchWithTimeout(GITHUB_API)
     if (!res) return null
 
     const data = await res.json()
@@ -44,25 +36,14 @@ export async function checkForUpdate(): Promise<UpdateInfo | null> {
 
     const hasUpdate = compareVersions(latestVersion, currentVersion) > 0
 
-    const apkAsset = data.assets?.find((a: { name: string }) => 
-      a.name.endsWith('.apk')
-    )
-
-    const originalUrl = apkAsset?.browser_download_url || data.html_url
-    let downloadUrl = originalUrl
-    for (const proxy of GITHUB_PROXIES) {
-      if (proxy) {
-        downloadUrl = `${proxy}${originalUrl}`
-        break
-      }
-    }
+    // 优先使用 R2 下载，速度快且稳定
+    const downloadUrl = `${R2_BASE}/zhivei-${latestVersion}-android-arm64-release.apk`
 
     return {
       hasUpdate,
       currentVersion,
       latestVersion,
       downloadUrl,
-      fallbackUrl: originalUrl,
       releaseNotes: data.body || '',
       publishedAt: data.published_at || '',
     }
