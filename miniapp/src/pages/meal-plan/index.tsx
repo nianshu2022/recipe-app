@@ -1,27 +1,25 @@
 import { useState, useMemo } from 'react'
 import { View, Text, Input, ScrollView } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
-import { useMealPlanStore, SLOT_LABELS, DAY_LABELS, getWeekStart } from '@/stores/mealPlanStore'
+import { useMealPlanStore, SLOT_LABELS, DAY_LABELS } from '@/stores/mealPlanStore'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useShoppingStore } from '@/stores/shoppingStore'
 import { useUIStore } from '@/stores/uiStore'
 import { Icon } from '@/components/Icon'
-import type { DayPlan, Recipe } from '@/types'
+import type { DayPlan } from '@/types'
 import { CATEGORY_OPTIONS, CATEGORY_ICONS, SLOT_COLORS } from '@/constants/options'
 import './index.scss'
 
 type SlotKey = keyof DayPlan
 
 export default function MealPlanPage() {
-  const plans = useMealPlanStore((s) => s.plans)
-  const currentWeekStart = useMealPlanStore((s) => s.currentWeekStart)
-  const loadPlans = useMealPlanStore((s) => s.loadPlans)
-  const setCurrentWeekStart = useMealPlanStore((s) => s.setCurrentWeekStart)
-  const getCurrentPlan = useMealPlanStore((s) => s.getCurrentPlan)
-  const addRecipeToSlot = useMealPlanStore((s) => s.addRecipeToSlot)
-  const removeRecipeFromSlot = useMealPlanStore((s) => s.removeRecipeFromSlot)
-  const clearCurrentPlan = useMealPlanStore((s) => s.clearCurrentPlan)
-  const getPlannedRecipeIds = useMealPlanStore((s) => s.getPlannedRecipeIds)
+  const currentPlan = useMealPlanStore((s) => s.currentPlan)
+  const loading = useMealPlanStore((s) => s.loading)
+  const loadCurrentWeek = useMealPlanStore((s) => s.loadCurrentWeek)
+  const setMeals = useMealPlanStore((s) => s.setMeals)
+  const removeMeal = useMealPlanStore((s) => s.removeMeal)
+  const clearPlan = useMealPlanStore((s) => s.clearPlan)
+  const getWeekDates = useMealPlanStore((s) => s.getWeekDates)
   const recipes = useRecipeStore((s) => s.recipes)
   const loadRecipes = useRecipeStore((s) => s.loadRecipes)
   const generateFromRecipes = useShoppingStore((s) => s.generateFromRecipes)
@@ -33,68 +31,66 @@ export default function MealPlanPage() {
   const [pickerSlot, setPickerSlot] = useState<SlotKey>('breakfast')
   const [pickerSearch, setPickerSearch] = useState('')
   const [pickerCategory, setPickerCategory] = useState('all')
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   useDidShow(() => {
-    loadPlans()
+    loadCurrentWeek()
     loadRecipes()
   })
 
-  const currentPlan = getCurrentPlan()
-
-  const weekDates = useMemo(() => {
-    const start = new Date(currentWeekStart)
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(start)
-      d.setDate(d.getDate() + i)
-      return d
-    })
-  }, [currentWeekStart])
-
-  const today = new Date().toISOString().split('T')[0]
+  const weekDates = getWeekDates()
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   const getRecipeName = (id: string): string => {
     const r = recipes.find((r) => r.id === id)
     return r?.name || '未知菜谱'
   }
 
-  const plannedCount = getPlannedRecipeIds().length
-
-  const handlePrevWeek = () => {
-    const d = new Date(currentWeekStart)
-    d.setDate(d.getDate() - 7)
-    setCurrentWeekStart(getWeekStart(d))
-  }
-
-  const handleNextWeek = () => {
-    const d = new Date(currentWeekStart)
-    d.setDate(d.getDate() + 7)
-    setCurrentWeekStart(getWeekStart(d))
-  }
+  const plannedCount = currentPlan
+    ? currentPlan.days.reduce((sum, day) => {
+        return sum + ['breakfast', 'lunch', 'dinner', 'snack'].reduce((s, slot) => s + ((day[slot as SlotKey] as string[])?.length ?? 0), 0)
+      }, 0)
+    : 0
 
   const handleOpenPicker = (dayIndex: number, slot: SlotKey) => {
     setPickerDayIndex(dayIndex)
     setPickerSlot(slot)
     setPickerSearch('')
     setPickerCategory('all')
+    setSelectedIds(new Set())
     setShowPicker(true)
   }
 
-  const handleSelectRecipe = (recipeId: string) => {
-    addRecipeToSlot(pickerDayIndex, pickerSlot, recipeId)
+  const toggleSelect = (recipeId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(recipeId)) next.delete(recipeId)
+      else next.add(recipeId)
+      return next
+    })
+  }
+
+  const handleConfirm = async () => {
+    if (selectedIds.size === 0) return
+    await setMeals(pickerDayIndex, pickerSlot, Array.from(selectedIds))
     setShowPicker(false)
   }
 
   const handleRemoveRecipe = (dayIndex: number, slot: SlotKey, recipeId: string) => {
-    removeRecipeFromSlot(dayIndex, slot, recipeId)
+    removeMeal(dayIndex, slot, recipeId)
   }
 
   const handleGenerateShoppingList = async () => {
-    const plannedIds = getPlannedRecipeIds()
-    if (plannedIds.length === 0) {
+    if (!currentPlan) return
+    const recipeIds = currentPlan.days.flatMap((day) =>
+      ['breakfast', 'lunch', 'dinner', 'snack'].flatMap((s) => (day[s as SlotKey] as string[]) ?? [])
+    )
+    if (recipeIds.length === 0) {
       showToast('还没有安排餐食', 'info')
       return
     }
-    const plannedRecipes = recipes.filter((r) => plannedIds.includes(r.id))
+    const plannedRecipes = recipes.filter((r) => recipeIds.includes(r.id))
     await generateFromRecipes(plannedRecipes)
     Taro.navigateTo({ url: '/pages/shopping/index' })
   }
@@ -106,12 +102,13 @@ export default function MealPlanPage() {
       danger: true,
     })
     if (confirmed) {
-      await clearCurrentPlan()
+      await clearPlan()
       showToast('已清空', 'success')
     }
   }
 
   const filteredPickerRecipes = useMemo(() => {
+    const existing = currentPlan?.days[pickerDayIndex]?.[pickerSlot] as string[] ?? []
     return recipes.filter((r) => {
       if (r.deletedAt) return false
       if (pickerCategory !== 'all' && r.category !== pickerCategory) return false
@@ -121,7 +118,7 @@ export default function MealPlanPage() {
       }
       return true
     })
-  }, [recipes, pickerSearch, pickerCategory])
+  }, [recipes, pickerSearch, pickerCategory, currentPlan, pickerDayIndex, pickerSlot])
 
   const getSlotRecipes = (day: DayPlan, slot: SlotKey): string[] => {
     return (day[slot] as string[]) || []
@@ -133,41 +130,34 @@ export default function MealPlanPage() {
         <View className='meal-plan-header__top'>
           <View>
             <Text className='meal-plan-header__title'>七日餐事</Text>
-            <Text className='meal-plan-header__count'>{plannedCount} 道菜已安排</Text>
+            <Text className='meal-plan-header__count'>
+              {plannedCount > 0 ? `已安排 ${plannedCount} 道菜` : '规划一周的美味'}
+            </Text>
           </View>
-          <View className='meal-plan-header__actions'>
-            <View className='meal-plan-header__btn' onClick={handleGenerateShoppingList}>
-              <Icon name='shoppingCart' size={40} color='#252220' />
+          {plannedCount > 0 && (
+            <View className='meal-plan-header__actions'>
+              <View className='meal-plan-header__btn' onClick={handleGenerateShoppingList}>
+                <Icon name='shoppingCart' size={40} color='#252220' />
+              </View>
+              <View className='meal-plan-header__btn' onClick={handleClearPlan}>
+                <Icon name='eraser' size={40} color='#252220' />
+              </View>
             </View>
-            <View className='meal-plan-header__btn' onClick={handleClearPlan}>
-              <Icon name='eraser' size={40} color='#252220' />
-            </View>
-          </View>
-        </View>
-
-        <View className='week-nav'>
-          <View className='week-nav__btn' onClick={handlePrevWeek}>
-            <Icon name='arrowLeft' size={36} color='#252220' />
-          </View>
-          <Text className='week-nav__label'>
-            {weekDates[0].toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })} - {weekDates[6].toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })}
-          </Text>
-          <View className='week-nav__btn' onClick={handleNextWeek}>
-            <Icon name='chevronRight' size={36} color='#252220' />
-          </View>
+          )}
         </View>
       </View>
 
       <ScrollView scrollY className='meal-plan-content' enhanced showScrollbar={false}>
         {weekDates.map((date, dayIndex) => {
-          const dateStr = date.toISOString().split('T')[0]
-          const isToday = dateStr === today
+          const isToday = date.getTime() === today.getTime()
           const day = currentPlan?.days[dayIndex] || {}
 
           return (
             <View key={dayIndex} className={`day-card ${isToday ? 'day-card--today' : ''}`}>
               <View className='day-card__header'>
-                <Text className='day-card__label'>{DAY_LABELS[dayIndex]}</Text>
+                <Text className={`day-card__label ${isToday ? 'day-card__label--today' : ''}`}>
+                  {DAY_LABELS[dayIndex]}
+                </Text>
                 <Text className='day-card__date'>{date.getMonth() + 1}/{date.getDate()}</Text>
                 {isToday && <View className='day-card__today-badge'><Text>今天</Text></View>}
               </View>
@@ -216,7 +206,7 @@ export default function MealPlanPage() {
         <View className='picker-overlay' onClick={() => setShowPicker(false)}>
           <View className='picker-sheet' onClick={(e) => e.stopPropagation()}>
             <View className='picker-sheet__header'>
-              <Text className='picker-sheet__title'>选择菜谱</Text>
+              <Text className='picker-sheet__title'>选择菜谱 · {SLOT_LABELS[['breakfast', 'lunch', 'dinner', 'snack'].indexOf(pickerSlot)]}</Text>
               <View className='picker-sheet__close' onClick={() => setShowPicker(false)}>
                 <Icon name='x' size={40} color='#252220' />
               </View>
@@ -251,22 +241,46 @@ export default function MealPlanPage() {
             </ScrollView>
 
             <ScrollView scrollY className='picker-sheet__list' enhanced showScrollbar={false}>
-              {filteredPickerRecipes.map((recipe) => (
-                <View key={recipe.id} className='picker-item' onClick={() => handleSelectRecipe(recipe.id)}>
-                  <View className='picker-item__cover'>
-                    {recipe.coverImage ? (
-                      <View className='picker-item__img' style={{ backgroundImage: `url(${recipe.coverImage})` }} />
-                    ) : (
-                      <View className='picker-item__placeholder'>
-                        <Icon name='chefHat' size={36} color='#a8a08e' />
-                      </View>
-                    )}
+              {filteredPickerRecipes.map((recipe) => {
+                const existing = currentPlan?.days[pickerDayIndex]?.[pickerSlot] as string[] ?? []
+                const alreadyAdded = existing.includes(recipe.id)
+                const isSelected = selectedIds.has(recipe.id)
+                return (
+                  <View
+                    key={recipe.id}
+                    className={`picker-item ${alreadyAdded ? 'picker-item--disabled' : ''} ${isSelected ? 'picker-item--selected' : ''}`}
+                    onClick={() => !alreadyAdded && toggleSelect(recipe.id)}
+                  >
+                    <View className={`picker-item__check ${isSelected ? 'picker-item__check--active' : ''}`}>
+                      {isSelected ? (
+                        <Icon name='check' size={28} color='#ffffff' />
+                      ) : (
+                        <Text className='picker-item__initial'>{recipe.name.charAt(0)}</Text>
+                      )}
+                    </View>
+                    <View className='picker-item__info'>
+                      <Text className='picker-item__name'>{recipe.name}</Text>
+                      <Text className='picker-item__meta'>
+                        {recipe.difficulty === 'easy' ? '简单' : recipe.difficulty === 'medium' ? '中等' : '困难'}
+                        {' · '}{recipe.duration}分钟
+                        {alreadyAdded && ' · 已添加'}
+                      </Text>
+                    </View>
                   </View>
-                  <Text className='picker-item__name'>{recipe.name}</Text>
-                  <Text className='picker-item__meta'>{recipe.duration}分钟</Text>
-                </View>
-              ))}
+                )
+              })}
             </ScrollView>
+
+            <View className='picker-sheet__footer'>
+              <View
+                className={`picker-sheet__confirm ${selectedIds.size > 0 ? '' : 'picker-sheet__confirm--disabled'}`}
+                onClick={handleConfirm}
+              >
+                <Text className='picker-sheet__confirm-text'>
+                  确认添加{selectedIds.size > 0 ? `（${selectedIds.size} 道）` : ''}
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
       )}

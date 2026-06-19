@@ -13,7 +13,6 @@
 
   &__top {
     @include flex-between;
-    margin-bottom: $space-3;
   }
 
   &__title {
@@ -27,11 +26,7 @@
   &__count {
     display: inline-block;
     font-size: $font-size-xs;
-    color: $color-primary;
-    background: $color-primary-bg;
-    padding: 4rpx 14rpx;
-    border-radius: $radius-full;
-    font-weight: 600;
+    color: $color-text-muted;
     margin-top: 6rpx;
   }
 
@@ -45,32 +40,6 @@
   }
 }
 
-.week-nav {
-  @include flex-between;
-  padding: $space-2 0;
-
-  &__btn {
-    @include flex-center;
-    width: 72rpx;
-    height: 72rpx;
-    border-radius: $radius-xl;
-    background: $color-bg-card;
-    box-shadow: $shadow-xs;
-    transition: $transition-fast;
-
-    &:active {
-      background: $color-bg-subtle;
-      transform: scale(0.92);
-    }
-  }
-
-  &__label {
-    font-size: $font-size-base;
-    font-weight: 600;
-    color: $color-text;
-  }
-}
-
 .meal-plan-content {
   flex: 1;
   padding: 0 $space-5 $space-10;
@@ -79,7 +48,7 @@
 .day-card {
   @include card;
   margin-bottom: $space-3;
-  padding: $space-3;
+  padding: $space-4;
   animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 
   @for $i from 1 through 7 {
@@ -89,9 +58,8 @@
   }
 
   &--today {
-    border: 2rpx solid $color-primary;
+    border: 2rpx solid rgba($color-primary, 0.2);
     box-shadow: $shadow-primary;
-    background: linear-gradient(135deg, #ffffff 0%, $color-primary-bg 100%);
   }
 
   &__header {
@@ -99,20 +67,21 @@
     align-items: center;
     gap: $space-2;
     margin-bottom: $space-3;
-    padding-bottom: $space-2;
-    border-bottom: 2rpx solid $color-border-subtle;
   }
 
   &__label {
-    font-size: $font-size-lg;
-    font-weight: 700;
+    font-size: $font-size-sm;
+    font-weight: 600;
     color: $color-text;
+
+    &--today {
+      color: $color-primary;
+    }
   }
 
   &__date {
-    font-size: $font-size-sm;
+    font-size: $font-size-xs;
     color: $color-text-muted;
-    font-weight: 500;
   }
 
   &__today-badge {
@@ -121,27 +90,27 @@
   }
 
   &__slots {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: $space-2;
   }
 }
 
 .meal-slot {
   display: flex;
-  gap: $space-2;
-  min-height: 72rpx;
-  align-items: flex-start;
+  flex-direction: column;
+  min-height: 128rpx;
+  border-radius: $radius-xl;
+  padding: $space-2;
+  transition: $transition-fast;
 
   &__label {
-    width: 88rpx;
-    height: 48rpx;
-    @include flex-center;
-    border-radius: $radius-full;
-    font-size: $font-size-xs;
-    font-weight: 600;
-    flex-shrink: 0;
-    letter-spacing: 0.5rpx;
+    font-size: 20rpx;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1rpx;
+    opacity: 0.6;
+    margin-bottom: $space-1;
   }
 
   &__content {
@@ -157,13 +126,14 @@
   }
 
   &__recipe {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6rpx;
-    padding: 8rpx $space-2;
+    gap: 4rpx;
+    padding: 4rpx 12rpx;
     border-radius: $radius-full;
-    font-size: $font-size-xs;
-    font-weight: 600;
+    font-size: 22rpx;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.6);
     transition: $transition-fast;
 
     &:active {
@@ -172,7 +142,7 @@
   }
 
   &__recipe-name {
-    max-width: 200rpx;
+    max-width: 120rpx;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -180,34 +150,36 @@
 
   &__remove {
     @include flex-center;
-    width: 32rpx;
-    height: 32rpx;
+    width: 20rpx;
+    height: 20rpx;
     border-radius: $radius-full;
+    opacity: 0.4;
     transition: $transition-fast;
 
     &:active {
+      opacity: 1;
       background: rgba(0, 0, 0, 0.1);
     }
   }
 
   &__add {
     @include flex-center;
-    width: 52rpx;
-    height: 52rpx;
+    width: 40rpx;
+    height: 40rpx;
     border-radius: $radius-full;
-    border: 2rpx dashed $color-border;
+    background: rgba(255, 255, 255, 0.4);
+    opacity: 0.5;
     transition: $transition-fast;
 
     &:active {
-      background: $color-bg-subtle;
-      border-color: $color-primary;
+      opacity: 1;
       transform: scale(0.92);
     }
   }
 
   &__empty {
     @include flex-center;
-    height: 56rpx;
+    flex: 1;
     border-radius: $radius-lg;
     border: 2rpx dashed $color-border;
     transition: $transition-fast;
@@ -221,7 +193,6 @@
   &__empty-text {
     font-size: $font-size-xs;
     color: $color-text-muted;
-    font-weight: 500;
   }
 }
 
@@ -233,7 +204,8 @@
   right: 0;
   bottom: 0;
   z-index: $z-modal;
-  background: $color-overlay;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8rpx);
   animation: fadeIn 0.2s ease;
 }
 
@@ -242,7 +214,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 80vh;
+  max-height: 75vh;
   background: $color-bg-card;
   border-radius: $radius-3xl $radius-3xl 0 0;
   display: flex;
@@ -256,16 +228,16 @@
   }
 
   &__title {
-    font-size: $font-size-xl;
-    font-weight: 700;
+    font-size: $font-size-base;
+    font-weight: 600;
     color: $color-text;
   }
 
   &__close {
     @include flex-center;
-    width: 64rpx;
-    height: 64rpx;
-    border-radius: $radius-full;
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: $radius-lg;
     background: $color-bg-subtle;
     transition: $transition-fast;
 
@@ -288,17 +260,45 @@
 
   &__filters {
     padding: 0 $space-5;
-    margin-bottom: $space-2;
+    margin-bottom: $space-3;
   }
 
   &__pills {
     display: inline-flex;
-    gap: $space-2;
+    gap: 12rpx;
   }
 
   &__list {
     flex: 1;
-    padding: 0 $space-5 $space-8;
+    padding: 0 $space-5 $space-3;
+  }
+
+  &__footer {
+    border-top: 2rpx solid $color-border;
+    padding: $space-4 $space-5;
+  }
+
+  &__confirm {
+    @include flex-center;
+    height: 96rpx;
+    border-radius: $radius-2xl;
+    background: $color-primary;
+    box-shadow: $shadow-md;
+    transition: $transition-fast;
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &--disabled {
+      opacity: 0.4;
+    }
+  }
+
+  &__confirm-text {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: #ffffff;
   }
 }
 
@@ -324,41 +324,54 @@
     transform: scale(0.98);
   }
 
-  &__cover {
-    width: 88rpx;
-    height: 88rpx;
-    border-radius: $radius-lg;
-    overflow: hidden;
-    flex-shrink: 0;
-    box-shadow: $shadow-xs;
+  &--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
-  &__img {
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
+  &--selected {
+    background: rgba($color-primary, 0.05);
+    border: 2rpx solid rgba($color-primary, 0.3);
   }
 
-  &__placeholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, $color-bg-subtle 0%, #e8e4dd 100%);
+  &__check {
     @include flex-center;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: $radius-lg;
+    background: $color-bg-subtle;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text-muted;
+    flex-shrink: 0;
+    transition: $transition-fast;
+
+    &--active {
+      background: $color-primary;
+      color: #ffffff;
+    }
+  }
+
+  &__initial {
+    font-size: $font-size-sm;
+    font-weight: 500;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
   }
 
   &__name {
-    flex: 1;
     font-size: $font-size-base;
-    font-weight: 600;
+    font-weight: 500;
     color: $color-text;
     @include text-truncate;
   }
 
   &__meta {
-    font-size: $font-size-sm;
+    font-size: $font-size-xs;
     color: $color-text-muted;
-    font-weight: 500;
   }
 }
 

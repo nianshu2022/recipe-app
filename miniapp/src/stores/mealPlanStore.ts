@@ -10,135 +10,121 @@ function getWeekStart(date: Date): string {
   return d.toISOString().split('T')[0]
 }
 
+function getMonday(date: Date): Date {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+  d.setDate(diff)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
 const SLOT_LABELS = ['早餐', '午餐', '晚餐', '加餐'] as const
 const DAY_LABELS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'] as const
 
+type SlotKey = keyof DayPlan
+
 interface MealPlanState {
-  plans: MealPlan[]
-  currentWeekStart: string
+  currentPlan: MealPlan | null
   loading: boolean
 
-  loadPlans: () => Promise<void>
-  setCurrentWeekStart: (date: string) => void
-  getCurrentPlan: () => MealPlan | undefined
-  addRecipeToSlot: (
-    dayIndex: number,
-    slot: keyof DayPlan,
-    recipeId: string,
-  ) => Promise<void>
-  removeRecipeFromSlot: (
-    dayIndex: number,
-    slot: keyof DayPlan,
-    recipeId: string,
-  ) => Promise<void>
-  clearCurrentPlan: () => Promise<void>
-  getPlannedRecipeIds: () => string[]
+  loadCurrentWeek: () => Promise<void>
+  setMeals: (dayIndex: number, slot: SlotKey, recipeIds: string[]) => Promise<void>
+  removeMeal: (dayIndex: number, slot: SlotKey, recipeId: string) => Promise<void>
+  clearPlan: () => Promise<void>
+  getWeekDates: () => Date[]
 }
 
 export { SLOT_LABELS, DAY_LABELS, getWeekStart }
 
 export const useMealPlanStore = create<MealPlanState>((set, get) => ({
-  plans: [],
-  currentWeekStart: getWeekStart(new Date()),
+  currentPlan: null,
   loading: false,
 
-  loadPlans: async () => {
+  loadCurrentWeek: async () => {
     set({ loading: true })
     try {
       const plans = await db.getAllMealPlans()
-      set({ plans, loading: false })
-    } catch {
+      const monday = getMonday(new Date())
+      const weekStart = monday.toISOString().split('T')[0]
+
+      let plan = plans.find((p) => p.weekStart === weekStart)
+      if (!plan) {
+        plan = {
+          id: `mp_${weekStart}`,
+          userId: '',
+          weekStart,
+          days: Array.from({ length: 7 }, () => ({})),
+          syncStatus: 'pending',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+        await db.putMealPlan(plan)
+      }
+      set({ currentPlan: plan, loading: false })
+    } catch (e) {
+      console.error('Failed to load meal plan:', e)
       set({ loading: false })
     }
   },
 
-  setCurrentWeekStart: (date) => set({ currentWeekStart: date }),
-
-  getCurrentPlan: () => {
-    const { plans, currentWeekStart } = get()
-    return plans.find((p) => p.weekStart === currentWeekStart)
-  },
-
-  addRecipeToSlot: async (dayIndex, slot, recipeId) => {
-    const { plans, currentWeekStart } = get()
-    let plan = plans.find((p) => p.weekStart === currentWeekStart)
-
-    if (!plan) {
-      plan = {
-        id: `mp_${currentWeekStart}`,
-        userId: '',
-        weekStart: currentWeekStart,
-        days: Array(7).fill({ breakfast: [], lunch: [], dinner: [], snack: [] }),
-        syncStatus: 'pending',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-    }
+  setMeals: async (dayIndex, slot, recipeIds) => {
+    const plan = get().currentPlan
+    if (!plan || recipeIds.length === 0) return
 
     const days = [...plan.days]
-    const day = { ...days[dayIndex] }
-    const current = (day[slot] as string[]) || []
-    if (!current.includes(recipeId)) {
-      ;(day as Record<string, string[]>)[slot] = [...current, recipeId]
-    }
-    days[dayIndex] = day
-
-    const updated = { ...plan, days, updatedAt: new Date().toISOString() }
-    await db.putMealPlan(updated)
-    set((state) => ({
-      plans: state.plans.some((p) => p.id === updated.id)
-        ? state.plans.map((p) => (p.id === updated.id ? updated : p))
-        : [...state.plans, updated],
-    }))
-  },
-
-  removeRecipeFromSlot: async (dayIndex, slot, recipeId) => {
-    const { plans, currentWeekStart } = get()
-    const plan = plans.find((p) => p.weekStart === currentWeekStart)
-    if (!plan) return
-
-    const days = [...plan.days]
-    const day = { ...days[dayIndex] }
-    const current = (day[slot] as string[]) || []
-    ;(day as Record<string, string[]>)[slot] = current.filter(
-      (id) => id !== recipeId,
-    )
-    days[dayIndex] = day
-
-    const updated = { ...plan, days, updatedAt: new Date().toISOString() }
-    await db.putMealPlan(updated)
-    set((state) => ({
-      plans: state.plans.map((p) => (p.id === updated.id ? updated : p)),
-    }))
-  },
-
-  clearCurrentPlan: async () => {
-    const { plans, currentWeekStart } = get()
-    const plan = plans.find((p) => p.weekStart === currentWeekStart)
-    if (!plan) return
+    const current = (days[dayIndex][slot] as string[]) || []
+    const newIds = recipeIds.filter((id) => !current.includes(id))
+    if (newIds.length === 0) return
+    days[dayIndex] = { ...days[dayIndex], [slot]: [...current, ...newIds] }
 
     const updated = {
       ...plan,
-      days: Array(7).fill({ breakfast: [], lunch: [], dinner: [], snack: [] }),
+      days,
       updatedAt: new Date().toISOString(),
+      syncStatus: 'pending' as const,
     }
     await db.putMealPlan(updated)
-    set((state) => ({
-      plans: state.plans.map((p) => (p.id === updated.id ? updated : p)),
-    }))
+    set({ currentPlan: updated })
   },
 
-  getPlannedRecipeIds: () => {
-    const plan = get().getCurrentPlan()
-    if (!plan) return []
-    const ids = new Set<string>()
-    for (const day of plan.days) {
-      for (const slot of ['breakfast', 'lunch', 'dinner', 'snack'] as const) {
-        for (const id of (day[slot] as string[]) || []) {
-          ids.add(id)
-        }
-      }
+  removeMeal: async (dayIndex, slot, recipeId) => {
+    const plan = get().currentPlan
+    if (!plan) return
+
+    const days = [...plan.days]
+    const current = (days[dayIndex][slot] as string[]) || []
+    days[dayIndex] = { ...days[dayIndex], [slot]: current.filter((id) => id !== recipeId) }
+
+    const updated = {
+      ...plan,
+      days,
+      updatedAt: new Date().toISOString(),
+      syncStatus: 'pending' as const,
     }
-    return [...ids]
+    await db.putMealPlan(updated)
+    set({ currentPlan: updated })
+  },
+
+  clearPlan: async () => {
+    const plan = get().currentPlan
+    if (!plan) return
+    const updated = {
+      ...plan,
+      days: Array.from({ length: 7 }, () => ({})),
+      updatedAt: new Date().toISOString(),
+      syncStatus: 'pending' as const,
+    }
+    await db.putMealPlan(updated)
+    set({ currentPlan: updated })
+  },
+
+  getWeekDates: () => {
+    const monday = getMonday(new Date())
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday)
+      d.setDate(d.getDate() + i)
+      return d
+    })
   },
 }))
