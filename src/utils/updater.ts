@@ -3,7 +3,7 @@ const GITHUB_PROXIES = [
   'https://ghfast.top/',
   'https://ghproxy.net/',
   'https://mirror.ghproxy.com/',
-  '', // 直接访问
+  '',
 ]
 
 export interface UpdateInfo {
@@ -11,6 +11,7 @@ export interface UpdateInfo {
   currentVersion: string
   latestVersion: string
   downloadUrl: string
+  fallbackUrl: string
   releaseNotes: string
   publishedAt: string
 }
@@ -36,7 +37,7 @@ export async function checkForUpdate(): Promise<UpdateInfo | null> {
     if (!res) return null
 
     const data = await res.json()
-    const currentVersion = '1.0.6'
+    const currentVersion = '1.0.7'
     const latestVersion = data.tag_name?.replace('v', '') || ''
 
     if (!latestVersion) return null
@@ -47,11 +48,11 @@ export async function checkForUpdate(): Promise<UpdateInfo | null> {
       a.name.endsWith('.apk')
     )
 
-    // 选择可用的代理下载
-    let downloadUrl = apkAsset?.browser_download_url || data.html_url
+    const originalUrl = apkAsset?.browser_download_url || data.html_url
+    let downloadUrl = originalUrl
     for (const proxy of GITHUB_PROXIES) {
       if (proxy) {
-        downloadUrl = `${proxy}${apkAsset?.browser_download_url || data.html_url}`
+        downloadUrl = `${proxy}${originalUrl}`
         break
       }
     }
@@ -61,6 +62,7 @@ export async function checkForUpdate(): Promise<UpdateInfo | null> {
       currentVersion,
       latestVersion,
       downloadUrl,
+      fallbackUrl: originalUrl,
       releaseNotes: data.body || '',
       publishedAt: data.published_at || '',
     }
