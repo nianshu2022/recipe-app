@@ -5,7 +5,6 @@ import {
   getSceneRecommendations,
   getSeasonalRecommendations,
   getQuickRecipes,
-  scenes,
 } from '../recommendations'
 import type { Recipe } from '@/types'
 

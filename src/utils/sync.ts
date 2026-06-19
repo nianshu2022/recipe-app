@@ -264,7 +264,7 @@ export async function pullChanges(): Promise<void> {
 
       const localRecord = await config.get(mapped.id as string)
       if (localRecord && localRecord.syncStatus === 'pending') {
-        const localUpdated = new Date((localRecord as Record<string, unknown>).updatedAt as string).getTime()
+        const localUpdated = new Date((localRecord as unknown as Record<string, unknown>).updatedAt as string).getTime()
         const remoteUpdated = new Date(mapped.updatedAt as string).getTime()
         if (remoteUpdated > localUpdated) {
           mapped.syncStatus = 'conflict'

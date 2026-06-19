@@ -25,3 +25,6 @@ miniapp/
 *.njsproj
 *.sln
 *.sw?
+
+# Android signing key
+android/app/release-key.jks
