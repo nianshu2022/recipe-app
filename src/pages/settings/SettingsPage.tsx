@@ -7,11 +7,12 @@ import {
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
 import { checkForUpdate, type UpdateInfo } from '@/utils/updater'
-import { showToast } from '@/components/ui/Toast'
+import { useUIStore } from '@/stores/uiStore'
 
 export function SettingsPage() {
   const { isLoggedIn, user, logout, syncNow } = useAuthStore()
   const { theme, setTheme } = useThemeStore()
+  const showToast = useUIStore((s) => s.showToast)
   const [syncing, setSyncing] = useState(false)
   const [checkingUpdate, setCheckingUpdate] = useState(false)
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
