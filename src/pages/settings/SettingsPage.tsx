@@ -51,9 +51,37 @@ export function SettingsPage() {
     setDownloadProgress(0)
     
     try {
-      // 直接打开下载链接，让系统处理下载
-      window.open(updateInfo.downloadUrl, '_blank')
-      showToast('正在跳转下载...', 'info')
+      const response = await fetch(updateInfo.downloadUrl)
+      if (!response.ok) throw new Error('Download failed')
+      
+      const contentLength = Number(response.headers.get('Content-Length'))
+      const reader = response.body?.getReader()
+      let receivedLength = 0
+      const chunks: BlobPart[] = []
+      
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          chunks.push(value)
+          receivedLength += value.length
+          if (contentLength) {
+            setDownloadProgress(Math.round((receivedLength / contentLength) * 100))
+          }
+        }
+      }
+      
+      const blob = new Blob(chunks)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `zhivei-${updateInfo.latestVersion}-android.apk`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      
+      showToast('下载完成，请安装新版本', 'success')
     } catch {
       showToast('下载失败，请稍后重试', 'error')
     } finally {
@@ -186,7 +214,7 @@ export function SettingsPage() {
 
       {/* About */}
       <div className="pb-4 pt-2 text-center">
-        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.0.3</p>
+        <p className="text-xs text-[var(--color-text-muted)]">知味 v1.0.4</p>
         <p className="mt-1 text-xs text-[var(--color-text-muted)]">你的私人美食管家</p>
         
         <div className="mt-3 flex items-center justify-center gap-4">
