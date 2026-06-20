@@ -51,7 +51,7 @@ Page({
   },
 
   getRecipeName(id) {
-    const all = [...(app.globalData.recipes || []), ...builtInRecipes]
+    const all = app.globalData.recipes || []
     return all.find(r => r.id === id)?.name || '未知'
   },
 
