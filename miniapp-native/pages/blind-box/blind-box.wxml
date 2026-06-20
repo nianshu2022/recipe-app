@@ -3,7 +3,7 @@
   <view class="header">
     <text class="header-title">今天吃什么</text>
     <text class="header-sub">
-      {{phase === 'idle' ? '让盲盒帮你决定' : phase === 'shaking' ? (source === 'recommend' ? '正在随机推荐中...' : '正在抽取中...') : (source === 'recommend' ? '随机推荐揭晓！' : '盲盒揭晓！')}}
+      {{phase === 'idle' ? '让盲盒帮你决定' : phase === 'shaking' ? '正在抽取中...' : '盲盒揭晓！'}}
     </text>
   </view>
 
@@ -11,10 +11,9 @@
   <view wx:if="{{!hasRecipes && phase === 'idle'}}" class="empty-state">
     <text class="empty-icon">📦</text>
     <text class="empty-title">还没有菜谱</text>
-    <text class="empty-desc">先去添加几道菜谱，或试试随机推荐</text>
+    <text class="empty-desc">先去添加几道菜谱再来抽取</text>
     <view class="empty-actions">
       <view class="btn btn-primary" bindtap="onCreateRecipe">创建菜谱</view>
-      <view class="btn btn-secondary" bindtap="onDrawGlobal">✨ 随机推荐</view>
     </view>
   </view>
 
@@ -23,14 +22,14 @@
     <!-- Front face -->
     <view wx:if="{{phase !== 'revealed'}}" class="blind-card {{phase === 'shaking' ? 'animate-shake' : ''}}">
       <view class="card-icon-wrap">
-        <text class="card-icon">{{source === 'recommend' ? '✨' : '📦'}}</text>
+        <text class="card-icon">📦</text>
       </view>
       <text class="card-sparkle">✨</text>
       <text class="card-text">
-        {{phase === 'shaking' ? (source === 'recommend' ? '正在挑选中...' : '摇一摇...') : '点击下方按钮抽取'}}
+        {{phase === 'shaking' ? '摇一摇...' : '点击下方按钮抽取'}}
       </text>
       <text class="card-hint">
-        {{source === 'recommend' ? '内置中式菜谱推荐' : '共 ' + (hasRecipes ? '多' : '0') + ' 道菜谱等待被抽中'}}
+        共 {{hasRecipes ? '多' : '0'}} 道菜谱等待被抽中
       </text>
     </view>
 
@@ -45,7 +44,6 @@
       <view class="result-info">
         <view class="result-header">
           <text class="result-name">{{result.name}}</text>
-          <text wx:if="{{source === 'recommend'}}" class="result-badge">推荐</text>
         </view>
         <view class="result-tags">
           <text class="tag {{result.difficultyColor}}">{{result.difficultyText}}</text>
@@ -64,14 +62,11 @@
   <!-- Action buttons -->
   <view class="actions">
     <block wx:if="{{phase === 'idle' && hasRecipes}}">
-      <view class="btn btn-primary large" bindtap="onDrawLocal">📦 从我的菜谱抽取</view>
-      <view class="btn btn-secondary" bindtap="onDrawGlobal">✨ 不知道吃什么？随机推荐</view>
+      <view class="btn btn-primary large" bindtap="onDraw">📦 从我的菜谱抽取</view>
     </block>
 
     <block wx:if="{{phase === 'revealed' && result}}">
-      <view wx:if="{{source === 'recommend' && !saved}}" class="btn btn-success large" bindtap="onSave">💾 保存到我的菜谱</view>
-      <view wx:if="{{source === 'recommend' && saved}}" class="btn btn-success-disabled large">已保存</view>
-      <view wx:if="{{source === 'local'}}" class="btn btn-primary large" bindtap="onViewDetail">查看详情 →</view>
+      <view class="btn btn-primary large" bindtap="onViewDetail">查看详情 →</view>
       <view class="btn btn-secondary" bindtap="onRedraw">↺ 再抽一次</view>
     </block>
   </view>

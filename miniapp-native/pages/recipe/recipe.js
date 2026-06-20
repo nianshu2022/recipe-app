@@ -1,5 +1,4 @@
 const app = getApp()
-const { recipes: builtInRecipes } = require('../../data/recipes')
 const { getDifficultyText, getDifficultyColor, getCategoryText, getCategoryIcon, showToast, showConfirm, guessCategory } = require('../../utils/util')
 const { scaleIngredients } = require('../../utils/db')
 
@@ -17,8 +16,7 @@ Page({
   },
 
   loadRecipe(id) {
-    const userRecipes = app.globalData.recipes || []
-    const allRecipes = [...userRecipes, ...builtInRecipes]
+    const allRecipes = app.globalData.recipes || []
     const recipe = allRecipes.find(r => r.id === id)
     if (recipe) {
       const isFavorited = (app.globalData.collections || []).some(c => (c.recipeIds || []).includes(recipe.id))

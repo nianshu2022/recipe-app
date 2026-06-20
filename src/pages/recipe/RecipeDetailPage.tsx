@@ -10,7 +10,6 @@ import { useUIStore } from '@/stores/uiStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
 import { exportRecipeAsImage } from '@/utils/share'
 import { estimateNutrition, getCalorieLevel, getMacroPercentages } from '@/utils/nutrition'
-import { getAllRecipes } from '@/data/chineseRecipes'
 import { scaleIngredients, formatAmount } from '@/utils/scaling'
 import { difficultyConfig, categoryIcons } from '@/constants/categories'
 import type { Recipe } from '@/types'
@@ -67,13 +66,6 @@ export function RecipeDetailPage() {
     if (found) {
       setRecipe(found)
       setServings(found.servings)
-      setLoading(false)
-      return
-    }
-    const builtIn = getAllRecipes().find((r) => r.id === id)
-    if (builtIn) {
-      setRecipe(builtIn)
-      setServings(builtIn.servings)
     }
     setLoading(false)
   }, [recipes, id])

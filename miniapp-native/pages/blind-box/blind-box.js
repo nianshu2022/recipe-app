@@ -1,13 +1,10 @@
 const app = getApp()
-const { recipes: builtInRecipes } = require('../../data/recipes')
 const { getDifficultyText, getDifficultyColor, getCategoryText, getCategoryIcon, showToast } = require('../../utils/util')
 
 Page({
   data: {
     phase: 'idle',
-    source: 'local',
     result: null,
-    saved: false,
     hasRecipes: false
   },
 
@@ -19,20 +16,12 @@ Page({
     this.setData({ hasRecipes: (app.globalData.recipes || []).length > 0 })
   },
 
-  onDrawLocal() {
+  onDraw() {
     const recipes = app.globalData.recipes || []
     if (recipes.length === 0) return
-    this.setData({ phase: 'shaking', source: 'local', result: null, saved: false })
+    this.setData({ phase: 'shaking', result: null })
     setTimeout(() => {
       const picked = recipes[Math.floor(Math.random() * recipes.length)]
-      this.setData({ phase: 'revealed', result: this.mapRecipe(picked) })
-    }, 850)
-  },
-
-  onDrawGlobal() {
-    this.setData({ phase: 'shaking', source: 'recommend', result: null, saved: false })
-    setTimeout(() => {
-      const picked = builtInRecipes[Math.floor(Math.random() * builtInRecipes.length)]
       this.setData({ phase: 'revealed', result: this.mapRecipe(picked) })
     }, 850)
   },
@@ -49,23 +38,7 @@ Page({
   },
 
   onRedraw() {
-    if (this.data.source === 'recommend') this.onDrawGlobal()
-    else this.onDrawLocal()
-  },
-
-  onSave() {
-    const { result } = this.data
-    if (!result) return
-    const recipe = { ...result, id: 'recipe_' + Date.now(), userId: 'local', syncStatus: 'pending', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-    delete recipe.difficultyText
-    delete recipe.difficultyColor
-    delete recipe.categoryText
-    delete recipe.categoryIcon
-    delete recipe.tagsStr
-    app.globalData.recipes.unshift(recipe)
-    app.saveRecipes()
-    this.setData({ saved: true })
-    showToast('已保存')
+    this.onDraw()
   },
 
   onViewDetail() {

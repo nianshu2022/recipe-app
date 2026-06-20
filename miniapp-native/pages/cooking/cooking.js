@@ -1,5 +1,4 @@
 const app = getApp()
-const { recipes: builtInRecipes } = require('../../data/recipes')
 const { showToast } = require('../../utils/util')
 
 Page({
@@ -16,7 +15,7 @@ Page({
 
   onLoad(options) {
     if (options.id) {
-      const allRecipes = [...(app.globalData.recipes || []), ...builtInRecipes]
+      const allRecipes = app.globalData.recipes || []
       const recipe = allRecipes.find(r => r.id === options.id)
       if (recipe) {
         this.setData({ recipe, totalSteps: recipe.steps.length })

@@ -1,5 +1,4 @@
 const app = getApp()
-const { recipes: builtInRecipes } = require('../../data/recipes')
 const { getDifficultyText, getDifficultyColor, getCategoryText, getCategoryIcon, showToast } = require('../../utils/util')
 
 Page({
@@ -36,8 +35,7 @@ Page({
   },
 
   loadRecipes() {
-    const userRecipes = app.globalData.recipes || []
-    const allRecipes = [...userRecipes, ...builtInRecipes.filter(b => !userRecipes.some(u => u.name === b.name))]
+    const allRecipes = app.globalData.recipes || []
     const mapped = allRecipes.map(r => ({
       ...r,
       difficultyText: getDifficultyText(r.difficulty),

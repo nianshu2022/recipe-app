@@ -1,5 +1,4 @@
 const app = getApp()
-const { recipes: builtInRecipes } = require('../../data/recipes')
 const { showToast, showConfirm, SLOT_LABELS, DAY_LABELS, guessCategory } = require('../../utils/util')
 const { getMonday } = require('../../utils/db')
 
@@ -32,7 +31,7 @@ Page({
     }
     const weekDates = Array.from({ length: 7 }, (_, i) => { const d = new Date(monday); d.setDate(d.getDate() + i); return d })
     let count = 0
-    const allRecipes = [...(app.globalData.recipes || []), ...builtInRecipes]
+    const allRecipes = app.globalData.recipes || []
 
     // Map recipe IDs to names for display
     const daysWithNames = plan.days.map(day => {
@@ -58,13 +57,13 @@ Page({
 
   onSlotTap(e) {
     const { day, slot } = e.currentTarget.dataset
-    const all = [...(app.globalData.recipes || []), ...builtInRecipes]
+    const all = app.globalData.recipes || []
     this.setData({ selecting: { day, slot }, selectedIds: [], pickerRecipes: all, pickerSearch: '' })
   },
 
   onPickerSearch(e) {
     const key = e.detail.value.toLowerCase()
-    const all = [...(app.globalData.recipes || []), ...builtInRecipes]
+    const all = app.globalData.recipes || []
     this.setData({
       pickerSearch: e.detail.value,
       pickerRecipes: key ? all.filter(r => r.name.toLowerCase().includes(key)) : all
@@ -136,7 +135,7 @@ Page({
     const recipeIds = currentPlan.days.flatMap(day => ['breakfast', 'lunch', 'dinner', 'snack'].flatMap(s => day[s] || []))
     if (recipeIds.length === 0) { showToast('还没有安排餐食'); return }
 
-    const allRecipes = [...(app.globalData.recipes || []), ...builtInRecipes]
+    const allRecipes = app.globalData.recipes || []
     const matchedRecipes = allRecipes.filter(r => recipeIds.includes(r.id))
     if (matchedRecipes.length === 0) { showToast('未找到菜谱'); return }
 
