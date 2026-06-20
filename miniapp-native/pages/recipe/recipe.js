@@ -1,6 +1,6 @@
 const app = getApp()
 const { recipes: builtInRecipes } = require('../../data/recipes')
-const { getDifficultyText, getDifficultyColor, getCategoryText, getCategoryIcon, showToast, showConfirm } = require('../../utils/util')
+const { getDifficultyText, getDifficultyColor, getCategoryText, getCategoryIcon, showToast, showConfirm, guessCategory } = require('../../utils/util')
 const { scaleIngredients } = require('../../utils/db')
 
 Page({
@@ -23,7 +23,13 @@ Page({
     if (recipe) {
       const isFavorited = (app.globalData.collections || []).some(c => (c.recipeIds || []).includes(recipe.id))
       this.setData({
-        recipe,
+        recipe: {
+          ...recipe,
+          difficultyText: getDifficultyText(recipe.difficulty),
+          difficultyColor: getDifficultyColor(recipe.difficulty),
+          categoryText: getCategoryText(recipe.category),
+          categoryIcon: getCategoryIcon(recipe.category)
+        },
         servings: recipe.servings,
         scaledIngredients: recipe.ingredients,
         isFavorited,
@@ -72,7 +78,7 @@ Page({
       if (existing) {
         existing.amount += ing.amount
       } else {
-        list.items.push({ id: 'item_' + Date.now() + Math.random().toString(36).substr(2, 4), name: ing.name, amount: ing.amount, unit: ing.unit, category: '其他', checked: false })
+        list.items.push({ id: 'item_' + Date.now() + Math.random().toString(36).substr(2, 4), name: ing.name, amount: ing.amount, unit: ing.unit, category: guessCategory(ing.name), checked: false })
       }
     }
     if (!list.sourceRecipeIds.includes(recipe.id)) list.sourceRecipeIds.push(recipe.id)

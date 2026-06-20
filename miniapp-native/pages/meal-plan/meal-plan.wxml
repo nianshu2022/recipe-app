@@ -24,10 +24,10 @@
           class="meal-slot" data-day="{{index}}" data-slot="{{slotIdx}}" bindtap="onSlotTap">
           <text class="slot-label">{{slotLabel}}</text>
           <view class="slot-content">
-            <block wx:if="{{currentPlan.days[index][['breakfast','lunch','dinner','snack'][slotIdx]]}}">
-              <view wx:for="{{currentPlan.days[index][['breakfast','lunch','dinner','snack'][slotIdx]]}}" wx:for-item="recipeId" wx:key="*this" class="slot-recipe">
-                <text class="recipe-name-text">{{recipeId}}</text>
-                <view class="remove-recipe" data-day="{{index}}" data-slot="{{slotIdx}}" data-recipe="{{recipeId}}" catchtap="onRemoveMeal">×</view>
+            <block wx:if="{{daysWithNames[index][['breakfast','lunch','dinner','snack'][slotIdx]].length > 0}}">
+              <view wx:for="{{daysWithNames[index][['breakfast','lunch','dinner','snack'][slotIdx]]}}" wx:for-item="meal" wx:key="id" class="slot-recipe">
+                <text class="recipe-name-text">{{meal.name}}</text>
+                <view class="remove-recipe" data-day="{{index}}" data-slot="{{slotIdx}}" data-recipe="{{meal.id}}" catchtap="onRemoveMeal">×</view>
               </view>
             </block>
             <text wx:else class="slot-empty">+</text>

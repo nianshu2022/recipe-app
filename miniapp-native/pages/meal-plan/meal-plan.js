@@ -1,6 +1,6 @@
 const app = getApp()
 const { recipes: builtInRecipes } = require('../../data/recipes')
-const { showToast, showConfirm, SLOT_LABELS, DAY_LABELS } = require('../../utils/util')
+const { showToast, showConfirm, SLOT_LABELS, DAY_LABELS, guessCategory } = require('../../utils/util')
 const { getMonday } = require('../../utils/db')
 
 Page({
@@ -32,8 +32,23 @@ Page({
     }
     const weekDates = Array.from({ length: 7 }, (_, i) => { const d = new Date(monday); d.setDate(d.getDate() + i); return d })
     let count = 0
-    plan.days.forEach(day => { SLOT_LABELS.forEach((_, i) => { count += (day[['breakfast','lunch','dinner','snack'][i]] || []).length }) })
-    this.setData({ currentPlan: plan, weekDates, plannedCount: count })
+    const allRecipes = [...(app.globalData.recipes || []), ...builtInRecipes]
+
+    // Map recipe IDs to names for display
+    const daysWithNames = plan.days.map(day => {
+      const dayWithNames = {}
+      for (const slotKey of ['breakfast', 'lunch', 'dinner', 'snack']) {
+        const ids = day[slotKey] || []
+        dayWithNames[slotKey] = ids.map(id => {
+          const recipe = allRecipes.find(r => r.id === id)
+          count++
+          return { id, name: recipe ? recipe.name : '未知菜谱' }
+        })
+      }
+      return dayWithNames
+    })
+
+    this.setData({ currentPlan: plan, weekDates, plannedCount: count, daysWithNames })
   },
 
   getRecipeName(id) {
@@ -120,6 +135,49 @@ Page({
     if (!currentPlan) return
     const recipeIds = currentPlan.days.flatMap(day => ['breakfast', 'lunch', 'dinner', 'snack'].flatMap(s => day[s] || []))
     if (recipeIds.length === 0) { showToast('还没有安排餐食'); return }
-    wx.navigateTo({ url: '/pages/shopping/shopping?fromMealPlan=1' })
+
+    const allRecipes = [...(app.globalData.recipes || []), ...builtInRecipes]
+    const matchedRecipes = allRecipes.filter(r => recipeIds.includes(r.id))
+    if (matchedRecipes.length === 0) { showToast('未找到菜谱'); return }
+
+    // Merge ingredients
+    const merged = new Map()
+    for (const recipe of matchedRecipes) {
+      for (const ing of recipe.ingredients) {
+        const key = `${ing.name}_${ing.unit}`
+        const existing = merged.get(key)
+        if (existing) {
+          existing.amount += ing.amount
+        } else {
+          merged.set(key, { name: ing.name, amount: ing.amount, unit: ing.unit, category: guessCategory(ing.name) })
+        }
+      }
+    }
+
+    const items = Array.from(merged.values()).map(m => ({
+      id: 'item_' + Date.now() + Math.random().toString(36).substr(2, 4),
+      name: m.name,
+      amount: Math.round(m.amount * 100) / 100,
+      unit: m.unit,
+      category: m.category,
+      checked: false
+    }))
+
+    const list = {
+      id: 'list_' + Date.now(),
+      userId: 'local',
+      sourceRecipeIds: recipeIds,
+      items,
+      syncStatus: 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+
+    const lists = app.globalData.shoppingLists || []
+    lists.unshift(list)
+    app.globalData.shoppingLists = lists
+    app.saveShoppingLists()
+    showToast('已生成购物清单')
+    wx.navigateTo({ url: '/pages/shopping/shopping' })
   }
 })
