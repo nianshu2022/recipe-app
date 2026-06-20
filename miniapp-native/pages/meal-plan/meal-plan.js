@@ -8,6 +8,7 @@ Page({
     dayLabels: DAY_LABELS,
     slotLabels: SLOT_LABELS,
     currentPlan: null,
+    daysWithNames: [],
     plannedCount: 0,
     selecting: null,
     selectedIds: [],
