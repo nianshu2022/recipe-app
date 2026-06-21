@@ -11,7 +11,7 @@
       <view class="recipe-cover">
         <image wx:if="{{item.coverImage}}" src="{{item.coverImage}}" mode="aspectFill" class="cover-img" />
         <view wx:else class="cover-placeholder">
-          <text class="cover-emoji">{{item.categoryIcon}}</text>
+          <image src="{{item.categoryIcon}}" class="cover-icon" mode="aspectFit" />
         </view>
       </view>
       <view class="recipe-info">
@@ -21,19 +21,25 @@
           <text wx:for="{{item.tagsStr}}" wx:for-item="tag" wx:key="*this" class="tag tag-default">{{tag}}</text>
         </view>
         <view class="recipe-meta">
-          <text>⏱ {{item.duration}}分钟</text>
-          <text>{{item.servings}}人份</text>
+          <view class="meta-item">
+            <image src="/assets/icons/clock.svg" class="meta-icon" mode="aspectFit" />
+            <text>{{item.duration}}分钟</text>
+          </view>
+          <view class="meta-item">
+            <image src="/assets/icons/users.svg" class="meta-icon" mode="aspectFit" />
+            <text>{{item.servings}}人份</text>
+          </view>
         </view>
       </view>
       <view class="unfav-btn" data-id="{{item.id}}" catchtap="onRemoveFavorite">
-        <text class="heart-active">♥</text>
+        <image src="/assets/icons/heart-filled.svg" class="unfav-icon" mode="aspectFit" />
       </view>
     </view>
   </view>
 
   <!-- Empty state -->
   <view wx:if="{{!loading && recipes.length === 0}}" class="empty-state">
-    <text class="empty-icon">♥</text>
+    <image src="/assets/icons/heart.svg" class="empty-icon" mode="aspectFit" />
     <text class="empty-title">还没有收藏</text>
     <text class="empty-desc">浏览菜谱时点击爱心，即可收藏喜欢的菜谱</text>
     <navigator url="/pages/index/index" openType="switchTab" class="empty-btn">去逛逛</navigator>

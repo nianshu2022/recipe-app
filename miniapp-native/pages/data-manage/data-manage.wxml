@@ -22,21 +22,21 @@
   <!-- Actions -->
   <view class="actions">
     <view class="action-item" bindtap="onExport">
-      <text class="action-icon">📤</text>
+      <image src="/assets/icons/download.svg" class="action-icon" mode="aspectFit" />
       <view class="action-info">
         <text class="action-title">导出数据</text>
         <text class="action-desc">复制数据到剪贴板</text>
       </view>
     </view>
     <view class="action-item" bindtap="onImport">
-      <text class="action-icon">📥</text>
+      <image src="/assets/icons/arrow-right.svg" class="action-icon rotated" mode="aspectFit" />
       <view class="action-info">
         <text class="action-title">导入数据</text>
         <text class="action-desc">从剪贴板导入数据</text>
       </view>
     </view>
     <view class="action-item danger" bindtap="onClearAll">
-      <text class="action-icon">🗑️</text>
+      <image src="/assets/icons/trash.svg" class="action-icon red" mode="aspectFit" />
       <view class="action-info">
         <text class="action-title">清除所有数据</text>
         <text class="action-desc">删除所有本地数据</text>

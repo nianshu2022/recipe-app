@@ -10,7 +10,9 @@
 .action-item:last-child { border-bottom: none; }
 .action-item:active { background: var(--color-bg-subtle); }
 .action-item.danger .action-title { color: #ef4444; }
-.action-icon { font-size: 36rpx; margin-right: 20rpx; }
+.action-icon { width: 40rpx; height: 40rpx; margin-right: 20rpx; opacity: 0.6; }
+.action-icon.rotated { transform: rotate(180deg); }
+.action-icon.red { filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%); }
 .action-info { flex: 1; }
 .action-title { font-size: 28rpx; font-weight: 600; color: var(--color-text); display: block; }
 .action-desc { font-size: 22rpx; color: var(--color-text-muted); display: block; margin-top: 4rpx; }

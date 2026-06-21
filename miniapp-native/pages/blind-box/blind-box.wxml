@@ -9,7 +9,7 @@
 
   <!-- No recipes state -->
   <view wx:if="{{!hasRecipes && phase === 'idle'}}" class="empty-state">
-    <text class="empty-icon">📦</text>
+    <image src="/assets/icons/package.svg" class="empty-icon" mode="aspectFit" />
     <text class="empty-title">还没有菜谱</text>
     <text class="empty-desc">先去添加几道菜谱再来抽取</text>
     <view class="empty-actions">
@@ -22,9 +22,9 @@
     <!-- Front face -->
     <view wx:if="{{phase !== 'revealed'}}" class="blind-card {{phase === 'shaking' ? 'animate-shake' : ''}}">
       <view class="card-icon-wrap">
-        <text class="card-icon">📦</text>
+        <image src="/assets/icons/package.svg" class="card-icon" mode="aspectFit" />
       </view>
-      <text class="card-sparkle">✨</text>
+      <image src="/assets/icons/sparkles.svg" class="card-sparkle" mode="aspectFit" />
       <text class="card-text">
         {{phase === 'shaking' ? '摇一摇...' : '点击下方按钮抽取'}}
       </text>
@@ -38,7 +38,7 @@
       <view class="result-cover">
         <image wx:if="{{result.coverImage}}" src="{{result.coverImage}}" mode="aspectFill" class="result-img" />
         <view wx:else class="result-placeholder">
-          <text class="result-emoji">{{result.categoryIcon}}</text>
+          <image src="{{result.categoryIcon}}" class="result-icon" mode="aspectFit" />
         </view>
       </view>
       <view class="result-info">
@@ -51,9 +51,18 @@
           <text wx:for="{{result.tagsStr}}" wx:for-item="tag" wx:key="*this" class="tag tag-default">{{tag}}</text>
         </view>
         <view class="result-meta">
-          <text>⏱ {{result.duration}}分钟</text>
-          <text>👤 {{result.servings}}人份</text>
-          <text>{{result.ingredients.length}}种食材</text>
+          <view class="meta-item">
+            <image src="/assets/icons/clock.svg" class="meta-icon" mode="aspectFit" />
+            <text>{{result.duration}}分钟</text>
+          </view>
+          <view class="meta-item">
+            <image src="/assets/icons/users.svg" class="meta-icon" mode="aspectFit" />
+            <text>{{result.servings}}人份</text>
+          </view>
+          <view class="meta-item">
+            <image src="/assets/icons/utensils.svg" class="meta-icon" mode="aspectFit" />
+            <text>{{result.ingredients.length}}种食材</text>
+          </view>
         </view>
       </view>
     </view>
@@ -62,12 +71,21 @@
   <!-- Action buttons -->
   <view class="actions">
     <block wx:if="{{phase === 'idle' && hasRecipes}}">
-      <view class="btn btn-primary large" bindtap="onDraw">📦 从我的菜谱抽取</view>
+      <view class="btn btn-primary large" bindtap="onDraw">
+        <image src="/assets/icons/package.svg" class="btn-icon white" mode="aspectFit" />
+        <text>从我的菜谱抽取</text>
+      </view>
     </block>
 
     <block wx:if="{{phase === 'revealed' && result}}">
-      <view class="btn btn-primary large" bindtap="onViewDetail">查看详情 →</view>
-      <view class="btn btn-secondary" bindtap="onRedraw">↺ 再抽一次</view>
+      <view class="btn btn-primary large" bindtap="onViewDetail">
+        <text>查看详情</text>
+        <image src="/assets/icons/arrow-right.svg" class="btn-icon white" mode="aspectFit" />
+      </view>
+      <view class="btn btn-secondary" bindtap="onRedraw">
+        <image src="/assets/icons/rotate-ccw.svg" class="btn-icon" mode="aspectFit" />
+        <text>再抽一次</text>
+      </view>
     </block>
   </view>
 </view>
