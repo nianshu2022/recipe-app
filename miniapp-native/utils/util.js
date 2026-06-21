@@ -28,9 +28,13 @@ function getCategoryText(category) {
 
 function getCategoryIcon(category) {
   return {
-    'cold-dish': '🥬', 'hot-dish': '🔥', 'soup': '🍲',
-    'staple': '🌾', 'dessert': '🍦', 'drink': '🥤'
-  }[category] || '🍽️'
+    'cold-dish': '/assets/icons/leaf.svg',
+    'hot-dish': '/assets/icons/flame.svg',
+    'soup': '/assets/icons/soup.svg',
+    'staple': '/assets/icons/wheat.svg',
+    'dessert': '/assets/icons/ice-cream.svg',
+    'drink': '/assets/icons/cup-soda.svg'
+  }[category] || '/assets/icons/utensils.svg'
 }
 
 function showToast(title, icon) {

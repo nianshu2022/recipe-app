@@ -7,12 +7,13 @@
 .header-right { display: flex; gap: 16rpx; }
 .header-btn { width: 80rpx; height: 80rpx; border-radius: 24rpx; background: var(--color-bg-card); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-xs); }
 .header-btn.primary { background: var(--color-primary); box-shadow: 0 4px 12px rgba(201, 88, 58, 0.3); }
-.header-btn .icon-text { font-size: 36rpx; }
-.header-btn.primary .icon-text { color: #fff; font-size: 40rpx; }
+.header-btn:active { transform: scale(0.95); }
+.header-icon { width: 40rpx; height: 40rpx; }
+.header-icon.white { filter: brightness(0) invert(1); }
 
 /* Search */
 .search-bar { display: flex; align-items: center; background: var(--color-bg-card); border-radius: 24rpx; padding: 0 28rpx; height: 80rpx; margin-bottom: 24rpx; border: 1rpx solid var(--color-border); box-shadow: var(--shadow-xs); }
-.search-icon { font-size: 28rpx; margin-right: 16rpx; }
+.search-icon { width: 36rpx; height: 36rpx; margin-right: 16rpx; opacity: 0.4; }
 .search-input { flex: 1; font-size: 28rpx; }
 
 /* Filters */
@@ -20,7 +21,8 @@
 .filter-row { display: inline-flex; gap: 12rpx; }
 .filter-tag { display: inline-flex; align-items: center; gap: 6rpx; padding: 12rpx 28rpx; border-radius: 999rpx; font-size: 24rpx; font-weight: 500; background: var(--color-bg-card); color: var(--color-text-secondary); box-shadow: var(--shadow-xs); }
 .filter-tag.active { background: var(--color-primary); color: #fff; }
-.filter-icon { font-size: 22rpx; }
+.filter-icon { width: 28rpx; height: 28rpx; }
+.filter-tag.active .filter-icon { filter: brightness(0) invert(1); }
 
 .difficulty-row { display: flex; gap: 12rpx; margin-bottom: 24rpx; }
 .difficulty-tag { padding: 10rpx 24rpx; border-radius: 999rpx; font-size: 22rpx; font-weight: 500; background: var(--color-bg-card); color: var(--color-text-secondary); box-shadow: var(--shadow-xs); }
@@ -33,7 +35,7 @@
 .recipe-cover { width: 160rpx; height: 160rpx; border-radius: 20rpx; overflow: hidden; flex-shrink: 0; }
 .cover-img { width: 100%; height: 100%; }
 .cover-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, var(--color-bg-subtle), var(--color-bg)); display: flex; align-items: center; justify-content: center; }
-.cover-emoji { font-size: 56rpx; }
+.cover-icon { width: 56rpx; height: 56rpx; opacity: 0.5; }
 .recipe-info { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .recipe-name { font-size: 30rpx; font-weight: 600; color: var(--color-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .recipe-tags { display: flex; flex-wrap: wrap; gap: 8rpx; margin-top: 12rpx; }
@@ -43,12 +45,13 @@
 .difficulty-hard { background: #fef2f2; color: #991b1b; }
 .tag-default { background: var(--color-bg-subtle); color: var(--color-text-secondary); }
 .recipe-meta { display: flex; gap: 20rpx; margin-top: 10rpx; font-size: 22rpx; color: var(--color-text-muted); }
-.meta-item { display: flex; align-items: center; gap: 4rpx; }
+.meta-item { display: flex; align-items: center; gap: 6rpx; }
+.meta-icon { width: 24rpx; height: 24rpx; opacity: 0.6; }
 
 /* Favorite button */
 .favorite-btn { position: absolute; top: 20rpx; right: 20rpx; width: 56rpx; height: 56rpx; border-radius: 50%; background: rgba(250, 249, 247, 0.8); display: flex; align-items: center; justify-content: center; }
-.heart { font-size: 28rpx; color: var(--color-text-muted); }
-.heart.active { color: #ef4444; }
+.heart-icon { width: 28rpx; height: 28rpx; opacity: 0.5; }
+.heart-icon.active { opacity: 1; filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%); }
 
 /* Loading */
 .loading-state { display: flex; flex-direction: column; gap: 20rpx; }
@@ -62,7 +65,7 @@
 
 /* Empty state */
 .empty-state { display: flex; flex-direction: column; align-items: center; padding: 120rpx 40rpx; }
-.empty-icon { font-size: 72rpx; margin-bottom: 24rpx; }
+.empty-icon { width: 96rpx; height: 96rpx; margin-bottom: 24rpx; opacity: 0.3; }
 .empty-title { font-size: 32rpx; font-weight: 600; color: var(--color-text); margin-bottom: 12rpx; }
 .empty-desc { font-size: 24rpx; color: var(--color-text-muted); margin-bottom: 48rpx; }
 .empty-btn { padding: 20rpx 64rpx; background: var(--color-primary); color: #fff; border-radius: 24rpx; font-size: 28rpx; font-weight: 600; }

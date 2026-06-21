@@ -7,17 +7,17 @@
     </view>
     <view class="header-right">
       <view class="header-btn" bindtap="onBlindBoxTap">
-        <text class="icon-text">🎲</text>
+        <image src="/assets/icons/sparkles.svg" class="header-icon" mode="aspectFit" />
       </view>
       <view class="header-btn primary" bindtap="onAddTap">
-        <text class="icon-text">＋</text>
+        <image src="/assets/icons/plus.svg" class="header-icon white" mode="aspectFit" />
       </view>
     </view>
   </view>
 
   <!-- Search -->
   <view class="search-bar">
-    <text class="search-icon">🔍</text>
+    <image src="/assets/icons/search.svg" class="search-icon" mode="aspectFit" />
     <input class="search-input" placeholder="搜索菜谱、食材、标签..." value="{{searchKey}}" bindinput="onSearchInput" />
   </view>
 
@@ -27,7 +27,7 @@
       <view wx:for="{{categories}}" wx:key="value" 
         class="filter-tag {{categoryFilter === item.value ? 'active' : ''}}" 
         data-value="{{item.value}}" bindtap="onCategoryTap">
-        <text wx:if="{{item.icon}}" class="filter-icon">{{item.icon}}</text>
+        <image wx:if="{{item.icon}}" src="{{item.icon}}" class="filter-icon" mode="aspectFit" />
         <text>{{item.label}}</text>
       </view>
     </view>
@@ -48,7 +48,7 @@
       <view class="recipe-cover">
         <image wx:if="{{item.coverImage}}" src="{{item.coverImage}}" mode="aspectFill" class="cover-img" />
         <view wx:else class="cover-placeholder">
-          <text class="cover-emoji">{{item.categoryIcon}}</text>
+          <image src="{{item.categoryIcon}}" class="cover-icon" mode="aspectFit" />
         </view>
       </view>
       <view class="recipe-info">
@@ -58,12 +58,18 @@
           <text wx:for="{{item.tagsStr}}" wx:for-item="tag" wx:key="*this" class="tag tag-default">{{tag}}</text>
         </view>
         <view class="recipe-meta">
-          <text class="meta-item">⏱ {{item.duration}}分钟</text>
-          <text class="meta-item">{{item.servings}}人份</text>
+          <view class="meta-item">
+            <image src="/assets/icons/clock.svg" class="meta-icon" mode="aspectFit" />
+            <text>{{item.duration}}分钟</text>
+          </view>
+          <view class="meta-item">
+            <image src="/assets/icons/users.svg" class="meta-icon" mode="aspectFit" />
+            <text>{{item.servings}}人份</text>
+          </view>
         </view>
       </view>
       <view class="favorite-btn" data-id="{{item.id}}" catchtap="onToggleFavorite">
-        <text class="heart {{item.isFavorited ? 'active' : ''}}">♥</text>
+        <image src="{{item.isFavorited ? '/assets/icons/heart-filled.svg' : '/assets/icons/heart.svg'}}" class="heart-icon {{item.isFavorited ? 'active' : ''}}" mode="aspectFit" />
       </view>
     </view>
   </view>
@@ -82,7 +88,7 @@
 
   <!-- Empty state -->
   <view wx:if="{{!loading && filteredRecipes.length === 0}}" class="empty-state">
-    <text class="empty-icon">👨‍🍳</text>
+    <image src="/assets/icons/utensils.svg" class="empty-icon" mode="aspectFit" />
     <text class="empty-title">还没有菜谱</text>
     <text class="empty-desc">快来创建你的第一道拿手菜吧</text>
     <view class="empty-btn" bindtap="onAddTap">创建菜谱</view>

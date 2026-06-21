@@ -7,12 +7,12 @@ Page({
     filteredRecipes: [],
     categories: [
       { value: 'all', label: '全部', icon: '' },
-      { value: 'cold-dish', label: '凉菜', icon: '🥬' },
-      { value: 'hot-dish', label: '热菜', icon: '🔥' },
-      { value: 'soup', label: '汤羹', icon: '🍲' },
-      { value: 'staple', label: '主食', icon: '🌾' },
-      { value: 'dessert', label: '甜品', icon: '🍦' },
-      { value: 'drink', label: '饮品', icon: '🥤' }
+      { value: 'cold-dish', label: '凉菜', icon: '/assets/icons/leaf.svg' },
+      { value: 'hot-dish', label: '热菜', icon: '/assets/icons/flame.svg' },
+      { value: 'soup', label: '汤羹', icon: '/assets/icons/soup.svg' },
+      { value: 'staple', label: '主食', icon: '/assets/icons/wheat.svg' },
+      { value: 'dessert', label: '甜品', icon: '/assets/icons/ice-cream.svg' },
+      { value: 'drink', label: '饮品', icon: '/assets/icons/cup-soda.svg' }
     ],
     difficulties: [
       { value: 'all', label: '全部' },

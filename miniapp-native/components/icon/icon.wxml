@@ -1,0 +1,198 @@
+<image
+  wx:if="{{name === 'utensils'}}"
+  src="/assets/icons/utensils.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'calendar'}}"
+  src="/assets/icons/calendar.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'sparkles'}}"
+  src="/assets/icons/sparkles.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'heart'}}"
+  src="/assets/icons/heart.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'heart-filled'}}"
+  src="/assets/icons/heart-filled.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'user'}}"
+  src="/assets/icons/user.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'search'}}"
+  src="/assets/icons/search.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'plus'}}"
+  src="/assets/icons/plus.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'arrow-left'}}"
+  src="/assets/icons/arrow-left.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'x'}}"
+  src="/assets/icons/x.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'check'}}"
+  src="/assets/icons/check.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'trash'}}"
+  src="/assets/icons/trash.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'pencil'}}"
+  src="/assets/icons/pencil.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'download'}}"
+  src="/assets/icons/download.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'shopping-cart'}}"
+  src="/assets/icons/shopping-cart.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'eraser'}}"
+  src="/assets/icons/eraser.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'clock'}}"
+  src="/assets/icons/clock.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'users'}}"
+  src="/assets/icons/users.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'play'}}"
+  src="/assets/icons/play.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'rotate-ccw'}}"
+  src="/assets/icons/rotate-ccw.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'arrow-right'}}"
+  src="/assets/icons/arrow-right.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'flame'}}"
+  src="/assets/icons/flame.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'leaf'}}"
+  src="/assets/icons/leaf.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'soup'}}"
+  src="/assets/icons/soup.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'wheat'}}"
+  src="/assets/icons/wheat.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'ice-cream'}}"
+  src="/assets/icons/ice-cream.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'cup-soda'}}"
+  src="/assets/icons/cup-soda.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'package'}}"
+  src="/assets/icons/package.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'mail'}}"
+  src="/assets/icons/mail.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'lock'}}"
+  src="/assets/icons/lock.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'database'}}"
+  src="/assets/icons/database.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'log-out'}}"
+  src="/assets/icons/log-out.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
+<image
+  wx:elif="{{name === 'share'}}"
+  src="/assets/icons/share.svg"
+  style="width: {{size}}px; height: {{size}}px;"
+  mode="aspectFit"
+/>
