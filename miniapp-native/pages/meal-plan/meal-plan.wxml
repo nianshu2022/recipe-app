@@ -6,8 +6,12 @@
       <text class="header-sub">{{plannedCount > 0 ? '已安排 ' + plannedCount + ' 道菜' : '规划一周的美味'}}</text>
     </view>
     <view wx:if="{{plannedCount > 0}}" class="header-right">
-      <view class="header-btn" bindtap="onGenerateShopping">🛒</view>
-      <view class="header-btn" bindtap="onClearPlan">🗑️</view>
+      <view class="header-btn" bindtap="onGenerateShopping">
+        <image src="/assets/icons/shopping-cart.svg" class="header-icon" mode="aspectFit" />
+      </view>
+      <view class="header-btn" bindtap="onClearPlan">
+        <image src="/assets/icons/eraser.svg" class="header-icon" mode="aspectFit" />
+      </view>
     </view>
   </view>
 
@@ -15,22 +19,32 @@
   <view class="week-grid">
     <view wx:for="{{weekDates}}" wx:key="index" class="day-card {{index === 0 ? 'today' : ''}}">
       <view class="day-header">
-        <text class="day-label {{index === 0 ? 'today-label' : ''}}">{{dayLabels[index]}}</text>
-        <text class="day-date">{{item.getMonth() + 1}}/{{item.getDate()}}</text>
-        <text wx:if="{{index === 0}}" class="today-badge">今天</text>
+        <view class="day-header-left">
+          <text class="day-label {{index === 0 ? 'today-label' : ''}}">{{dayLabels[index]}}</text>
+          <text class="day-date">{{item.getMonth() + 1}}/{{item.getDate()}}</text>
+          <text wx:if="{{index === 0}}" class="today-badge">今天</text>
+        </view>
       </view>
       <view class="day-slots">
         <view wx:for="{{slotLabels}}" wx:for-item="slotLabel" wx:for-index="slotIdx" wx:key="*this"
-          class="meal-slot" data-day="{{index}}" data-slot="{{slotIdx}}" bindtap="onSlotTap">
+          class="meal-slot {{daysWithNames[index][['breakfast','lunch','dinner','snack'][slotIdx]].length > 0 ? 'has-recipes' : 'empty'}} slot-{{slotIdx}}"
+          data-day="{{index}}" data-slot="{{slotIdx}}" bindtap="onSlotTap">
           <text class="slot-label">{{slotLabel}}</text>
           <view class="slot-content">
             <block wx:if="{{daysWithNames[index][['breakfast','lunch','dinner','snack'][slotIdx]].length > 0}}">
-              <view wx:for="{{daysWithNames[index][['breakfast','lunch','dinner','snack'][slotIdx]]}}" wx:for-item="meal" wx:key="id" class="slot-recipe">
-                <text class="recipe-name-text">{{meal.name}}</text>
-                <view class="remove-recipe" data-day="{{index}}" data-slot="{{slotIdx}}" data-recipe="{{meal.id}}" catchtap="onRemoveMeal">×</view>
+              <view class="slot-recipes">
+                <view wx:for="{{daysWithNames[index][['breakfast','lunch','dinner','snack'][slotIdx]]}}" wx:for-item="meal" wx:key="id" class="slot-recipe">
+                  <text class="recipe-name-text">{{meal.name}}</text>
+                  <view class="remove-recipe" data-day="{{index}}" data-slot="{{slotIdx}}" data-recipe="{{meal.id}}" catchtap="onRemoveMeal">
+                    <image src="/assets/icons/x.svg" class="remove-icon" mode="aspectFit" />
+                  </view>
+                </view>
+                <view class="add-recipe-btn" data-day="{{index}}" data-slot="{{slotIdx}}" catchtap="onSlotTap">
+                  <image src="/assets/icons/plus.svg" class="add-icon" mode="aspectFit" />
+                </view>
               </view>
             </block>
-            <text wx:else class="slot-empty">+</text>
+            <text wx:else class="slot-empty">点击添加</text>
           </view>
         </view>
       </view>
@@ -42,26 +56,48 @@
     <view class="modal-sheet" catchtap="">
       <view class="modal-header">
         <text class="modal-title">选择菜谱 · {{slotLabels[selecting.slot]}}</text>
-        <view class="modal-close" bindtap="onClosePicker">×</view>
+        <view class="modal-close" bindtap="onClosePicker">
+          <image src="/assets/icons/x.svg" class="close-icon" mode="aspectFit" />
+        </view>
       </view>
       <view class="picker-search">
-        <input class="search-input" placeholder="搜索菜谱" value="{{pickerSearch}}" bindinput="onPickerSearch" />
+        <image src="/assets/icons/search.svg" class="search-icon" mode="aspectFit" />
+        <input class="search-input" placeholder="搜索菜谱..." value="{{pickerSearch}}" bindinput="onPickerSearch" />
       </view>
+
+      <!-- Category filter -->
+      <scroll-view class="category-filter" scroll-x enable-flex>
+        <view class="filter-row">
+          <view class="filter-tag {{pickerCategory === '' ? 'active' : ''}}" data-category="" bindtap="onCategoryFilter">
+            <text>全部</text>
+          </view>
+          <view wx:for="{{categories}}" wx:key="value" class="filter-tag {{pickerCategory === item.value ? 'active' : ''}}" data-category="{{item.value}}" bindtap="onCategoryFilter">
+            <image wx:if="{{item.icon}}" src="{{item.icon}}" class="filter-icon" mode="aspectFit" />
+            <text>{{item.label}}</text>
+          </view>
+        </view>
+      </scroll-view>
+
       <scroll-view class="picker-list" scroll-y>
         <view wx:for="{{pickerRecipes}}" wx:key="id" class="picker-item {{selectedIds.indexOf(item.id) >= 0 ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="onToggleRecipe">
           <view class="picker-check {{selectedIds.indexOf(item.id) >= 0 ? 'active' : ''}}">
-            <text wx:if="{{selectedIds.indexOf(item.id) >= 0}}">✓</text>
-            <text wx:else>{{item.name[0]}}</text>
+            <image wx:if="{{selectedIds.indexOf(item.id) >= 0}}" src="/assets/icons/check.svg" class="check-icon" mode="aspectFit" />
+            <text wx:else class="picker-initial">{{item.name[0]}}</text>
           </view>
           <view class="picker-info">
             <text class="picker-name">{{item.name}}</text>
-            <text class="picker-meta">{{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}} · {{item.duration}}分钟</text>
+            <view class="picker-meta">
+              <text class="picker-difficulty {{item.difficulty === 'easy' ? 'easy' : item.difficulty === 'medium' ? 'medium' : 'hard'}}">
+                {{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}}
+              </text>
+              <text class="picker-duration">{{item.duration}}分钟</text>
+            </view>
           </view>
         </view>
       </scroll-view>
       <view class="modal-footer">
         <view class="confirm-btn {{selectedIds.length === 0 ? 'disabled' : ''}}" bindtap="onConfirmSelect">
-          确认添加{{selectedIds.length > 0 ? '（' + selectedIds.length + ' 道）' : ''}}
+          <text>确认添加{{selectedIds.length > 0 ? '（' + selectedIds.length + ' 道）' : ''}}</text>
         </view>
       </view>
     </view>

@@ -1,5 +1,5 @@
 const app = getApp()
-const { showToast, showConfirm, SLOT_LABELS, DAY_LABELS, guessCategory } = require('../../utils/util')
+const { showToast, showConfirm, SLOT_LABELS, DAY_LABELS, guessCategory, CATEGORY_OPTIONS, getCategoryIcon } = require('../../utils/util')
 const { getMonday } = require('../../utils/db')
 
 Page({
@@ -7,13 +7,15 @@ Page({
     weekDates: [],
     dayLabels: DAY_LABELS,
     slotLabels: SLOT_LABELS,
+    categories: CATEGORY_OPTIONS.map(c => ({ ...c, icon: getCategoryIcon(c.value) })),
     currentPlan: null,
     daysWithNames: [],
     plannedCount: 0,
     selecting: null,
     selectedIds: [],
     pickerRecipes: [],
-    pickerSearch: ''
+    pickerSearch: '',
+    pickerCategory: ''
   },
 
   onLoad() { this.loadPlan() },
@@ -59,16 +61,32 @@ Page({
   onSlotTap(e) {
     const { day, slot } = e.currentTarget.dataset
     const all = app.globalData.recipes || []
-    this.setData({ selecting: { day, slot }, selectedIds: [], pickerRecipes: all, pickerSearch: '' })
+    this.setData({ selecting: { day, slot }, selectedIds: [], pickerRecipes: all, pickerSearch: '', pickerCategory: '' })
   },
 
   onPickerSearch(e) {
-    const key = e.detail.value.toLowerCase()
-    const all = app.globalData.recipes || []
-    this.setData({
-      pickerSearch: e.detail.value,
-      pickerRecipes: key ? all.filter(r => r.name.toLowerCase().includes(key)) : all
-    })
+    this.setData({ pickerSearch: e.detail.value })
+    this.filterPickerRecipes()
+  },
+
+  onCategoryFilter(e) {
+    const category = e.currentTarget.dataset.category
+    this.setData({ pickerCategory: category })
+    this.filterPickerRecipes()
+  },
+
+  filterPickerRecipes() {
+    const { pickerSearch, pickerCategory } = this.data
+    let all = app.globalData.recipes || []
+    const key = pickerSearch.toLowerCase()
+
+    if (pickerCategory) {
+      all = all.filter(r => r.category === pickerCategory)
+    }
+    if (key) {
+      all = all.filter(r => r.name.toLowerCase().includes(key))
+    }
+    this.setData({ pickerRecipes: all })
   },
 
   onToggleRecipe(e) {
