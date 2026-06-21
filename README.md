@@ -18,47 +18,25 @@
 - 数据同步 - 多设备同步
 - PWA 支持 - 离线可用
 
-## 项目结构
-
-- `src/` - Web 端源码（React + TypeScript）
-- `miniapp-native/` - 微信小程序源码（原生）
-- `server/` - 后端服务（Cloudflare Workers）
-
 ## 技术栈
 
-### Web 端
 - React 19 + TypeScript + Tailwind CSS
 - Zustand + React Router v7
 - Cloudflare Workers + D1
 - Vite + PWA
 
-### 微信小程序
-- 原生微信小程序开发
-- WXML + WXSS + JavaScript
-
 ## 开发
 
-### Web 端
 ```bash
 npm install
 npm run dev
 ```
 
-### 微信小程序
-1. 下载并安装 [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)
-2. 打开微信开发者工具，导入 `miniapp-native` 目录
-3. 配置 AppID（在 `project.config.json` 中修改）
-4. 开始开发
-
 ## 部署
 
-- Web 端：推送到 main 分支自动部署到 Cloudflare Pages
-- 微信小程序：使用微信开发者工具上传代码并提交审核
+推送到 main 分支自动部署到 Cloudflare Pages。
 
-## 链接
-
-- Web 端：https://recipe.nianshu2022.cn
-- GitHub：https://github.com/nianshu2022/recipe-app
+- https://recipe.nianshu2022.cn
 
 ## License
 
