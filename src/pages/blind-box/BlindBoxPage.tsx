@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Package, Clock, Users, RotateCcw, ArrowRight,
+  Package, Clock, Users, RotateCcw, ArrowRight, Sparkles,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
@@ -12,16 +12,14 @@ type Phase = 'idle' | 'shaking' | 'revealed'
 
 export function BlindBoxPage() {
   const navigate = useNavigate()
-  const { recipes, loading, addRecipe } = useRecipeStore()
+  const { recipes, loading } = useRecipeStore()
   const [phase, setPhase] = useState<Phase>('idle')
   const [result, setResult] = useState<Recipe | null>(null)
-  const [saved, setSaved] = useState(false)
 
   const draw = () => {
     if (recipes.length === 0) return
     setPhase('shaking')
     setResult(null)
-    setSaved(false)
 
     setTimeout(() => {
       const picked = recipes[Math.floor(Math.random() * recipes.length)]
@@ -32,25 +30,6 @@ export function BlindBoxPage() {
 
   const redraw = () => {
     draw()
-  }
-
-  const handleSave = async () => {
-    if (!result) return
-    await addRecipe({
-      userId: result.userId,
-      name: result.name,
-      category: result.category,
-      tags: result.tags,
-      coverImage: result.coverImage,
-      difficulty: result.difficulty,
-      duration: result.duration,
-      servings: result.servings,
-      ingredients: result.ingredients,
-      steps: result.steps,
-      nutrition: result.nutrition,
-      deletedAt: result.deletedAt,
-    })
-    setSaved(true)
   }
 
   if (loading) {
