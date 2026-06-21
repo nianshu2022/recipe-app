@@ -1,22 +1,30 @@
 page {
+  /* Colors - exact match with web app */
   --color-bg: #faf9f7;
   --color-bg-card: #ffffff;
+  --color-bg-elevated: #ffffff;
   --color-bg-subtle: #f5f3ef;
   --color-text: #252220;
   --color-text-secondary: #6b6355;
   --color-text-muted: #a8a08e;
+  --color-border: #e8e4de;
+  --color-border-subtle: #f5f3ef;
   --color-primary: #c9583a;
-  --color-primary-hover: #a8432d;
+  --color-primary-light: #e47a4e;
+  --color-primary-dark: #a8432d;
   --color-accent-50: #fdf4f0;
   --color-accent-400: #e47a4e;
   --color-accent-500: #c9583a;
-  --color-border: #e8e4de;
-  --color-border-subtle: #f5f3ef;
+
+  /* Shadows - warm toned, exact match */
   --shadow-xs: 0 1px 2px rgba(37, 34, 32, 0.04);
   --shadow-sm: 0 2px 8px rgba(37, 34, 32, 0.06);
   --shadow-md: 0 4px 16px rgba(37, 34, 32, 0.08);
+  --shadow-lg: 0 8px 32px rgba(37, 34, 32, 0.10);
+  --shadow-xl: 0 16px 48px rgba(37, 34, 32, 0.12);
 
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+  /* Typography */
+  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
   font-size: 28rpx;
   color: var(--color-text);
   background-color: var(--color-bg);
@@ -25,6 +33,7 @@ page {
 
 ::-webkit-scrollbar { display: none; }
 
+/* Animation */
 .animate-shake {
   animation: shake 0.8s ease-in-out;
 }

@@ -5,41 +5,41 @@
 .header-title { font-size: 56rpx; font-weight: 700; color: var(--color-text); display: block; letter-spacing: -1rpx; }
 .header-sub { font-size: 24rpx; color: var(--color-text-muted); margin-top: 4rpx; display: block; }
 .header-right { display: flex; gap: 16rpx; }
-.header-btn { width: 80rpx; height: 80rpx; border-radius: 24rpx; background: var(--color-bg-card); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-xs); }
+.header-btn { width: 80rpx; height: 80rpx; border-radius: 32rpx; background: var(--color-bg-card); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-xs); transition: all 0.2s; }
 .header-btn.primary { background: var(--color-primary); box-shadow: 0 4px 12px rgba(201, 88, 58, 0.3); }
 .header-btn:active { transform: scale(0.95); }
 .header-icon { width: 40rpx; height: 40rpx; }
 .header-icon.white { filter: brightness(0) invert(1); }
 
 /* Search */
-.search-bar { display: flex; align-items: center; background: var(--color-bg-card); border-radius: 24rpx; padding: 0 28rpx; height: 80rpx; margin-bottom: 24rpx; border: 1rpx solid var(--color-border); box-shadow: var(--shadow-xs); }
+.search-bar { display: flex; align-items: center; background: var(--color-bg-card); border-radius: 32rpx; padding: 0 28rpx; height: 80rpx; margin-bottom: 24rpx; border: 1rpx solid var(--color-border); box-shadow: var(--shadow-xs); transition: all 0.2s; }
 .search-icon { width: 36rpx; height: 36rpx; margin-right: 16rpx; opacity: 0.4; }
 .search-input { flex: 1; font-size: 28rpx; }
 
 /* Filters */
 .filter-scroll { white-space: nowrap; margin-bottom: 16rpx; }
 .filter-row { display: inline-flex; gap: 12rpx; }
-.filter-tag { display: inline-flex; align-items: center; gap: 6rpx; padding: 12rpx 28rpx; border-radius: 999rpx; font-size: 24rpx; font-weight: 500; background: var(--color-bg-card); color: var(--color-text-secondary); box-shadow: var(--shadow-xs); }
+.filter-tag { display: inline-flex; align-items: center; gap: 6rpx; padding: 12rpx 28rpx; border-radius: 9999rpx; font-size: 24rpx; font-weight: 500; background: var(--color-bg-card); color: var(--color-text-secondary); box-shadow: var(--shadow-xs); transition: all 0.2s; }
 .filter-tag.active { background: var(--color-primary); color: #fff; }
 .filter-icon { width: 28rpx; height: 28rpx; }
 .filter-tag.active .filter-icon { filter: brightness(0) invert(1); }
 
 .difficulty-row { display: flex; gap: 12rpx; margin-bottom: 24rpx; }
-.difficulty-tag { padding: 10rpx 24rpx; border-radius: 999rpx; font-size: 22rpx; font-weight: 500; background: var(--color-bg-card); color: var(--color-text-secondary); box-shadow: var(--shadow-xs); }
+.difficulty-tag { padding: 10rpx 24rpx; border-radius: 9999rpx; font-size: 22rpx; font-weight: 500; background: var(--color-bg-card); color: var(--color-text-secondary); box-shadow: var(--shadow-xs); transition: all 0.2s; }
 .difficulty-tag.active { background: var(--color-primary); color: #fff; }
 
 /* Recipe cards */
-.recipe-list { display: flex; flex-direction: column; gap: 20rpx; }
-.recipe-card { display: flex; gap: 24rpx; padding: 24rpx; background: var(--color-bg-card); border-radius: 24rpx; box-shadow: var(--shadow-xs); position: relative; }
-.recipe-card:active { transform: scale(0.98); opacity: 0.9; }
-.recipe-cover { width: 160rpx; height: 160rpx; border-radius: 20rpx; overflow: hidden; flex-shrink: 0; }
+.recipe-list { display: flex; flex-direction: column; gap: 16rpx; }
+.recipe-card { display: flex; gap: 24rpx; padding: 24rpx; background: var(--color-bg-card); border-radius: 32rpx; box-shadow: var(--shadow-xs); position: relative; transition: all 0.3s; }
+.recipe-card:active { transform: scale(0.99); box-shadow: var(--shadow-sm); }
+.recipe-cover { width: 160rpx; height: 160rpx; border-radius: 24rpx; overflow: hidden; flex-shrink: 0; }
 .cover-img { width: 100%; height: 100%; }
 .cover-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, var(--color-bg-subtle), var(--color-bg)); display: flex; align-items: center; justify-content: center; }
 .cover-icon { width: 56rpx; height: 56rpx; opacity: 0.5; }
 .recipe-info { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .recipe-name { font-size: 30rpx; font-weight: 600; color: var(--color-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .recipe-tags { display: flex; flex-wrap: wrap; gap: 8rpx; margin-top: 12rpx; }
-.tag { font-size: 20rpx; padding: 4rpx 14rpx; border-radius: 999rpx; font-weight: 500; }
+.tag { font-size: 20rpx; padding: 4rpx 14rpx; border-radius: 9999rpx; font-weight: 500; }
 .difficulty-easy { background: #ecfdf5; color: #065f46; }
 .difficulty-medium { background: #fffbeb; color: #92400e; }
 .difficulty-hard { background: #fef2f2; color: #991b1b; }
@@ -49,16 +49,16 @@
 .meta-icon { width: 24rpx; height: 24rpx; opacity: 0.6; }
 
 /* Favorite button */
-.favorite-btn { position: absolute; top: 20rpx; right: 20rpx; width: 56rpx; height: 56rpx; border-radius: 50%; background: rgba(250, 249, 247, 0.8); display: flex; align-items: center; justify-content: center; }
+.favorite-btn { position: absolute; top: 20rpx; right: 20rpx; width: 56rpx; height: 56rpx; border-radius: 9999rpx; background: rgba(250, 249, 247, 0.8); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 .heart-icon { width: 28rpx; height: 28rpx; opacity: 0.5; }
 .heart-icon.active { opacity: 1; filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%); }
 
 /* Loading */
-.loading-state { display: flex; flex-direction: column; gap: 20rpx; }
-.loading-card { display: flex; gap: 24rpx; padding: 24rpx; background: var(--color-bg-card); border-radius: 24rpx; box-shadow: var(--shadow-xs); }
-.loading-cover { width: 160rpx; height: 160rpx; border-radius: 20rpx; background: var(--color-bg-subtle); }
+.loading-state { display: flex; flex-direction: column; gap: 16rpx; }
+.loading-card { display: flex; gap: 24rpx; padding: 24rpx; background: var(--color-bg-card); border-radius: 32rpx; box-shadow: var(--shadow-xs); }
+.loading-cover { width: 160rpx; height: 160rpx; border-radius: 24rpx; background: var(--color-bg-subtle); }
 .loading-info { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 16rpx; }
-.loading-line { height: 24rpx; background: var(--color-bg-subtle); border-radius: 8rpx; }
+.loading-line { height: 24rpx; background: var(--color-bg-subtle); border-radius: 12rpx; }
 .loading-line.long { width: 200rpx; }
 .loading-line.medium { width: 280rpx; }
 .loading-line.short { width: 120rpx; }
@@ -68,5 +68,5 @@
 .empty-icon { width: 96rpx; height: 96rpx; margin-bottom: 24rpx; opacity: 0.3; }
 .empty-title { font-size: 32rpx; font-weight: 600; color: var(--color-text); margin-bottom: 12rpx; }
 .empty-desc { font-size: 24rpx; color: var(--color-text-muted); margin-bottom: 48rpx; }
-.empty-btn { padding: 20rpx 64rpx; background: var(--color-primary); color: #fff; border-radius: 24rpx; font-size: 28rpx; font-weight: 600; }
-.empty-btn:active { opacity: 0.8; }
+.empty-btn { padding: 20rpx 64rpx; background: var(--color-primary); color: #fff; border-radius: 32rpx; font-size: 28rpx; font-weight: 600; box-shadow: var(--shadow-md); transition: all 0.2s; }
+.empty-btn:active { transform: scale(0.98); }
