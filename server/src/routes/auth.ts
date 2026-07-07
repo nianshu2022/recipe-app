@@ -11,6 +11,7 @@ type AuthBody = {
   password?: string
   nickname?: string
   refreshToken?: string
+  code?: string
 }
 
 const PBKDF2_ITERATIONS = 200_000
@@ -226,6 +227,141 @@ export async function handleAuth(request: Request, env: Env): Promise<Response> 
         .run()
     }
     return jsonResponse({ success: true }, 200, request)
+  }
+
+  // Send verification code
+  if (path === '/api/auth/send-code') {
+    const { email } = body
+    if (!email || !validateEmail(email)) {
+      return errorResponse('请提供有效的邮箱地址', 400, request)
+    }
+
+    // Rate limit: 1 code per 60 seconds per email
+    const codeRate = await checkRateLimit(`code:${email}`, 1, 60_000, env)
+    if (!codeRate.allowed) {
+      return errorResponse('发送过于频繁，请60秒后重试', 429, request)
+    }
+
+    // Generate 6-digit code
+    const code = String(Math.floor(100000 + Math.random() * 900000))
+    const codeId = crypto.randomUUID()
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString() // 5 minutes
+
+    // Delete old unused codes for this email
+    await env.DB.prepare(
+      'DELETE FROM verification_codes WHERE email = ? AND used = 0',
+    ).bind(email).run()
+
+    // Save new code
+    await env.DB.prepare(
+      'INSERT INTO verification_codes (id, email, code, purpose, expires_at) VALUES (?, ?, ?, ?, ?)',
+    ).bind(codeId, email, code, 'login', expiresAt).run()
+
+    // Send email via Resend API
+    if (env.RESEND_API_KEY) {
+      try {
+        const resendRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: '知味 <noreply@nianshu2022.cn>',
+            to: email,
+            subject: '【知味】登录验证码',
+            html: `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 20px;">
+                <h2 style="color: #252220;">知味 · 登录验证码</h2>
+                <p style="color: #6b6355; font-size: 14px;">您正在使用邮箱验证码登录，验证码为：</p>
+                <div style="background: #f5f3ef; border-radius: 12px; padding: 20px; text-align: center; margin: 20px 0;">
+                  <span style="font-size: 32px; font-weight: bold; color: #c9583a; letter-spacing: 8px;">${code}</span>
+                </div>
+                <p style="color: #a8a08e; font-size: 12px;">验证码5分钟内有效，请勿泄露给他人。</p>
+              </div>
+            `,
+          }),
+        })
+
+        if (!resendRes.ok) {
+          const errText = await resendRes.text()
+          console.error('Resend API error:', errText)
+          return errorResponse('验证码发送失败，请稍后重试', 500, request)
+        }
+      } catch (e) {
+        console.error('Failed to send email:', e)
+        return errorResponse('验证码发送失败，请稍后重试', 500, request)
+      }
+    } else {
+      // Development mode: log code to console
+      console.log(`[DEV] Verification code for ${email}: ${code}`)
+    }
+
+    return jsonResponse({ success: true, message: '验证码已发送' }, 200, request)
+  }
+
+  // Login with verification code
+  if (path === '/api/auth/login-code') {
+    const { email, code } = body
+    if (!email || !validateEmail(email)) {
+      return errorResponse('请提供有效的邮箱地址', 400, request)
+    }
+    if (!code || typeof code !== 'string' || code.length !== 6) {
+      return errorResponse('请提供6位验证码', 400, request)
+    }
+
+    // Find valid code
+    const record = await env.DB.prepare(
+      'SELECT id FROM verification_codes WHERE email = ? AND code = ? AND used = 0 AND expires_at > datetime("now")',
+    ).bind(email, code).first<{ id: string }>()
+
+    if (!record) {
+      return errorResponse('验证码无效或已过期', 401, request)
+    }
+
+    // Mark code as used
+    await env.DB.prepare(
+      'UPDATE verification_codes SET used = 1 WHERE id = ?',
+    ).bind(record.id).run()
+
+    // Find or create user
+    let user = await env.DB.prepare(
+      'SELECT id, email, nickname FROM users WHERE email = ?',
+    ).bind(email).first<{ id: string; email: string; nickname: string }>()
+
+    if (!user) {
+      // Auto-register
+      const userId = crypto.randomUUID()
+      const nickname = email.split('@')[0]
+      // Generate a random password for code-login users
+      const randomPassword = crypto.randomUUID().slice(0, 16)
+      const passwordHash = await hashPassword(randomPassword)
+
+      await env.DB.prepare(
+        'INSERT INTO users (id, email, password_hash, nickname) VALUES (?, ?, ?, ?)',
+      ).bind(userId, email, passwordHash, nickname).run()
+
+      user = { id: userId, email, nickname }
+    }
+
+    const accessToken = await signJWT({ sub: user.id }, env.JWT_SECRET, 900)
+    const refreshToken = await signJWT({ sub: user.id, type: 'refresh' }, env.JWT_SECRET, 604800)
+
+    const tokenHash = await hashRefreshToken(refreshToken, env.JWT_SECRET)
+    await env.DB.prepare(
+      'INSERT INTO sessions (id, user_id, refresh_token, expires_at) VALUES (?, ?, ?, datetime("now", "+7 days"))',
+    )
+      .bind(crypto.randomUUID(), user.id, tokenHash)
+      .run()
+
+    const response = jsonResponse(
+      { accessToken, refreshToken, user },
+      200, request,
+    )
+    for (const [k, v] of Object.entries(extraHeaders)) {
+      response.headers.set(k, v)
+    }
+    return response
   }
 
   return errorResponse('Not found', 404, request)

@@ -1,0 +1,125 @@
+<view class="page page-safe plan-page {{themeClass}}">
+  <view class="plan-topbar" style="padding-top: {{headerTopInset}}px; padding-right: {{menuButtonReserve}}px;">
+    <view class="topbar-copy">
+      <view class="title">七日餐事</view>
+      <view class="subtitle">{{plannedCount > 0 ? '已安排 ' + plannedCount + ' 道菜' : '规划一周的美味'}}</view>
+    </view>
+    <view wx:if="{{plannedCount > 0}}" class="topbar-actions">
+      <view class="tool-button" bindtap="generateShopping">
+        <image class="tool-icon" src="/assets/lucide/shopping-cart.svg" mode="aspectFit" />
+      </view>
+      <view class="tool-button" bindtap="clearPlan">
+        <image class="tool-icon" src="/assets/lucide/eraser.svg" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <view class="plan-list">
+    <view wx:for="{{days}}" wx:key="name" class="plan-card card">
+      <view class="day-head">
+        <view class="day-title-row">
+          <text class="day-name {{item.isToday ? 'is-today' : ''}}">{{item.name}}</text>
+          <text class="day-date">{{item.dateText}}</text>
+          <text wx:if="{{item.isToday}}" class="today-badge">今天</text>
+        </view>
+      </view>
+      <view
+        wx:for="{{item.slots}}"
+        wx:for-item="slot"
+        wx:key="key"
+        class="slot-row slot-{{slot.key}} {{slot.isEmpty ? 'is-empty' : ''}}"
+        data-day="{{item.dayIndex}}"
+        data-slot="{{slot.key}}"
+        bindtap="chooseRecipe"
+      >
+        <text class="slot-label">{{slot.label}}</text>
+        <view class="slot-content">
+          <view wx:if="{{slot.recipes.length > 0}}" class="meal-chip-row">
+            <view wx:for="{{slot.recipes}}" wx:for-item="recipe" wx:key="id" class="meal-chip">
+              <text>{{recipe.name}}</text>
+              <image
+                class="chip-remove"
+                data-day="{{item.dayIndex}}"
+                data-slot="{{slot.key}}"
+                data-id="{{recipe.id}}"
+                catchtap="removeRecipe"
+                src="/assets/lucide/x.svg"
+                mode="aspectFit"
+              />
+            </view>
+          </view>
+          <view wx:else class="slot-empty">
+            <image class="slot-plus" src="/assets/lucide/plus.svg" mode="aspectFit" />
+            <text class="slot-value">{{slot.value}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<view wx:if="{{showPicker}}" class="picker-mask" bindtap="closePicker">
+  <view class="picker-panel" catchtap="noop">
+    <view class="picker-head">
+      <view class="picker-title">选择菜谱 · {{selectingSlotLabel}}</view>
+      <view class="picker-close" bindtap="closePicker">
+        <image class="picker-close-icon" src="/assets/lucide/x.svg" mode="aspectFit" />
+      </view>
+    </view>
+
+    <view class="picker-search">
+      <image class="picker-search-icon" src="/assets/lucide/search.svg" mode="aspectFit" />
+      <input
+        class="picker-search-input"
+        value="{{pickerSearch}}"
+        bindinput="onPickerSearch"
+        placeholder="搜索菜谱..."
+        placeholder-class="picker-placeholder"
+      />
+    </view>
+
+    <scroll-view class="picker-category-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="picker-category-row">
+        <view
+          wx:for="{{pickerCategories}}"
+          wx:key="key"
+          class="picker-category {{pickerCategory === item.key ? 'active' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="onPickerCategory"
+        >
+          <image wx:if="{{item.icon}}" class="picker-category-icon" src="{{pickerCategory === item.key ? item.activeIcon : item.icon}}" mode="aspectFit" />
+          {{item.label}}
+        </view>
+      </view>
+    </scroll-view>
+
+    <scroll-view class="picker-list" scroll-y enhanced>
+      <view wx:if="{{pickerRecipes.length > 0}}">
+        <view
+          wx:for="{{pickerRecipes}}"
+          wx:key="id"
+          class="picker-recipe {{item.isSelected ? 'is-selected' : ''}} {{item.alreadyAdded ? 'is-disabled' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="togglePickerRecipe"
+        >
+          <view class="picker-recipe-mark">
+            <image wx:if="{{item.isSelected}}" class="picker-check" src="/assets/lucide/check-white.svg" mode="aspectFit" />
+            <text wx:else>{{item.initial}}</text>
+          </view>
+          <view class="picker-recipe-copy">
+            <view class="picker-recipe-name">{{item.name}}</view>
+            <view class="picker-recipe-meta">{{item.metaText}}{{item.alreadyAdded ? ' · 已添加' : ''}}</view>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="picker-empty">没有匹配的菜谱</view>
+    </scroll-view>
+
+    <view class="picker-footer">
+      <view class="picker-confirm {{selectedCount === 0 ? 'is-disabled' : ''}}" bindtap="confirmPicker">
+        确认添加{{selectedCount > 0 ? '（' + selectedCount + ' 道）' : ''}}
+      </view>
+    </view>
+  </view>
+</view>
+<app-tabbar active="meal" />

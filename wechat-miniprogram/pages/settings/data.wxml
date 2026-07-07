@@ -1,0 +1,67 @@
+<view class="page page-safe data-page {{themeClass}}">
+  <view class="topbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px; padding-right: {{menuButtonReserve}}px;">
+    <view class="back-button" bindtap="backToSettings">
+      <image class="back-icon" src="/assets/lucide/arrow-left.svg" mode="aspectFit" />
+    </view>
+    <view class="title">数据管理</view>
+  </view>
+
+  <view class="stats-grid">
+    <view class="stat-card card">
+      <view class="stat-value">{{stats.recipes}}</view>
+      <view class="stat-label">菜谱</view>
+    </view>
+    <view class="stat-card card">
+      <view class="stat-value">{{stats.collections}}</view>
+      <view class="stat-label">收藏夹</view>
+    </view>
+    <view class="stat-card card">
+      <view class="stat-value">{{stats.cookingRecords}}</view>
+      <view class="stat-label">做菜记录</view>
+    </view>
+  </view>
+
+  <view class="group-title">备份与恢复</view>
+  <view class="action-list card">
+    <button class="action-row" bindtap="copyBackup">
+      <image class="row-icon" src="/assets/lucide/download.svg" mode="aspectFit" />
+      <view class="row-copy">
+        <view class="row-title">导出全部数据</view>
+        <view class="row-desc">复制 JSON 备份到剪贴板</view>
+      </view>
+    </button>
+    <button class="action-row" bindtap="pasteFromClipboard">
+      <image class="row-icon" src="/assets/lucide/upload.svg" mode="aspectFit" />
+      <view class="row-copy">
+        <view class="row-title">从剪贴板粘贴</view>
+        <view class="row-desc">把备份内容放到下方输入框</view>
+      </view>
+    </button>
+  </view>
+
+  <textarea
+    class="import-box"
+    value="{{importText}}"
+    bindinput="onImportInput"
+    placeholder="粘贴知味备份 JSON"
+    placeholder-class="placeholder"
+  />
+  <button class="primary-button import-button" bindtap="importBackup">导入数据</button>
+
+  <view wx:if="{{message}}" class="message {{messageType}}">
+    <image class="message-icon" src="/assets/lucide/circle-check.svg" mode="aspectFit" />
+    <text>{{message}}</text>
+  </view>
+
+  <view class="group-title">危险操作</view>
+  <view class="action-list card">
+    <button class="action-row danger" bindtap="clearData">
+      <image class="row-icon" src="/assets/lucide/trash-2.svg" mode="aspectFit" />
+      <view class="row-copy">
+        <view class="row-title">清除所有数据</view>
+        <view class="row-desc">删除本地菜谱、收藏、餐事和清单</view>
+      </view>
+    </button>
+  </view>
+</view>
+<app-tabbar active="settings" />

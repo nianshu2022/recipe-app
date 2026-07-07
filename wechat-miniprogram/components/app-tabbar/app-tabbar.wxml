@@ -1,0 +1,18 @@
+<view class="tabbar {{themeClass}}">
+  <view
+    wx:for="{{items}}"
+    wx:key="key"
+    class="tab-item {{item.center ? 'is-center' : ''}} {{active === item.key ? 'is-active' : ''}}"
+    data-page="{{item.page}}"
+    bindtap="switchTab"
+  >
+    <view class="tab-icon-wrap">
+      <image
+        class="tab-icon-image"
+        src="{{active === item.key ? item.activeIcon : item.icon}}"
+        mode="aspectFit"
+      />
+    </view>
+    <view class="tab-text">{{item.text}}</view>
+  </view>
+</view>

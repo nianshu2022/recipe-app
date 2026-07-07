@@ -1,0 +1,88 @@
+<view class="page page-safe shopping-page {{themeClass}}">
+  <view class="shopping-topbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px; padding-right: {{menuButtonReserve}}px;">
+    <view class="icon-button" bindtap="back">
+      <image class="icon-image" src="/assets/lucide/arrow-left.svg" mode="aspectFit" />
+    </view>
+    <view class="topbar-copy">
+      <view class="title">购物清单</view>
+      <view class="subtitle">{{checkedCount}}/{{totalCount}} 已购</view>
+    </view>
+    <view wx:if="{{checkedCount > 0}}" class="icon-button" bindtap="clearChecked">
+      <image class="icon-image" src="/assets/lucide/eraser.svg" mode="aspectFit" />
+    </view>
+    <view class="icon-button primary" bindtap="showAddInput">
+      <image class="icon-image" src="/assets/lucide/plus-white.svg" mode="aspectFit" />
+    </view>
+  </view>
+
+  <picker wx:if="{{lists.length > 1}}" range="{{listOptions}}" value="{{currentListIndex}}" bindchange="onListChange">
+    <view class="list-picker">
+      <text>{{currentListLabel}}</text>
+      <image class="picker-icon" src="/assets/lucide/chevron-right.svg" mode="aspectFit" />
+    </view>
+  </picker>
+
+  <view wx:if="{{showAdd}}" class="add-row">
+    <input
+      class="add-input"
+      value="{{newName}}"
+      bindinput="onNewNameInput"
+      placeholder="输入食材名称"
+      placeholder-class="placeholder"
+      confirm-type="done"
+      bindconfirm="addItem"
+      focus
+    />
+    <view class="add-submit" bindtap="addItem">添加</view>
+    <view class="add-cancel" bindtap="hideAddInput">
+      <image class="cancel-icon" src="/assets/lucide/x.svg" mode="aspectFit" />
+    </view>
+  </view>
+
+  <view class="progress-track">
+    <view class="progress-fill" style="width: {{progress}}%;"></view>
+  </view>
+
+  <view wx:if="{{groupedItems.length > 0}}" class="group-list">
+    <view wx:for="{{groupedItems}}" wx:key="category" class="shopping-group card">
+      <view class="group-head" data-category="{{item.category}}" bindtap="toggleCategory">
+        <view class="group-title">
+          <text>{{item.category}}</text>
+          <text class="group-count">{{item.checkedCount}}/{{item.totalCount}}</text>
+        </view>
+        <image class="group-chevron {{item.expanded ? 'is-expanded' : ''}}" src="/assets/lucide/chevron-right.svg" mode="aspectFit" />
+      </view>
+
+      <view wx:if="{{item.expanded}}" class="group-items">
+        <view
+          wx:for="{{item.items}}"
+          wx:for-item="food"
+          wx:key="id"
+          class="shopping-item {{food.checked ? 'is-checked' : ''}}"
+        >
+          <view class="check-dot" data-id="{{food.id}}" bindtap="toggleItem">
+            <image wx:if="{{food.checked}}" class="check-icon" src="/assets/lucide/check-white.svg" mode="aspectFit" />
+          </view>
+          <view class="item-main" data-id="{{food.id}}" bindtap="toggleItem">
+            <text class="item-name">{{food.name}}</text>
+            <text wx:if="{{food.sourceRecipeName}}" class="item-source">{{food.sourceRecipeName}}</text>
+          </view>
+          <text class="item-amount">{{food.amountText}}</text>
+          <view class="remove-button" data-id="{{food.id}}" bindtap="removeItem">
+            <image class="remove-icon" src="/assets/lucide/trash-2.svg" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="delete-list-button" bindtap="deleteCurrentList">删除清单</view>
+  </view>
+
+  <view wx:else class="card empty">
+    <image class="empty-icon" src="/assets/lucide/shopping-cart.svg" mode="aspectFit" />
+    <view class="empty-title">清单是空的</view>
+    <view class="empty-text">从菜谱生成一份购物清单吧</view>
+    <button class="primary-button empty-action" bindtap="goHome">去选菜谱</button>
+  </view>
+</view>
+<app-tabbar active="" />

@@ -1,0 +1,115 @@
+<view class="page page-safe settings-page {{themeClass}}" style="padding-top: {{contentTopInset}}px;">
+  <view class="settings-title">小窝</view>
+
+  <view class="profile-card card" bindtap="openProfile">
+    <view class="avatar">
+      <image class="avatar-icon" src="/assets/lucide/chef-hat.svg" mode="aspectFit" />
+    </view>
+    <view class="profile-info">
+      <view class="name">{{userName}}</view>
+      <view class="desc">{{userDesc}}</view>
+    </view>
+    <view wx:if="{{loggedIn}}" class="sync-button" catchtap="syncNow">
+      <image class="sync-icon {{syncing ? 'is-syncing' : ''}}" src="/assets/lucide/refresh-cw.svg" mode="aspectFit" />
+    </view>
+    <image wx:else class="chevron" src="/assets/lucide/chevron-right.svg" mode="aspectFit" />
+  </view>
+
+  <view class="group-title">我的内容</view>
+  <view class="action-list card">
+    <view class="action-row" bindtap="openCollection">
+      <view class="row-left">
+        <image class="row-icon" src="/assets/lucide/heart.svg" mode="aspectFit" />
+        <text>我的收藏夹</text>
+      </view>
+      <image class="chevron" src="/assets/lucide/chevron-right.svg" mode="aspectFit" />
+    </view>
+    <view class="action-row" bindtap="openShopping">
+      <view class="row-left">
+        <image class="row-icon" src="/assets/lucide/shopping-cart.svg" mode="aspectFit" />
+        <text>购物清单</text>
+      </view>
+      <image class="chevron" src="/assets/lucide/chevron-right.svg" mode="aspectFit" />
+    </view>
+  </view>
+
+  <button wx:if="{{loggedIn}}" class="logout-button" bindtap="logout">
+    <image class="logout-icon" src="/assets/lucide/log-out.svg" mode="aspectFit" />
+    <text>退出登录</text>
+  </button>
+
+  <view class="group-title">设置</view>
+  <view class="action-list card">
+    <view class="action-row" bindtap="openSettings">
+      <view class="row-left">
+        <image class="row-icon" src="/assets/lucide/settings.svg" mode="aspectFit" />
+        <text>设置</text>
+      </view>
+      <image class="chevron" src="/assets/lucide/chevron-right.svg" mode="aspectFit" />
+    </view>
+  </view>
+
+  <view class="about">
+    <view>知味 v1.1.6</view>
+    <view>你的私人美食管家</view>
+  </view>
+</view>
+
+<!-- Settings Panel -->
+<view wx:if="{{showSettings}}" class="settings-panel {{themeClass}}">
+  <view class="panel-header" style="padding-top: {{statusBarHeight + 8}}px;">
+    <view class="back-button" bindtap="closeSettings">
+      <image class="back-icon" src="/assets/lucide/arrow-left.svg" mode="aspectFit" />
+    </view>
+    <view class="panel-title">设置</view>
+  </view>
+
+  <view class="panel-content">
+    <view class="group-title">外观</view>
+    <view class="theme-card card">
+      <view class="theme-option {{theme === 'light' ? 'active' : ''}}" data-theme="light" bindtap="setTheme">
+        <image class="theme-icon" src="/assets/lucide/sun.svg" mode="aspectFit" />
+        <text>浅色</text>
+      </view>
+      <view class="theme-option {{theme === 'dark' ? 'active' : ''}}" data-theme="dark" bindtap="setTheme">
+        <image class="theme-icon" src="/assets/lucide/moon.svg" mode="aspectFit" />
+        <text>深色</text>
+      </view>
+      <view class="theme-option {{theme === 'system' ? 'active' : ''}}" data-theme="system" bindtap="setTheme">
+        <image class="theme-icon" src="{{theme === 'system' ? '/assets/lucide/monitor-white.svg' : '/assets/lucide/monitor.svg'}}" mode="aspectFit" />
+        <text>跟随系统</text>
+      </view>
+    </view>
+
+    <view class="group-title">数据</view>
+    <view class="action-list card">
+      <view class="action-row" bindtap="openData">
+        <view class="row-left">
+          <image class="row-icon" src="/assets/lucide/database.svg" mode="aspectFit" />
+          <text>数据管理</text>
+        </view>
+        <image class="chevron" src="/assets/lucide/chevron-right.svg" mode="aspectFit" />
+      </view>
+    </view>
+
+    <view class="group-title">关于</view>
+    <view class="action-list card">
+      <view class="action-row" bindtap="checkUpdate">
+        <view class="row-left">
+          <image class="row-icon" src="/assets/lucide/download.svg" mode="aspectFit" />
+          <text>检查更新</text>
+        </view>
+        <image class="chevron" src="/assets/lucide/chevron-right.svg" mode="aspectFit" />
+      </view>
+      <view class="action-row" bindtap="openPrivacy">
+        <view class="row-left">
+          <image class="row-icon" src="/assets/lucide/heart.svg" mode="aspectFit" />
+          <text>隐私政策</text>
+        </view>
+        <image class="chevron" src="/assets/lucide/chevron-right.svg" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+</view>
+
+<app-tabbar active="settings" />

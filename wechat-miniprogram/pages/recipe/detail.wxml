@@ -1,0 +1,128 @@
+<view wx:if="{{recipe}}" class="page detail-page page-safe {{themeClass}}">
+  <view class="detail-topbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px; padding-right: {{menuButtonReserve}}px;">
+    <view class="icon-button" bindtap="back">
+      <image class="topbar-icon" src="/assets/lucide/arrow-left.svg" mode="aspectFit" />
+    </view>
+    <view class="topbar-title">{{recipe.name}}</view>
+    <view class="icon-button" bindtap="editRecipe">
+      <image class="topbar-icon" src="/assets/lucide/pencil.svg" mode="aspectFit" />
+    </view>
+    <view class="icon-button" bindtap="removeRecipe">
+      <image class="topbar-icon" src="/assets/lucide/trash-2.svg" mode="aspectFit" />
+    </view>
+    <view class="icon-button" bindtap="toggleFavorite">
+      <image class="topbar-icon" src="{{isFavorited ? '/assets/lucide/heart-active.svg' : '/assets/lucide/heart.svg'}}" mode="aspectFit" />
+    </view>
+  </view>
+
+  <view class="cover-card" style="background: {{recipe.coverColor}};">
+    <image wx:if="{{recipe.coverImage}}" class="cover-image" src="{{recipe.coverImage}}" mode="aspectFill" />
+    <view wx:else class="cover-placeholder">
+      <image class="cover-placeholder-icon" src="{{recipe.categoryIcon}}" mode="aspectFit" />
+    </view>
+  </view>
+
+  <view class="meta-row">
+    <view class="meta-chip">
+      <image class="meta-icon" src="/assets/lucide/clock.svg" mode="aspectFit" />
+      <text>{{recipe.durationText}}</text>
+    </view>
+    <view class="meta-chip">
+      <image class="meta-icon" src="/assets/lucide/chef-hat.svg" mode="aspectFit" />
+      <text>{{recipe.difficultyText}}</text>
+    </view>
+    <view class="meta-chip">
+      <image class="meta-icon" src="/assets/lucide/users.svg" mode="aspectFit" />
+      <text>{{recipe.servingsNow}}人份</text>
+    </view>
+  </view>
+
+  <view class="nutrition-card card">
+    <view class="nutrition-head">
+      <text class="section-title">营养信息（每份）</text>
+      <text class="nutrition-badge {{recipe.nutrition.levelClass}}">{{recipe.nutrition.label}} {{recipe.nutrition.calories}}kcal</text>
+    </view>
+    <view class="macro-bar">
+      <view class="macro protein" style="width: {{recipe.nutrition.proteinPercent}}%;"></view>
+      <view class="macro carbs" style="width: {{recipe.nutrition.carbsPercent}}%;"></view>
+      <view class="macro fat" style="width: {{recipe.nutrition.fatPercent}}%;"></view>
+    </view>
+    <view class="nutrition-grid">
+      <view class="nutrition-item">
+        <text class="nutrition-value">{{recipe.nutrition.protein}}g</text>
+        <text class="nutrition-label">蛋白质</text>
+      </view>
+      <view class="nutrition-item">
+        <text class="nutrition-value">{{recipe.nutrition.carbs}}g</text>
+        <text class="nutrition-label">碳水</text>
+      </view>
+      <view class="nutrition-item">
+        <text class="nutrition-value">{{recipe.nutrition.fat}}g</text>
+        <text class="nutrition-label">脂肪</text>
+      </view>
+      <view class="nutrition-item">
+        <text class="nutrition-value">{{recipe.nutrition.fiber}}g</text>
+        <text class="nutrition-label">膳食纤维</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <view class="section-title">用料清单</view>
+      <view class="serving-control">
+        <view class="serving-button" data-delta="-1" bindtap="changeServings">
+          <image class="serving-icon" src="/assets/lucide/minus.svg" mode="aspectFit" />
+        </view>
+        <text class="serving-text">{{recipe.servingsNow}} 人份</text>
+        <view class="serving-button" data-delta="1" bindtap="changeServings">
+          <image class="serving-icon" src="/assets/lucide/plus.svg" mode="aspectFit" />
+        </view>
+      </view>
+    </view>
+    <view class="ingredient-list card">
+      <view wx:for="{{recipe.scaledIngredients}}" wx:key="id" class="ingredient-item">
+        <text class="ingredient-name">{{item.name}}</text>
+        <text class="ingredient-amount">{{item.amountText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">操作步骤</view>
+    <view class="step-list">
+      <view wx:for="{{recipe.steps}}" wx:key="order" class="step-card card">
+        <view class="step-main">
+          <view class="step-head">
+            <view class="step-index">{{item.order}}</view>
+            <view wx:if="{{item.timer}}" class="timer-badge">
+              <image class="timer-icon" src="/assets/lucide/clock.svg" mode="aspectFit" />
+              <text>{{item.timer}}分钟</text>
+            </view>
+          </view>
+          <view class="step-text">{{item.description}}</view>
+          <view wx:if="{{item.tip}}" class="tip-box">
+            <image class="tip-icon" src="/assets/lucide/lightbulb.svg" mode="aspectFit" />
+            <text>{{item.tip}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-action-list">
+    <view class="bottom-action primary" bindtap="startCooking">
+      <image class="bottom-action-icon" src="/assets/lucide/play-white.svg" mode="aspectFit" />
+      <text>开始做菜</text>
+    </view>
+    <view class="bottom-action" bindtap="addToShopping">
+      <image class="bottom-action-icon" src="/assets/lucide/shopping-cart.svg" mode="aspectFit" />
+      <text>生成购物清单</text>
+    </view>
+    <button class="bottom-action" open-type="share">
+      <image class="bottom-action-icon" src="/assets/lucide/share-2.svg" mode="aspectFit" />
+      <text>分享菜谱</text>
+    </button>
+  </view>
+</view>
+<app-tabbar active="" />

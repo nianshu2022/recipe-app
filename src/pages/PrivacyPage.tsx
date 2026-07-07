@@ -1,7 +1,20 @@
+import { useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
+
 export function PrivacyPage() {
+  const navigate = useNavigate()
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-8 text-2xl font-bold text-[var(--color-text)]">隐私政策</h1>
+      <div className="mb-8 flex items-center gap-3">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex h-10 w-10 items-center justify-center rounded-xl hover:bg-[var(--color-bg-subtle)] transition-colors"
+        >
+          <ArrowLeft size={20} className="text-[var(--color-text)]" />
+        </button>
+        <h1 className="text-2xl font-bold text-[var(--color-text)]">隐私政策</h1>
+      </div>
       
       <div className="space-y-6 text-[var(--color-text-secondary)]">
         <section>

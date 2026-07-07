@@ -47,30 +47,69 @@ let dbPromise: Promise<IDBPDatabase<RecipeAppDB>> | null = null
 function getDB() {
   if (!dbPromise) {
     dbPromise = openDB<RecipeAppDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        const recipeStore = db.createObjectStore('recipes', { keyPath: 'id' })
-        recipeStore.createIndex('by-category', 'category')
-        recipeStore.createIndex('by-updated', 'updatedAt')
+      upgrade(db, _oldVersion, _newVersion, transaction) {
+        // Helper to create store only if it doesn't exist
+        const createStore = <T extends { keyPath: string }>(
+          name: string,
+          options: IDBObjectStoreParameters
+        ) => {
+          if (!db.objectStoreNames.contains(name)) {
+            const store = db.createObjectStore(name, options)
+            return store
+          }
+          return transaction.objectStore(name)
+        }
 
-        const collectionStore = db.createObjectStore('collections', { keyPath: 'id' })
-        collectionStore.createIndex('by-updated', 'updatedAt')
+        // Recipes
+        const recipeStore = createStore('recipes', { keyPath: 'id' })
+        if (!recipeStore.indexNames.contains('by-category')) {
+          recipeStore.createIndex('by-category', 'category')
+        }
+        if (!recipeStore.indexNames.contains('by-updated')) {
+          recipeStore.createIndex('by-updated', 'updatedAt')
+        }
 
-        const menuStore = db.createObjectStore('menus', { keyPath: 'id' })
-        menuStore.createIndex('by-updated', 'updatedAt')
+        // Collections
+        const collectionStore = createStore('collections', { keyPath: 'id' })
+        if (!collectionStore.indexNames.contains('by-updated')) {
+          collectionStore.createIndex('by-updated', 'updatedAt')
+        }
 
-        const mealPlanStore = db.createObjectStore('mealPlans', { keyPath: 'id' })
-        mealPlanStore.createIndex('by-week', 'weekStart')
+        // Menus
+        const menuStore = createStore('menus', { keyPath: 'id' })
+        if (!menuStore.indexNames.contains('by-updated')) {
+          menuStore.createIndex('by-updated', 'updatedAt')
+        }
 
-        const shoppingListStore = db.createObjectStore('shoppingLists', { keyPath: 'id' })
-        shoppingListStore.createIndex('by-updated', 'updatedAt')
+        // Meal Plans
+        const mealPlanStore = createStore('mealPlans', { keyPath: 'id' })
+        if (!mealPlanStore.indexNames.contains('by-week')) {
+          mealPlanStore.createIndex('by-week', 'weekStart')
+        }
 
-        const cookingStore = db.createObjectStore('cookingRecords', { keyPath: 'id' })
-        cookingStore.createIndex('by-date', 'date')
-        cookingStore.createIndex('by-recipe', 'recipeId')
+        // Shopping Lists
+        const shoppingListStore = createStore('shoppingLists', { keyPath: 'id' })
+        if (!shoppingListStore.indexNames.contains('by-updated')) {
+          shoppingListStore.createIndex('by-updated', 'updatedAt')
+        }
 
-        const fridgeStore = db.createObjectStore('fridgeItems', { keyPath: 'id' })
-        fridgeStore.createIndex('by-expiry', 'expiryDate')
-        fridgeStore.createIndex('by-category', 'category')
+        // Cooking Records
+        const cookingStore = createStore('cookingRecords', { keyPath: 'id' })
+        if (!cookingStore.indexNames.contains('by-date')) {
+          cookingStore.createIndex('by-date', 'date')
+        }
+        if (!cookingStore.indexNames.contains('by-recipe')) {
+          cookingStore.createIndex('by-recipe', 'recipeId')
+        }
+
+        // Fridge Items
+        const fridgeStore = createStore('fridgeItems', { keyPath: 'id' })
+        if (!fridgeStore.indexNames.contains('by-expiry')) {
+          fridgeStore.createIndex('by-expiry', 'expiryDate')
+        }
+        if (!fridgeStore.indexNames.contains('by-category')) {
+          fridgeStore.createIndex('by-category', 'category')
+        }
       },
     })
   }

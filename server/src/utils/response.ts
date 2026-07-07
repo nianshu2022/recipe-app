@@ -2,6 +2,9 @@ const ALLOWED_ORIGINS = [
   'https://recipe.nianshu2022.cn',
   'http://localhost:5173',
   'http://localhost:4173',
+  'http://localhost:5174',
+  'http://192.168.1.100:5173',
+  'http://192.168.1.100:5174',
 ]
 
 export function getCorsHeaders(origin: string | null): Record<string, string> {

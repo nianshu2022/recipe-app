@@ -1,15 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  ChevronRight, Heart, ShoppingCart, ChefHat, Moon, Sun, Monitor, Database, LogIn, LogOut, RefreshCw,
-  Download, X,
+  ChevronRight, Heart, ShoppingCart, ChefHat, Moon, Sun, Monitor, Database, LogOut, RefreshCw,
+  Settings, ArrowLeft,
 } from 'lucide-react'
-import { Capacitor } from '@capacitor/core'
-import { Browser } from '@capacitor/browser'
-import { Filesystem, Directory } from '@capacitor/filesystem'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
-import { checkForUpdate, type UpdateInfo } from '@/utils/updater'
 import { useUIStore } from '@/stores/uiStore'
 
 export function SettingsPage() {
@@ -17,11 +13,7 @@ export function SettingsPage() {
   const { theme, setTheme } = useThemeStore()
   const showToast = useUIStore((s) => s.showToast)
   const [syncing, setSyncing] = useState(false)
-  const [showUpdateModal, setShowUpdateModal] = useState(false)
-  const [checkingUpdate, setCheckingUpdate] = useState(false)
-  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
-  const [downloading, setDownloading] = useState(false)
-  const [downloadProgress, setDownloadProgress] = useState(0)
+  const [showSettings, setShowSettings] = useState(false)
 
   const handleSync = async () => {
     setSyncing(true)
@@ -29,168 +21,10 @@ export function SettingsPage() {
     setSyncing(false)
   }
 
-  const handleCheckUpdate = async () => {
-    setCheckingUpdate(true)
-    setShowUpdateModal(true)
-    setUpdateInfo(null)
-    
-    try {
-      const info = await checkForUpdate()
-      if (info) {
-        setUpdateInfo(info)
-        if (!info.hasUpdate) {
-          showToast('已是最新版本', 'success')
-          setShowUpdateModal(false)
-        }
-      } else {
-        showToast('检查更新失败，请稍后重试', 'error')
-        setShowUpdateModal(false)
-      }
-    } catch {
-      showToast('检查更新失败', 'error')
-      setShowUpdateModal(false)
-    } finally {
-      setCheckingUpdate(false)
-    }
-  }
-
-  const handleDownload = async () => {
-    if (!updateInfo?.downloadUrl) return
-    
-    setDownloading(true)
-    setDownloadProgress(0)
-    
-    try {
-      if (Capacitor.isNativePlatform()) {
-        showToast('正在下载...', 'info')
-        
-        // 使用 fetch 下载文件
-        const response = await fetch(updateInfo.downloadUrl)
-        if (!response.ok) throw new Error('Download failed')
-        
-        const contentLength = Number(response.headers.get('Content-Length'))
-        const reader = response.body?.getReader()
-        let receivedLength = 0
-        const chunks: Uint8Array[] = []
-        
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-            chunks.push(value)
-            receivedLength += value.length
-            if (contentLength) {
-              setDownloadProgress(Math.round((receivedLength / contentLength) * 100))
-            }
-          }
-        }
-        
-        // 合并数据
-        const allChunks = new Uint8Array(receivedLength)
-        let position = 0
-        for (const chunk of chunks) {
-          allChunks.set(chunk, position)
-          position += chunk.length
-        }
-        
-        // 分块转换为 base64（避免栈溢出）
-        let binary = ''
-        const chunkSize = 8192
-        for (let i = 0; i < allChunks.length; i += chunkSize) {
-          const slice = allChunks.subarray(i, i + chunkSize)
-          binary += String.fromCharCode.apply(null, Array.from(slice))
-        }
-        const base64 = btoa(binary)
-        
-        // 保存到文件系统
-        const fileName = `zhivei-${updateInfo.latestVersion}.apk`
-        await Filesystem.writeFile({
-          path: fileName,
-          data: base64,
-          directory: Directory.Cache,
-        })
-        
-        setDownloadProgress(100)
-        showToast('下载完成，正在安装...', 'success')
-        
-        // 获取文件 URI
-        const fileUri = await Filesystem.getUri({
-          path: fileName,
-          directory: Directory.Cache,
-        })
-        
-        // 打开文件进行安装
-        await Browser.open({ url: fileUri.uri })
-        setShowUpdateModal(false)
-      } else {
-        // Web: 使用 fetch 下载
-        const response = await fetch(updateInfo.downloadUrl)
-        if (!response.ok) throw new Error('Download failed')
-        
-        const contentLength = Number(response.headers.get('Content-Length'))
-        const reader = response.body?.getReader()
-        let receivedLength = 0
-        const chunks: BlobPart[] = []
-        
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-            chunks.push(value)
-            receivedLength += value.length
-            if (contentLength) {
-              setDownloadProgress(Math.round((receivedLength / contentLength) * 100))
-            }
-          }
-        }
-        
-        const blob = new Blob(chunks)
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `zhivei-${updateInfo.latestVersion}-android.apk`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
-        
-        showToast('下载完成，请安装新版本', 'success')
-        setShowUpdateModal(false)
-      }
-    } catch (e) {
-      console.error('Download error:', e)
-      showToast('下载失败，请稍后重试', 'error')
-    } finally {
-      setDownloading(false)
-      setDownloadProgress(0)
-    }
-  }
-
   const themeOptions = [
     { value: 'light' as const, label: '浅色', icon: Sun },
     { value: 'dark' as const, label: '深色', icon: Moon },
     { value: 'system' as const, label: '跟随系统', icon: Monitor },
-  ]
-
-  const menuGroups = [
-    {
-      title: '我的内容',
-      items: [
-        { to: '/collection', icon: Heart, label: '我的收藏夹' },
-        { to: '/shopping', icon: ShoppingCart, label: '购物清单' },
-      ],
-    },
-    {
-      title: '设置',
-      items: isLoggedIn
-        ? [
-            { to: '/settings/data', icon: Database, label: '数据管理' },
-          ]
-        : [
-            { to: '/login', icon: LogIn, label: '登录 / 注册' },
-            { to: '/settings/data', icon: Database, label: '数据管理' },
-          ],
-    },
   ]
 
   return (
@@ -202,7 +36,10 @@ export function SettingsPage() {
       </div>
 
       {/* Profile card */}
-      <div className="flex items-center gap-4 rounded-2xl bg-[var(--color-bg-card)] p-5 shadow-xs">
+      <Link
+        to={isLoggedIn ? '#' : '/login'}
+        className="flex items-center gap-4 rounded-2xl bg-[var(--color-bg-card)] p-5 shadow-xs transition-colors hover:bg-[var(--color-bg-subtle)]"
+      >
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-bg-subtle)] to-[var(--color-bg)]">
           <ChefHat size={24} className="text-[var(--color-text-muted)]" />
         </div>
@@ -214,68 +51,48 @@ export function SettingsPage() {
             {isLoggedIn ? user?.email : '登录后可同步数据到云端'}
           </p>
         </div>
-        {isLoggedIn && (
+        {isLoggedIn ? (
           <button
-            onClick={handleSync}
+            onClick={(e) => { e.preventDefault(); handleSync() }}
             disabled={syncing}
             className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-bg)] text-[var(--color-text-muted)] shadow-xs transition-all duration-200 hover:bg-[var(--color-bg-subtle)] active:scale-95 disabled:opacity-50"
             title="同步数据"
           >
             <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
           </button>
+        ) : (
+          <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
         )}
-      </div>
+      </Link>
 
-      {/* Theme selector */}
+      {/* My Content */}
       <div className="space-y-3">
         <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
-          外观
+          我的内容
         </h2>
         <div className="overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs">
-          <div className="flex p-1.5 gap-1">
-            {themeOptions.map(({ value, label, icon: Icon }) => (
-              <button
-                key={value}
-                onClick={() => setTheme(value)}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all duration-200 ${
-                  theme === value
-                    ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                    : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
-                }`}
-              >
-                <Icon size={16} />
-                {label}
-              </button>
-            ))}
-          </div>
+          <Link
+            to="/collection"
+            className="flex items-center justify-between px-5 py-3.5 transition-colors duration-150 hover:bg-[var(--color-bg-subtle)]"
+          >
+            <div className="flex items-center gap-3">
+              <Heart size={18} className="text-[var(--color-text-muted)]" />
+              <span className="text-sm font-medium text-[var(--color-text)]">我的收藏夹</span>
+            </div>
+            <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+          </Link>
+          <Link
+            to="/shopping"
+            className="flex items-center justify-between px-5 py-3.5 border-t border-[var(--color-border-subtle)] transition-colors duration-150 hover:bg-[var(--color-bg-subtle)]"
+          >
+            <div className="flex items-center gap-3">
+              <ShoppingCart size={18} className="text-[var(--color-text-muted)]" />
+              <span className="text-sm font-medium text-[var(--color-text)]">购物清单</span>
+            </div>
+            <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+          </Link>
         </div>
       </div>
-
-      {/* Menu groups */}
-      {menuGroups.map((group) => (
-        <div key={group.title} className="space-y-3">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
-            {group.title}
-          </h2>
-          <div className="overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs">
-            {group.items.map(({ to, icon: Icon, label }, i) => (
-              <Link
-                key={label}
-                to={to}
-                className={`flex items-center justify-between px-5 py-3.5 transition-colors duration-150 hover:bg-[var(--color-bg-subtle)] ${
-                  i > 0 ? 'border-t border-[var(--color-border-subtle)]' : ''
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon size={18} className="text-[var(--color-text-muted)]" />
-                  <span className="text-sm font-medium text-[var(--color-text)]">{label}</span>
-                </div>
-                <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      ))}
 
       {/* Logout */}
       {isLoggedIn && (
@@ -288,89 +105,111 @@ export function SettingsPage() {
         </button>
       )}
 
+      {/* Settings button */}
+      <div className="space-y-3">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+          设置
+        </h2>
+        <div className="overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs">
+          <button
+            onClick={() => setShowSettings(true)}
+            className="flex w-full items-center justify-between px-5 py-3.5 transition-colors duration-150 hover:bg-[var(--color-bg-subtle)]"
+          >
+            <div className="flex items-center gap-3">
+              <Settings size={18} className="text-[var(--color-text-muted)]" />
+              <span className="text-sm font-medium text-[var(--color-text)]">设置</span>
+            </div>
+            <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+          </button>
+        </div>
+      </div>
+
       {/* About */}
       <div className="pb-4 pt-2 text-center">
         <p className="text-xs text-[var(--color-text-muted)]">知味 v1.1.6</p>
         <p className="mt-1 text-xs text-[var(--color-text-muted)]">你的私人美食管家</p>
-        
-        <div className="mt-3 flex items-center justify-center gap-4">
-          <button
-            onClick={handleCheckUpdate}
-            disabled={checkingUpdate}
-            className="inline-flex items-center gap-1.5 text-xs text-[var(--color-primary)] hover:underline disabled:opacity-50"
-          >
-            <Download size={14} className={checkingUpdate ? 'animate-bounce' : ''} />
-            {checkingUpdate ? '检查中...' : '检查更新'}
-          </button>
-
-          <Link to="/privacy" className="text-xs text-[var(--color-primary)] hover:underline">
-            隐私政策
-          </Link>
-        </div>
       </div>
 
-      {/* Update Modal */}
-      {showUpdateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => !downloading && setShowUpdateModal(false)}>
-          <div className="w-full max-w-sm rounded-2xl bg-[var(--color-bg-card)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-[var(--color-text)]">
-                {checkingUpdate ? '检查更新' : updateInfo?.hasUpdate ? '发现新版本' : '检查更新'}
-              </h3>
-              {!downloading && (
-                <button
-                  onClick={() => setShowUpdateModal(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--color-bg-subtle)]"
-                >
-                  <X size={18} className="text-[var(--color-text-muted)]" />
-                </button>
-              )}
+      {/* Settings Panel */}
+      {showSettings && (
+        <div className="fixed inset-0 z-50 bg-[var(--color-bg)]">
+          <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-center gap-3 bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
+            <button
+              onClick={() => setShowSettings(false)}
+              aria-label="返回"
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
+            >
+              <ArrowLeft size={18} className="text-[var(--color-text-secondary)]" />
+            </button>
+            <h1 className="flex-1 truncate font-display text-lg font-semibold tracking-tight text-[var(--color-text)]">
+              设置
+            </h1>
+          </div>
+
+          <div className="space-y-8 px-5">
+            {/* Appearance */}
+            <div className="space-y-3">
+              <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                外观
+              </h2>
+              <div className="overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs">
+                <div className="p-1.5">
+                  <div className="flex gap-1">
+                    {themeOptions.map(({ value, label, icon: Icon }) => (
+                      <button
+                        key={value}
+                        onClick={() => setTheme(value)}
+                        className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all duration-200 ${
+                          theme === value
+                            ? 'bg-[var(--color-primary)] text-white shadow-sm'
+                            : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
+                        }`}
+                      >
+                        <Icon size={16} />
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Content */}
-            <div className="mt-4">
-              {checkingUpdate ? (
-                <div className="flex flex-col items-center py-4">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-primary)]" />
-                  <p className="mt-3 text-sm text-[var(--color-text-muted)]">正在检查更新...</p>
-                </div>
-              ) : updateInfo?.hasUpdate ? (
-                <div>
-                  <p className="text-sm text-[var(--color-text-secondary)]">
-                    发现新版本 <span className="font-semibold text-[var(--color-text)]">v{updateInfo.latestVersion}</span>
-                  </p>
-                  <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                    当前版本：v{updateInfo.currentVersion}
-                  </p>
-                  
-                  {downloading ? (
-                    <div className="mt-4">
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-bg-subtle)]">
-                        <div
-                          className="h-full bg-[var(--color-primary)] transition-all duration-300"
-                          style={{ width: `${downloadProgress}%` }}
-                        />
-                      </div>
-                      <p className="mt-2 text-center text-xs text-[var(--color-text-muted)]">
-                        下载中 {downloadProgress}%
-                      </p>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={handleDownload}
-                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)] active:scale-[0.98]"
-                    >
-                      <Download size={16} />
-                      下载新版本
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <p className="py-4 text-center text-sm text-[var(--color-text-muted)]">
-                  当前已是最新版本
-                </p>
-              )}
+            {/* Data Management */}
+            <div className="space-y-3">
+              <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                数据
+              </h2>
+              <div className="overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs">
+                <Link
+                  to="/settings/data"
+                  className="flex items-center justify-between px-5 py-3.5 transition-colors duration-150 hover:bg-[var(--color-bg-subtle)]"
+                >
+                  <div className="flex items-center gap-3">
+                    <Database size={18} className="text-[var(--color-text-muted)]" />
+                    <span className="text-sm font-medium text-[var(--color-text)]">数据管理</span>
+                  </div>
+                  <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+                </Link>
+              </div>
+            </div>
+
+            {/* About */}
+            <div className="space-y-3">
+              <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                关于
+              </h2>
+              <div className="overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs">
+                <Link
+                  to="/privacy"
+                  className="flex items-center justify-between px-5 py-3.5 transition-colors duration-150 hover:bg-[var(--color-bg-subtle)]"
+                >
+                  <div className="flex items-center gap-3">
+                    <Heart size={18} className="text-[var(--color-text-muted)]" />
+                    <span className="text-sm font-medium text-[var(--color-text)]">隐私政策</span>
+                  </div>
+                  <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>

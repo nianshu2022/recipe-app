@@ -1,0 +1,410 @@
+page {
+  min-height: 100vh;
+  --color-bg: #faf9f7;
+  --color-bg-card: #ffffff;
+  --color-bg-subtle: #f5f3ef;
+  --color-bg-glass: rgba(250, 249, 247, 0.96);
+  --color-tabbar: rgba(255, 255, 255, 0.95);
+  --color-text: #252220;
+  --color-text-secondary: #6b6355;
+  --color-text-muted: #a8a08e;
+  --color-text-faint: #a8a08e;
+  --color-border: #e8e4de;
+  --color-border-subtle: #f5f3ef;
+  --color-primary: #c9583a;
+  --color-primary-dark: #a8432d;
+  --color-success: #5a7a54;
+  --color-warning: #c49a3c;
+  --color-danger: #c44b4b;
+  --shadow-card: 0 8rpx 32rpx rgba(37, 34, 32, 0.08);
+  --shadow-soft: 0 4rpx 16rpx rgba(37, 34, 32, 0.06);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+view,
+text,
+input,
+textarea,
+button {
+  box-sizing: border-box;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  line-height: inherit;
+  color: inherit;
+  font: inherit;
+}
+
+button::after {
+  border: 0;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 28rpx 28rpx 56rpx;
+}
+
+.page-safe {
+  padding-bottom: calc(56rpx + env(safe-area-inset-bottom));
+}
+
+.section-title {
+  color: #252220;
+  font-size: 34rpx;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.muted {
+  color: #8a8270;
+}
+
+.card {
+  background: #ffffff;
+  border: 1rpx solid #e8e4de;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(37, 34, 32, 0.08);
+}
+
+.primary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
+  padding: 0 32rpx;
+  border-radius: 999rpx;
+  background: #c9583a;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.ghost-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 76rpx;
+  padding: 0 28rpx;
+  border: 1rpx solid #e8e4de;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #524c40;
+  font-weight: 600;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  background: #f5f3ef;
+  color: #6b6355;
+  font-size: 22rpx;
+}
+
+.empty {
+  padding: 80rpx 36rpx;
+  text-align: center;
+  color: #8a8270;
+}
+
+.theme-light {
+  --color-bg: #faf9f7;
+  --color-bg-card: #ffffff;
+  --color-bg-subtle: #f5f3ef;
+  --color-bg-glass: rgba(250, 249, 247, 0.96);
+  --color-tabbar: rgba(255, 255, 255, 0.95);
+  --color-text: #252220;
+  --color-text-secondary: #6b6355;
+  --color-text-muted: #a8a08e;
+  --color-text-faint: #a8a08e;
+  --color-border: #e8e4de;
+  --color-border-subtle: #f5f3ef;
+  --shadow-card: 0 8rpx 32rpx rgba(37, 34, 32, 0.08);
+  --shadow-soft: 0 4rpx 16rpx rgba(37, 34, 32, 0.06);
+}
+
+.theme-dark {
+  --color-bg: #141312;
+  --color-bg-card: #1e1d1c;
+  --color-bg-subtle: #1e1d1c;
+  --color-bg-glass: rgba(20, 19, 18, 0.96);
+  --color-tabbar: rgba(30, 29, 28, 0.95);
+  --color-text: #f0ede8;
+  --color-text-secondary: #a09a90;
+  --color-text-muted: #575450;
+  --color-text-faint: #575450;
+  --color-border: #3d3b38;
+  --color-border-subtle: #2e2d2b;
+  --shadow-card: 0 8rpx 32rpx rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 4rpx 16rpx rgba(0, 0, 0, 0.3);
+}
+
+.theme-light,
+.theme-dark {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.theme-dark.card,
+.theme-dark .card,
+.theme-dark .action-list,
+.theme-dark .theme-card,
+.theme-dark .form-card,
+.theme-dark .ingredient-card,
+.theme-dark .step-edit-card,
+.theme-dark .nutrition-card,
+.theme-dark .ingredient-list,
+.theme-dark .shopping-group,
+.theme-dark .plan-card,
+.theme-dark .favorite-card,
+.theme-dark .profile-card,
+.theme-dark .content {
+  border-color: var(--color-border);
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-card);
+}
+
+.theme-dark .topbar,
+.theme-dark .detail-topbar,
+.theme-dark .form-topbar,
+.theme-dark .shopping-topbar,
+.theme-dark .plan-topbar,
+.theme-dark .settings-panel,
+.theme-dark .panel-header {
+  background: var(--color-bg-glass);
+}
+
+.theme-dark.tabbar,
+.theme-dark .tabbar {
+  border-top-color: var(--color-border-subtle);
+  background: var(--color-tabbar);
+  box-shadow: 0 -8rpx 28rpx rgba(0, 0, 0, 0.26);
+}
+
+.theme-dark .title,
+.theme-dark .settings-title,
+.theme-dark .hero-title,
+.theme-dark .topbar-title,
+.theme-dark .recipe-title,
+.theme-dark .favorite-name,
+.theme-dark .result-name,
+.theme-dark .box-title,
+.theme-dark .section-title,
+.theme-dark .day-name,
+.theme-dark .picker-title,
+.theme-dark .picker-recipe-name,
+.theme-dark .group-title,
+.theme-dark .ingredient-name,
+.theme-dark .nutrition-value,
+.theme-dark .step-description,
+.theme-dark .step-text,
+.theme-dark .top-title,
+.theme-dark .name,
+.theme-dark .row-title,
+.theme-dark .empty-title,
+.theme-dark .complete-title,
+.theme-dark .stat-value,
+.theme-dark .item-name,
+.theme-dark .label,
+.theme-dark .strong {
+  color: var(--color-text);
+}
+
+.theme-dark .subtitle,
+.theme-dark .hero-subtitle,
+.theme-dark .desc,
+.theme-dark .row-desc,
+.theme-dark .result-meta,
+.theme-dark .box-desc,
+.theme-dark .step-text,
+.theme-dark .tip-text,
+.theme-dark .paragraph,
+.theme-dark .list-item,
+.theme-dark .favorite-meta,
+.theme-dark .recipe-meta,
+.theme-dark .progress-text,
+.theme-dark .timer-text,
+.theme-dark .complete-desc,
+.theme-dark .picker-recipe-meta,
+.theme-dark .slot-label,
+.theme-dark .slot-value,
+.theme-dark .item-source,
+.theme-dark .item-amount,
+.theme-dark .ingredient-amount,
+.theme-dark .nutrition-label,
+.theme-dark .stat-label,
+.theme-dark .timer-label,
+.theme-dark .picker-empty,
+.theme-dark .empty-text,
+.theme-dark .about,
+.theme-dark .hint,
+.theme-dark .updated,
+.theme-dark .muted {
+  color: var(--color-text-muted);
+}
+
+.theme-dark .icon-button,
+.theme-dark .back-button,
+.theme-dark .round-button,
+.theme-dark .tool-button,
+.theme-dark .sync-button,
+.theme-dark .serving-control,
+.theme-dark .serving-button,
+.theme-dark .add-cancel,
+.theme-dark .picker-close,
+.theme-dark .meta-chip,
+.theme-dark .bottom-action,
+.theme-dark .nav-button,
+.theme-dark .timer-button,
+.theme-dark .list-picker,
+.theme-dark .action-row,
+.theme-dark .logout-button,
+.theme-dark .theme-option,
+.theme-dark .category-pill,
+.theme-dark .difficulty-pill,
+.theme-dark .picker-category {
+  border-color: var(--color-border);
+  background: var(--color-bg-card);
+  color: var(--color-text-secondary);
+  box-shadow: var(--shadow-soft);
+}
+
+.theme-dark .section-add-row {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.theme-dark .search-card,
+.theme-dark .picker-search,
+.theme-dark .input,
+.theme-dark .textarea,
+.theme-dark .picker-value,
+.theme-dark .add-input,
+.theme-dark .timer-input,
+.theme-dark .import-box,
+.theme-dark .cover-upload,
+.theme-dark .timer-row,
+.theme-dark .step-textarea,
+.theme-dark .slot-row,
+.theme-dark .picker-panel {
+  border-color: var(--color-border);
+  background: var(--color-bg-card);
+  color: var(--color-text);
+}
+
+.theme-dark .search-input,
+.theme-dark .picker-search-input {
+  color: var(--color-text);
+}
+
+.theme-dark .message {
+  border-color: var(--color-border);
+  background: var(--color-bg-subtle);
+}
+
+.theme-dark .search-placeholder,
+.theme-dark .placeholder,
+.theme-dark .picker-placeholder {
+  color: var(--color-text-faint);
+}
+
+.theme-dark .tag,
+.theme-dark .mini-pill,
+.theme-dark .result-pill,
+.theme-dark .meal-chip,
+.theme-dark .group-count,
+.theme-dark .step-index,
+.theme-dark .timer-badge,
+.theme-dark .tip-card,
+.theme-dark .tip-box,
+.theme-dark .empty-icon-wrap,
+.theme-dark .empty-icon,
+.theme-dark .avatar,
+.theme-dark .picker-recipe-mark,
+.theme-dark .slot-empty,
+.theme-dark .cover-preview,
+.theme-dark .macro-bar,
+.theme-dark .progress-track,
+.theme-dark .timer-progress,
+.theme-dark .delete-button,
+.theme-dark .remove-button {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-secondary);
+}
+
+.theme-dark .ingredient-item,
+.theme-dark .action-row,
+.theme-dark .group-items,
+.theme-dark .shopping-item,
+.theme-dark .picker-footer,
+.theme-dark .bottom-actions {
+  border-color: var(--color-border-subtle);
+}
+
+.theme-dark .bottom-actions {
+  background: var(--color-tabbar);
+}
+
+.theme-dark .primary-button,
+.theme-dark .add-button,
+.theme-dark .icon-button.primary,
+.theme-dark .timer-button.primary,
+.theme-dark .category-pill.is-active,
+.theme-dark .difficulty-pill.is-active,
+.theme-dark .picker-category.active,
+.theme-dark .theme-option.active,
+.theme-dark .save-top-button,
+.theme-dark .add-submit,
+.theme-dark .picker-confirm,
+.theme-dark .nav-button.primary,
+.theme-dark .bottom-action.primary {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.theme-dark .step-index,
+.theme-dark .bottom-action.primary {
+  border-color: var(--color-text);
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+.theme-dark .slot-breakfast:not(.is-empty) {
+  border-color: #604b22;
+  background: #2a2417;
+}
+
+.theme-dark .slot-lunch:not(.is-empty) {
+  border-color: #345232;
+  background: #172417;
+}
+
+.theme-dark .slot-dinner:not(.is-empty) {
+  border-color: #315157;
+  background: #162325;
+}
+
+.theme-dark .slot-snack:not(.is-empty) {
+  border-color: #56365c;
+  background: #251827;
+}
+
+.theme-dark .progress-fill,
+.theme-dark .timer-progress-fill {
+  background: var(--color-text);
+}
+
+.theme-dark .complete-mark {
+  background: linear-gradient(135deg, #173522, #10281b);
+}

@@ -1,0 +1,64 @@
+<view class="page page-safe privacy-page {{themeClass}}">
+  <view class="topbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px; padding-right: {{menuButtonReserve}}px;">
+    <view class="back-button" bindtap="backToSettings">
+      <image class="back-icon" src="/assets/lucide/arrow-left.svg" mode="aspectFit" />
+    </view>
+    <view class="title">隐私政策</view>
+  </view>
+
+  <view class="content card">
+    <view class="updated">最后更新日期：2026年6月19日</view>
+    <view class="paragraph">知味（以下简称"本应用"）尊重并保护您的隐私。本隐私政策说明了我们如何收集、使用和保护您的个人信息。</view>
+
+    <view class="section-title">一、信息收集</view>
+    <view class="paragraph">当您使用本应用时，我们可能收集以下信息：</view>
+    <view class="list">
+      <view class="list-item"><text class="strong">账户信息</text>：邮箱地址、昵称（用于创建和管理您的账户）</view>
+      <view class="list-item"><text class="strong">食谱数据</text>：您创建的食谱、食材、步骤等信息</view>
+      <view class="list-item"><text class="strong">使用数据</text>：购物清单、用餐计划、收藏夹、做菜记录等</view>
+      <view class="list-item"><text class="strong">上传内容</text>：您上传的食谱图片（JPEG、PNG、WebP、GIF格式，最大5MB）</view>
+    </view>
+
+    <view class="section-title">二、信息使用</view>
+    <view class="paragraph">我们收集的信息用于：</view>
+    <view class="list">
+      <view class="list-item">提供食谱管理、购物清单、用餐计划等核心功能</view>
+      <view class="list-item">在您登录的设备间同步数据</view>
+      <view class="list-item">维护账户安全和提供客户支持</view>
+    </view>
+
+    <view class="section-title">三、信息存储与保护</view>
+    <view class="list">
+      <view class="list-item"><text class="strong">本地存储</text>：食谱、购物清单等数据存储在您的设备本地</view>
+      <view class="list-item"><text class="strong">云端同步</text>：登录后，数据会加密传输并存储在 Cloudflare 服务器上</view>
+      <view class="list-item"><text class="strong">安全措施</text>：我们使用加密传输（HTTPS）、访问控制等安全措施保护您的数据</view>
+    </view>
+
+    <view class="section-title">四、信息共享</view>
+    <view class="paragraph">我们不会将您的个人信息出售、交易或转让给第三方。仅在以下情况下可能共享：</view>
+    <view class="list">
+      <view class="list-item">获得您的明确同意</view>
+      <view class="list-item">法律法规要求</view>
+    </view>
+
+    <view class="section-title">五、您的权利</view>
+    <view class="paragraph">您有权：</view>
+    <view class="list">
+      <view class="list-item">访问、修改或删除您的个人信息</view>
+      <view class="list-item">导出您的所有数据</view>
+      <view class="list-item">注销账户并删除所有云端数据</view>
+      <view class="list-item">选择不使用云端同步功能</view>
+    </view>
+
+    <view class="section-title">六、未成年人保护</view>
+    <view class="paragraph">本应用不面向13岁以下的未成年人。如果我们发现收集了未成年人的信息，会立即删除相关数据。</view>
+
+    <view class="section-title">七、隐私政策更新</view>
+    <view class="paragraph">我们可能会不时更新本隐私政策。更新后的政策将在本页面发布，并注明最新更新日期。</view>
+
+    <view class="section-title">八、联系我们</view>
+    <view class="paragraph">如果您对本隐私政策有任何疑问，请通过以下方式联系我们：</view>
+    <view class="paragraph">邮箱：nianshu2022@163.com</view>
+  </view>
+</view>
+<app-tabbar active="" />

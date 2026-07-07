@@ -1,0 +1,399 @@
+.detail-page {
+  padding-top: 0;
+  padding-bottom: 180rpx;
+}
+
+.detail-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin: -28rpx -28rpx 18rpx;
+  padding-left: 28rpx;
+  padding-bottom: 8rpx;
+  background: rgba(250, 249, 247, 0.96);
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 66rpx;
+  height: 66rpx;
+  flex: 0 0 66rpx;
+  border-radius: 20rpx;
+  background: #ffffff;
+  box-shadow: 0 4rpx 16rpx rgba(37, 34, 32, 0.06);
+}
+
+.topbar-icon {
+  width: 34rpx;
+  height: 34rpx;
+}
+
+.topbar-title {
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  color: #252220;
+  font-size: 30rpx;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cover-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 430rpx;
+  border-radius: 32rpx;
+  color: #ffffff;
+  box-shadow: 0 18rpx 48rpx rgba(37, 34, 32, 0.16);
+}
+
+.cover-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cover-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 116rpx;
+  height: 116rpx;
+  border-radius: 32rpx;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.cover-placeholder-icon {
+  width: 72rpx;
+  height: 72rpx;
+  opacity: 0.72;
+  filter: brightness(0) invert(1);
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 24rpx;
+}
+
+.meta-chip {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  min-height: 64rpx;
+  padding: 0 22rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #524c40;
+  font-size: 25rpx;
+  font-weight: 700;
+  box-shadow: 0 4rpx 16rpx rgba(37, 34, 32, 0.05);
+}
+
+.meta-icon {
+  width: 28rpx;
+  height: 28rpx;
+}
+
+.nutrition-card {
+  margin-top: 34rpx;
+  margin-bottom: 34rpx;
+  padding: 28rpx;
+}
+
+.nutrition-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.nutrition-badge {
+  flex: 0 0 auto;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+
+.nutrition-badge.low {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.nutrition-badge.medium {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.nutrition-badge.high {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.macro-bar {
+  display: flex;
+  overflow: hidden;
+  height: 14rpx;
+  margin-top: 24rpx;
+  border-radius: 999rpx;
+  background: #f5f3ef;
+}
+
+.macro {
+  height: 100%;
+}
+
+.macro.protein {
+  background: #6b9ac4;
+}
+
+.macro.carbs {
+  background: #d9a83f;
+}
+
+.macro.fat {
+  background: #c96f72;
+}
+
+.nutrition-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12rpx;
+  margin-top: 24rpx;
+}
+
+.nutrition-item {
+  text-align: center;
+}
+
+.nutrition-value {
+  display: block;
+  color: #252220;
+  font-size: 27rpx;
+  font-weight: 800;
+}
+
+.nutrition-label {
+  display: block;
+  margin-top: 4rpx;
+  color: #8a8270;
+  font-size: 21rpx;
+}
+
+.section {
+  margin-top: 34rpx;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
+.section-head .section-title {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.serving-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 360rpx;
+  max-width: 62vw;
+  min-height: 64rpx;
+  padding: 0 10rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #524c40;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.serving-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48rpx;
+  height: 48rpx;
+  flex: 0 0 48rpx;
+  border-radius: 50%;
+  background: #f5f3ef;
+}
+
+.serving-text {
+  flex: 1;
+  min-width: 96rpx;
+  text-align: center;
+}
+
+.serving-icon {
+  width: 28rpx;
+  height: 28rpx;
+}
+
+.ingredient-list {
+  margin-top: 18rpx;
+  padding: 10rpx 28rpx;
+}
+
+.ingredient-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 84rpx;
+  border-bottom: 1rpx solid #f5f3ef;
+}
+
+.ingredient-item:last-child {
+  border-bottom: 0;
+}
+
+.ingredient-name {
+  color: #252220;
+  font-size: 29rpx;
+  font-weight: 650;
+}
+
+.ingredient-amount {
+  color: #8a8270;
+  font-size: 26rpx;
+}
+
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+  margin-top: 18rpx;
+}
+
+.step-card {
+  display: flex;
+  gap: 20rpx;
+  padding: 26rpx;
+}
+
+.step-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-head {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin-bottom: 16rpx;
+}
+
+.step-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52rpx;
+  height: 52rpx;
+  flex: 0 0 52rpx;
+  border-radius: 50%;
+  background: #fdf4f0;
+  color: #c9583a;
+  font-size: 25rpx;
+  font-weight: 800;
+}
+
+.step-text {
+  color: #524c40;
+  font-size: 28rpx;
+  line-height: 1.7;
+}
+
+.timer-badge {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  min-height: 42rpx;
+  padding: 0 16rpx;
+  border-radius: 999rpx;
+  background: #fff8e8;
+  color: #9a6d16;
+  font-size: 22rpx;
+  font-weight: 750;
+}
+
+.timer-icon {
+  width: 22rpx;
+  height: 22rpx;
+}
+
+.tip-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10rpx;
+  margin-top: 18rpx;
+  padding: 18rpx;
+  border-radius: 18rpx;
+  background: #f5f3ef;
+  color: #8a8270;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.tip-icon {
+  width: 26rpx;
+  height: 26rpx;
+  margin-top: 3rpx;
+  flex: 0 0 26rpx;
+}
+
+.bottom-action-list {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18rpx;
+  width: 100%;
+  margin-top: 42rpx;
+  padding-bottom: 28rpx;
+}
+
+.bottom-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14rpx;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  line-height: 1;
+  min-height: 92rpx;
+  border: 1rpx solid #e8e4de;
+  border-radius: 28rpx;
+  background: #ffffff;
+  color: #524c40;
+  font-size: 28rpx;
+  font-weight: 800;
+  box-shadow: 0 6rpx 18rpx rgba(37, 34, 32, 0.05);
+}
+
+.bottom-action.primary {
+  border-color: #252220;
+  background: #252220;
+  color: #ffffff;
+  box-shadow: 0 14rpx 30rpx rgba(37, 34, 32, 0.16);
+}
+
+.bottom-action-icon {
+  width: 34rpx;
+  height: 34rpx;
+}

@@ -1,0 +1,27 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/recipe/detail",
+    "pages/recipe/form",
+    "pages/cooking/cooking",
+    "pages/meal-plan/meal-plan",
+    "pages/blind-box/blind-box",
+    "pages/collection/collection",
+    "pages/shopping/shopping",
+    "pages/settings/settings",
+    "pages/settings/login",
+    "pages/settings/data",
+    "pages/settings/privacy"
+  ],
+  "window": {
+    "navigationBarTitleText": "知味",
+    "navigationBarBackgroundColor": "#faf9f7",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#faf9f7",
+    "backgroundTextStyle": "dark"
+  },
+  "usingComponents": {
+    "app-tabbar": "/components/app-tabbar/app-tabbar"
+  },
+  "style": "v2"
+}

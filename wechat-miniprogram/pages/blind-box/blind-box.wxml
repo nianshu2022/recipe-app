@@ -1,0 +1,68 @@
+<view class="page page-safe blind-page {{themeClass}}" style="padding-top: {{contentTopInset}}px;">
+  <view class="page-heading">
+    <view class="title">今天吃什么</view>
+    <view class="subtitle">
+      {{phase === 'idle' ? '让盲盒帮你决定' : phase === 'shaking' ? '正在抽取中...' : '盲盒揭晓！'}}
+    </view>
+  </view>
+
+  <view wx:if="{{recipes.length === 0 && phase === 'idle'}}" class="empty-state">
+    <view class="empty-icon-wrap">
+      <image class="empty-icon" src="/assets/lucide/package.svg" mode="aspectFit" />
+    </view>
+    <view class="empty-title">还没有菜谱</view>
+    <view class="empty-text">先去添加几道菜谱再来抽取</view>
+    <button class="primary-button empty-action" bindtap="createRecipe">创建菜谱</button>
+  </view>
+
+  <view wx:else class="box-card card {{phase === 'shaking' ? 'is-shaking' : ''}}">
+    <view wx:if="{{phase !== 'revealed'}}" class="box-face">
+      <view class="box-icon">
+        <image class="box-icon-image" src="/assets/lucide/package.svg" mode="aspectFit" />
+      </view>
+      <image class="sparkle-icon" src="/assets/lucide/sparkles-white.svg" mode="aspectFit" />
+      <view class="box-title">共 {{recipes.length}} 道菜谱</view>
+      <view class="box-desc">点击按钮抽一道今天的答案</view>
+    </view>
+
+    <view wx:else class="result-face">
+      <view class="result-cover" style="background: {{result.coverColor}};">
+        <image wx:if="{{result.coverImage}}" class="result-cover-image" src="{{result.coverImage}}" mode="aspectFill" />
+        <image wx:else class="result-cover-icon" src="{{result.categoryIcon}}" mode="aspectFit" />
+      </view>
+      <view class="result-content">
+        <view class="result-name">{{result.name}}</view>
+        <view class="result-tags">
+          <text class="result-pill">{{result.difficultyName}}</text>
+          <text class="result-pill">{{result.categoryName}}</text>
+          <text wx:for="{{result.tags}}" wx:key="*this" class="result-pill">{{item}}</text>
+        </view>
+        <view class="result-meta">
+          <view class="result-meta-item">
+            <image class="result-meta-icon" src="/assets/lucide/clock.svg" mode="aspectFit" />
+            <text>{{result.durationText}}</text>
+          </view>
+          <view class="result-meta-item">
+            <image class="result-meta-icon" src="/assets/lucide/users.svg" mode="aspectFit" />
+            <text>{{result.servings}} 人份</text>
+          </view>
+          <text>{{result.ingredients.length}} 种食材</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <button wx:if="{{recipes.length > 0 && phase === 'revealed'}}" class="primary-button icon-action" bindtap="openRecipe">
+    <text>查看详情</text>
+    <image class="action-icon" src="/assets/lucide/arrow-right-white.svg" mode="aspectFit" />
+  </button>
+  <button wx:elif="{{recipes.length > 0}}" class="primary-button icon-action" bindtap="drawRecipe">
+    <image class="action-icon" src="/assets/lucide/package-white.svg" mode="aspectFit" />
+    <text>从我的菜谱抽取</text>
+  </button>
+  <button wx:if="{{phase === 'revealed'}}" class="ghost-button redraw-button icon-action" bindtap="drawRecipe">
+    <image class="action-icon" src="/assets/lucide/rotate-cw.svg" mode="aspectFit" />
+    <text>再抽一次</text>
+  </button>
+</view>
+<app-tabbar active="blind" />

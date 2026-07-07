@@ -1,0 +1,131 @@
+<view class="page page-safe form-page {{themeClass}}">
+  <view class="form-topbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px; padding-right: {{menuButtonReserve}}px;">
+    <view class="topbar-left">
+      <view class="back-button" bindtap="back">
+        <image class="topbar-icon" src="/assets/lucide/arrow-left.svg" mode="aspectFit" />
+      </view>
+      <view class="topbar-title">{{isEdit ? '编辑菜谱' : '新建菜谱'}}</view>
+    </view>
+    <view class="save-top-button" bindtap="saveRecipe">
+      <image class="save-icon" src="/assets/lucide/check-white.svg" mode="aspectFit" />
+      <text>{{isEdit ? '更新' : '保存'}}</text>
+    </view>
+  </view>
+
+  <view class="form-card card">
+    <view class="field">
+      <text class="label">菜名 <text class="required">*</text></text>
+      <input class="input" value="{{form.name}}" data-field="name" bindinput="onFieldInput" placeholder="给你的菜取个名字" />
+    </view>
+
+    <view class="field two-column">
+      <view class="field-inner">
+        <text class="label">分类</text>
+        <picker range="{{categoryOptions}}" range-key="label" value="{{categoryIndex}}" bindchange="onCategoryChange">
+          <view class="picker-value">{{categoryLabel}}</view>
+        </picker>
+      </view>
+      <view class="field-inner">
+        <text class="label">难度</text>
+        <picker range="{{difficultyOptions}}" range-key="label" value="{{difficultyIndex}}" bindchange="onDifficultyChange">
+          <view class="picker-value">{{difficultyLabel}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="field two-column">
+      <view class="field-inner">
+        <text class="label">时长（分钟）</text>
+        <input class="input" type="number" value="{{form.duration}}" data-field="duration" bindinput="onFieldInput" />
+      </view>
+      <view class="field-inner">
+        <text class="label">参考人数</text>
+        <input class="input" type="number" value="{{form.servings}}" data-field="servings" bindinput="onFieldInput" />
+      </view>
+    </view>
+
+    <view class="field">
+      <text class="label">标签</text>
+      <input class="input" value="{{form.tags}}" data-field="tags" bindinput="onFieldInput" placeholder="用逗号分隔，如：家常菜, 快手菜" />
+    </view>
+
+    <view class="field">
+      <text class="label">封面图</text>
+      <view wx:if="{{form.coverImage}}" class="cover-preview">
+        <image class="cover-preview-image" src="{{form.coverImage}}" mode="aspectFill" />
+        <view class="cover-remove" bindtap="removeCoverImage">
+          <image class="cover-remove-icon" src="/assets/lucide/x.svg" mode="aspectFit" />
+        </view>
+      </view>
+      <view wx:else class="cover-upload" bindtap="chooseCoverImage">
+        <image class="cover-upload-icon" src="/assets/lucide/upload.svg" mode="aspectFit" />
+        <text>点击上传图片</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="editor-section">
+    <view class="section-head">
+      <view class="section-title">用料 <text class="required-small">*必填</text></view>
+    </view>
+
+    <view class="repeat-list">
+      <view wx:for="{{ingredients}}" wx:key="id" class="ingredient-card card">
+        <view class="item-head">
+          <text class="item-index">食材 {{index + 1}}</text>
+          <view class="delete-button" data-index="{{index}}" bindtap="removeIngredient">
+            <image class="delete-icon" src="/assets/lucide/trash-2.svg" mode="aspectFit" />
+          </view>
+        </view>
+        <view class="ingredient-grid">
+          <view class="ingredient-name-field">
+            <text class="label">食材名</text>
+            <input class="input" value="{{item.name}}" data-index="{{index}}" data-field="name" bindinput="onIngredientInput" placeholder="食材名" />
+          </view>
+          <view>
+            <text class="label">用量</text>
+            <input class="input" type="digit" value="{{item.amount}}" data-index="{{index}}" data-field="amount" bindinput="onIngredientInput" placeholder="用量" />
+          </view>
+          <view>
+            <text class="label">单位</text>
+            <picker range="{{unitOptions}}" value="{{item.unitIndex}}" data-index="{{index}}" bindchange="onIngredientUnitChange">
+              <view class="picker-value unit-picker">{{item.unit || '单位'}}</view>
+            </picker>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="section-add-row" bindtap="addIngredient">
+      <image class="section-add-icon" src="/assets/lucide/plus.svg" mode="aspectFit" />
+      <text>添加用料</text>
+    </view>
+  </view>
+
+  <view class="editor-section">
+    <view class="section-head">
+      <view class="section-title">步骤 <text class="required-small">*必填</text></view>
+    </view>
+
+    <view class="repeat-list">
+      <view wx:for="{{steps}}" wx:key="order" class="step-edit-card card">
+        <view class="item-head">
+          <view class="step-number">{{item.order}}</view>
+          <view class="delete-button" data-index="{{index}}" bindtap="removeStep">
+            <image class="delete-icon" src="/assets/lucide/trash-2.svg" mode="aspectFit" />
+          </view>
+        </view>
+        <textarea class="textarea step-textarea" value="{{item.description}}" data-index="{{index}}" data-field="description" bindinput="onStepInput" placeholder="描述这一步的操作..." />
+        <view class="timer-row">
+          <image class="timer-icon" src="/assets/lucide/clock.svg" mode="aspectFit" />
+          <text class="timer-label">计时（分钟）</text>
+          <input class="timer-input" type="number" value="{{item.timer}}" data-index="{{index}}" data-field="timer" bindinput="onStepInput" placeholder="可选" />
+        </view>
+      </view>
+    </view>
+    <view class="section-add-row" bindtap="addStep">
+      <image class="section-add-icon" src="/assets/lucide/plus.svg" mode="aspectFit" />
+      <text>添加步骤</text>
+    </view>
+  </view>
+</view>
+<app-tabbar active="" />

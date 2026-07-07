@@ -1,0 +1,60 @@
+<view class="page page-safe login-page {{themeClass}}">
+  <view class="topbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px; padding-right: {{menuButtonReserve}}px;">
+    <view class="back-button" bindtap="backToSettings">
+      <image class="back-icon" src="/assets/lucide/arrow-left.svg" mode="aspectFit" />
+    </view>
+    <view class="title">{{isRegister ? '注册' : '登录'}}</view>
+  </view>
+
+  <view class="form-card card">
+    <view class="field">
+      <image class="field-icon" src="/assets/lucide/mail.svg" mode="aspectFit" />
+      <input
+        class="input"
+        value="{{email}}"
+        data-field="email"
+        bindinput="onFieldInput"
+        placeholder="邮箱地址"
+        placeholder-class="placeholder"
+      />
+    </view>
+
+    <view wx:if="{{isRegister}}" class="field">
+      <image class="field-icon" src="/assets/lucide/user.svg" mode="aspectFit" />
+      <input
+        class="input"
+        value="{{nickname}}"
+        data-field="nickname"
+        bindinput="onFieldInput"
+        placeholder="昵称（选填）"
+        placeholder-class="placeholder"
+      />
+    </view>
+
+    <view class="field">
+      <image class="field-icon" src="/assets/lucide/lock.svg" mode="aspectFit" />
+      <input
+        class="input"
+        password
+        value="{{password}}"
+        data-field="password"
+        bindinput="onFieldInput"
+        placeholder="密码"
+        placeholder-class="placeholder"
+      />
+    </view>
+
+    <view wx:if="{{error}}" class="error-text">{{error}}</view>
+
+    <button class="submit-button {{loading ? 'is-loading' : ''}}" disabled="{{loading}}" bindtap="submit">
+      {{loading ? '处理中...' : isRegister ? '注册' : '登录'}}
+    </button>
+
+    <button class="mode-button" bindtap="toggleMode">
+      {{isRegister ? '已有账号？去登录' : '没有账号？去注册'}}
+    </button>
+  </view>
+
+  <view class="hint">登录后可多设备同步菜谱数据</view>
+</view>
+<app-tabbar active="" />

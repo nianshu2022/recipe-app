@@ -177,6 +177,26 @@ export async function register(email: string, password: string, nickname?: strin
   return true
 }
 
+export async function sendVerifyCode(email: string): Promise<boolean> {
+  const res = await apiFetch('/api/auth/send-code', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  })
+  return res.ok
+}
+
+export async function loginWithCode(email: string, code: string): Promise<boolean> {
+  const res = await apiFetch('/api/auth/login-code', {
+    method: 'POST',
+    body: JSON.stringify({ email, code }),
+  })
+  if (!res.ok) return false
+
+  const data = await res.json()
+  storeAuthData(data)
+  return true
+}
+
 export async function logout(): Promise<void> {
   const refreshToken = localStorage.getItem('refresh_token')
   if (refreshToken) {

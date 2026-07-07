@@ -1,0 +1,47 @@
+<view class="page page-safe collection-page {{themeClass}}" style="padding-top: {{contentTopInset}}px;">
+  <view class="page-heading">
+    <view class="back-button" bindtap="back">
+      <image class="back-icon" src="/assets/lucide/arrow-left.svg" mode="aspectFit" />
+    </view>
+    <view class="heading-copy">
+      <view class="title">我的收藏</view>
+      <view class="subtitle">{{recipes.length > 0 ? recipes.length + ' 道收藏' : '收藏喜欢的菜谱'}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{recipes.length > 0}}" class="favorite-list">
+    <view wx:for="{{recipes}}" wx:key="id" class="favorite-card card">
+      <view class="favorite-main" data-id="{{item.id}}" bindtap="openRecipe">
+        <view class="favorite-cover" style="background: {{item.coverColor}};">
+          <image wx:if="{{item.coverImage}}" class="favorite-cover-image" src="{{item.coverImage}}" mode="aspectFill" />
+          <view wx:else class="favorite-cover-placeholder">
+            <image class="favorite-cover-icon" src="{{item.categoryIcon}}" mode="aspectFit" />
+          </view>
+        </view>
+        <view class="favorite-body">
+          <view class="favorite-name">{{item.name}}</view>
+          <view class="tag-line">
+            <text class="mini-pill">{{item.difficultyName}}</text>
+            <text wx:for="{{item.displayTags}}" wx:key="*this" class="mini-pill">{{item}}</text>
+          </view>
+          <view class="favorite-meta">
+            <image class="meta-icon" src="/assets/lucide/clock.svg" mode="aspectFit" />
+            <text>{{item.durationText}}</text>
+            <text>{{item.servings}} 人份</text>
+          </view>
+        </view>
+      </view>
+      <view class="remove-button" data-id="{{item.id}}" bindtap="removeFavorite">
+        <image class="remove-icon" src="/assets/lucide/heart-active.svg" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="card empty">
+    <image class="empty-icon" src="/assets/lucide/heart.svg" mode="aspectFit" />
+    <view class="empty-title">还没有收藏</view>
+    <view class="empty-text">浏览菜谱时点击爱心，即可收藏喜欢的菜谱</view>
+    <button class="primary-button empty-action" bindtap="goHome">去逛逛</button>
+  </view>
+</view>
+<app-tabbar active="collection" />

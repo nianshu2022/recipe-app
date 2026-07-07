@@ -1,0 +1,62 @@
+<view wx:if="{{recipe && !completed}}" class="cooking-page {{themeClass}}">
+  <view class="topbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px; padding-right: {{menuButtonReserve}}px;">
+    <view class="back-button" bindtap="backToRecipe">
+      <image class="back-icon" src="/assets/lucide/arrow-left.svg" mode="aspectFit" />
+    </view>
+    <view class="top-title">{{recipe.name}}</view>
+  </view>
+
+  <view class="progress-wrap">
+    <view class="progress-track">
+      <view class="progress-fill" style="width: {{progress}}%;"></view>
+    </view>
+    <view class="progress-text">{{stepPosition}}</view>
+  </view>
+
+  <view class="step-stage">
+    <view class="step-index">{{step.order}}</view>
+    <view class="step-description">{{step.description}}</view>
+
+    <view wx:if="{{step.timer}}" class="timer-card card">
+      <view class="timer-text">{{timerText}}</view>
+      <view class="timer-progress">
+        <view class="timer-progress-fill {{timerSeconds <= 10 && timerSeconds > 0 ? 'is-warning' : ''}}" style="width: {{timerPercent}}%;"></view>
+      </view>
+      <view class="timer-actions">
+        <button wx:if="{{alarmActive}}" class="timer-button alarm" bindtap="stopAlarm">关闭铃声</button>
+        <button wx:else class="timer-button primary icon-only" bindtap="toggleTimer">
+          <image class="timer-action-icon white" src="{{timerRunning ? '/assets/lucide/pause-white.svg' : '/assets/lucide/play-white.svg'}}" mode="aspectFit" />
+        </button>
+        <button class="timer-button" bindtap="resetTimer">
+          <image class="timer-action-icon" src="/assets/lucide/rotate-cw.svg" mode="aspectFit" />
+        </button>
+      </view>
+    </view>
+
+    <view wx:if="{{step.tip}}" class="tip-card">
+      <view class="tip-title">小提示</view>
+      <view class="tip-text">{{step.tip}}</view>
+    </view>
+  </view>
+
+  <view class="bottom-actions">
+    <button class="nav-button" disabled="{{isFirstStep}}" bindtap="previousStep">
+      <image class="nav-icon" src="/assets/lucide/chevron-left.svg" mode="aspectFit" />
+      <text>上一步</text>
+    </button>
+    <button class="nav-button primary" bindtap="nextStep">
+      <text>{{nextLabel}}</text>
+      <image wx:if="{{nextLabel === '下一步'}}" class="nav-icon white" src="/assets/lucide/arrow-right-white.svg" mode="aspectFit" />
+      <image wx:else class="nav-icon white" src="/assets/lucide/check-white.svg" mode="aspectFit" />
+    </button>
+  </view>
+</view>
+
+<view wx:if="{{recipe && completed}}" class="complete-page {{themeClass}}">
+  <view class="complete-mark">
+    <image class="complete-icon" src="/assets/lucide/party-popper.svg" mode="aspectFit" />
+  </view>
+  <view class="complete-title">大功告成</view>
+  <view class="complete-desc">{{recipe.name}} 做好了</view>
+  <button class="primary-button complete-button" bindtap="backToRecipe">返回菜谱</button>
+</view>

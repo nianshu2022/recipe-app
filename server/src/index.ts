@@ -3,6 +3,7 @@ export interface Env {
   MEDIA: R2Bucket
   JWT_SECRET: string
   RATE_LIMIT_KV?: KVNamespace
+  RESEND_API_KEY?: string
 }
 
 import { handleAuth } from './routes/auth'
@@ -38,7 +39,9 @@ export default {
         path === '/api/auth/register' ||
         path === '/api/auth/login' ||
         path === '/api/auth/refresh' ||
-        path === '/api/auth/logout'
+        path === '/api/auth/logout' ||
+        path === '/api/auth/send-code' ||
+        path === '/api/auth/login-code'
       ) {
         return await handleAuth(request, env)
       }

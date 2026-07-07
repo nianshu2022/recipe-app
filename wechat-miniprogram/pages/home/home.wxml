@@ -1,0 +1,100 @@
+<view class="page page-safe home-page {{themeClass}}">
+  <view class="hero" style="padding-top: {{headerTopInset}}px; padding-right: {{menuButtonReserve}}px;">
+    <view class="hero-copy">
+      <view class="hero-title">寻味</view>
+      <view class="hero-subtitle">{{filteredRecipes.length > 0 ? filteredRecipes.length + ' 道拿手菜' : '记录你的拿手好菜'}}</view>
+    </view>
+    <view class="hero-actions">
+      <view class="round-button dice-button" bindtap="openBlindBox">
+        <image class="round-icon" src="/assets/lucide/dice-5.svg" mode="aspectFit" />
+      </view>
+      <view class="round-button add-button" bindtap="createRecipe">
+        <image class="round-icon" src="/assets/lucide/plus-white.svg" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <view class="search-card">
+    <image class="search-icon" src="/assets/lucide/search.svg" mode="aspectFit" />
+    <input
+      class="search-input"
+      placeholder="搜索菜谱、食材、标签..."
+      placeholder-class="search-placeholder"
+      value="{{query}}"
+      bindinput="onSearchInput"
+      confirm-type="search"
+    />
+  </view>
+
+  <scroll-view class="category-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="category-row">
+      <view
+        wx:for="{{categories}}"
+        wx:key="key"
+        class="category-pill {{activeCategory === item.key ? 'is-active' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onCategoryTap"
+      >
+        <image wx:if="{{item.icon}}" class="category-icon" src="{{activeCategory === item.key ? item.activeIcon : item.icon}}" mode="aspectFit" />
+        {{item.label}}
+      </view>
+    </view>
+  </scroll-view>
+
+  <scroll-view class="difficulty-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="difficulty-row">
+      <view
+        wx:for="{{difficulties}}"
+        wx:key="key"
+        wx:if="{{item.key !== 'all'}}"
+        class="difficulty-pill {{activeDifficulty === item.key ? 'is-active' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onDifficultyTap"
+      >
+        {{item.label}}
+      </view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{filteredRecipes.length > 0}}" class="recipe-list">
+    <view
+      wx:for="{{filteredRecipes}}"
+      wx:key="id"
+      class="recipe-card card"
+      data-id="{{item.id}}"
+      bindtap="openRecipe"
+    >
+      <view class="recipe-cover" style="background: {{item.coverColor}};">
+        <image wx:if="{{item.coverImage}}" class="recipe-cover-image" src="{{item.coverImage}}" mode="aspectFill" />
+        <image wx:else class="recipe-cover-icon" src="{{item.categoryIcon}}" mode="aspectFit" />
+      </view>
+      <view class="favorite-button" data-id="{{item.id}}" catchtap="toggleFavorite">
+        <image class="favorite-icon" src="{{item.isFavorited ? '/assets/lucide/heart-active.svg' : '/assets/lucide/heart.svg'}}" mode="aspectFit" />
+      </view>
+      <view class="recipe-body">
+        <view class="recipe-title">{{item.name}}</view>
+        <view class="recipe-pills">
+          <text class="mini-pill difficulty-pill-inline">{{item.difficultyName}}</text>
+          <text wx:for="{{item.displayTags}}" wx:for-item="tag" wx:key="*this" class="mini-pill">{{tag}}</text>
+        </view>
+        <view class="recipe-footer">
+          <view class="recipe-foot-item">
+            <image class="recipe-foot-icon" src="/assets/lucide/clock.svg" mode="aspectFit" />
+            <text>{{item.durationText}}</text>
+          </view>
+          <text>{{item.servings}} 人份</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty-state">
+    <view class="empty-icon">
+      <image class="empty-icon-image" src="/assets/lucide/chef-hat.svg" mode="aspectFit" />
+    </view>
+    <view class="empty-title">还没有菜谱</view>
+    <view class="empty-text">快来创建你的第一道拿手菜吧</view>
+    <button class="empty-button" bindtap="createRecipe">创建菜谱</button>
+  </view>
+</view>
+<app-tabbar active="home" />

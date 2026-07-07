@@ -3,6 +3,8 @@ main = "src/index.ts"
 compatibility_date = "2024-12-01"
 
 # JWT_SECRET must be set via: wrangler secret put JWT_SECRET
+# RESEND_API_KEY must be set via: wrangler secret put RESEND_API_KEY
+# (Optional, only needed for email verification codes)
 
 [[d1_databases]]
 binding = "DB"
