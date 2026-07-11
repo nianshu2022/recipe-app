@@ -211,3 +211,12 @@ export interface FamilyGroup {
   createdAt: string
   updatedAt: string
 }
+
+export interface MealPreferences {
+  servings: number
+  excludeCategories: Category[]
+  maxDifficulty: Difficulty
+  maxDuration: number
+  preferCold: boolean
+  preferSoup: boolean
+}

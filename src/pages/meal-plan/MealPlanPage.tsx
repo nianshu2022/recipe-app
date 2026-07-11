@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Eraser, ShoppingCart, Plus, Search, Check, Bookmark, ChevronDown } from 'lucide-react'
-import type { Category } from '@/types'
+import { X, Eraser, ShoppingCart, Plus, Search, Check, Bookmark, ChevronDown, Wand2 } from 'lucide-react'
+import type { Category, Difficulty } from '@/types'
 import { categoryIcons, categoryLabels } from '@/constants/categories'
 import { useMealPlanStore, type MealSlot } from '@/stores/mealPlanStore'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useShoppingStore } from '@/stores/shoppingStore'
 import { useTemplateStore } from '@/stores/templateStore'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
+import { usePreferencesStore } from '@/stores/preferencesStore'
+import { generateMealPlan } from '@/utils/mealGenerator'
 import { useUIStore } from '@/stores/uiStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
 
@@ -26,6 +28,7 @@ export function MealPlanPage() {
   const { generateFromRecipes } = useShoppingStore()
   const { templates, loadTemplates, saveTemplate, deleteTemplate, getTemplateDays } = useTemplateStore()
   const { isPro } = useSubscriptionStore()
+  const { preferences } = usePreferencesStore()
   const navigate = useNavigate()
 
   const [selecting, setSelecting] = useState<{ day: number; slot: MealSlot } | null>(null)
@@ -34,6 +37,7 @@ export function MealPlanPage() {
   const [pickerCategory, setPickerCategory] = useState<Category | null>(null)
   const [showTemplateMenu, setShowTemplateMenu] = useState(false)
   const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [showPreferences, setShowPreferences] = useState(false)
   const [templateName, setTemplateName] = useState('')
   const setModalOpen = useUIStore((s) => s.setModalOpen)
 
@@ -118,6 +122,16 @@ export function MealPlanPage() {
     setShowTemplateMenu(false)
   }
 
+  const handleAutoGenerate = async () => {
+    if (!currentPlan || recipes.length === 0) return
+    const days = generateMealPlan(recipes, preferences)
+    const updatedPlan = { ...currentPlan, days, updatedAt: new Date().toISOString() }
+    const { db } = await import('@/db')
+    await db.putMealPlan(updatedPlan)
+    loadCurrentWeek()
+    setShowPreferences(false)
+  }
+
   const hasMeals = currentPlan?.days.some((day) =>
     slots.some((slot) => (day[slot]?.length ?? 0) > 0)
   )
@@ -145,6 +159,13 @@ export function MealPlanPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => setShowPreferences(true)}
+            className="flex h-10 items-center gap-1 rounded-xl bg-[var(--color-bg-card)] px-3 text-[var(--color-text-muted)] shadow-xs transition-all duration-200 hover:bg-purple-50 hover:text-purple-600 active:scale-95"
+            title="智能排菜"
+          >
+            <Wand2 size={16} />
+          </button>
           <div className="relative">
             <button
               onClick={() => setShowTemplateMenu(!showTemplateMenu)}
@@ -466,6 +487,123 @@ export function MealPlanPage() {
                 className="flex-1 rounded-xl bg-[var(--color-primary)] py-2.5 text-sm font-medium text-white shadow-md transition-all active:scale-[0.98] disabled:opacity-40"
               >
                 保存
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Auto-generate preferences dialog */}
+      {showPreferences && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowPreferences(false)}>
+          <div
+            className="mx-4 w-full max-w-sm rounded-2xl bg-[var(--color-bg-card)] p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center gap-2">
+              <Wand2 size={20} className="text-purple-500" />
+              <h3 className="text-lg font-semibold text-[var(--color-text)]">智能排菜</h3>
+            </div>
+            <p className="mb-4 text-sm text-[var(--color-text-muted)]">
+              根据你的偏好自动生成一周菜单
+            </p>
+
+            <div className="space-y-4">
+              {/* Servings */}
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">用餐人数</label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5, 6].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => usePreferencesStore.getState().updateServings(n)}
+                      className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
+                        preferences.servings === n
+                          ? 'bg-[var(--color-primary)] text-white'
+                          : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)]'
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Max difficulty */}
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">最大难度</label>
+                <div className="flex gap-2">
+                  {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => usePreferencesStore.getState().setMaxDifficulty(d)}
+                      className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
+                        preferences.maxDifficulty === d
+                          ? 'bg-[var(--color-primary)] text-white'
+                          : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)]'
+                      }`}
+                    >
+                      {d === 'easy' ? '简单' : d === 'medium' ? '中等' : '困难'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Max duration */}
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">
+                  最长烹饪时间：{preferences.maxDuration}分钟
+                </label>
+                <input
+                  type="range"
+                  min={15}
+                  max={120}
+                  step={15}
+                  value={preferences.maxDuration}
+                  onChange={(e) => usePreferencesStore.getState().setMaxDuration(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+
+              {/* Exclude categories */}
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">排除分类</label>
+                <div className="flex flex-wrap gap-2">
+                  {(Object.entries(categoryLabels) as [Category, string][]).map(([val, label]) => {
+                    const Icon = categoryIcons[val]
+                    const excluded = preferences.excludeCategories.includes(val)
+                    return (
+                      <button
+                        key={val}
+                        onClick={() => usePreferencesStore.getState().toggleExcludeCategory(val)}
+                        className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                          excluded
+                            ? 'bg-red-100 text-red-600 line-through'
+                            : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)]'
+                        }`}
+                      >
+                        <Icon size={12} />
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowPreferences(false)}
+                className="flex-1 rounded-xl border border-[var(--color-border)] py-2.5 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleAutoGenerate}
+                disabled={recipes.length === 0}
+                className="flex-1 rounded-xl bg-[var(--color-primary)] py-2.5 text-sm font-medium text-white shadow-md transition-all active:scale-[0.98] disabled:opacity-40"
+              >
+                生成菜单
               </button>
             </div>
           </div>
