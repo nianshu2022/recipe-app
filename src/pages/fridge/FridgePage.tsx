@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Trash2, AlertTriangle, Clock, X, Search, ChevronDown, Wand2 } from 'lucide-react'
+import { Plus, Trash2, AlertTriangle, Clock, X, Search, ChevronDown, Wand2, Pencil } from 'lucide-react'
 import { useFridgeStore } from '@/stores/fridgeStore'
 import { useUIStore } from '@/stores/uiStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
@@ -27,16 +27,19 @@ function getDaysUntilExpiry(expiryDate: string): number {
   return Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 }
 
+import type { FridgeItem } from '@/types'
+
 export function FridgePage() {
-  const { items, loading, loadItems, addItem, deleteItem, getExpiringSoon, getExpired } = useFridgeStore()
+  const { items, loading, loadItems, addItem, updateItem, deleteItem, getExpiringSoon, getExpired } = useFridgeStore()
   const showToast = useUIStore((s) => s.showToast)
   const navigate = useNavigate()
 
   const [showAdd, setShowAdd] = useState(false)
+  const [editingItem, setEditingItem] = useState<FridgeItem | null>(null)
   const [filterCategory, setFilterCategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Add form state
+  // Add/Edit form state
   const [name, setName] = useState('')
   const [amount, setAmount] = useState('')
   const [unit, setUnit] = useState('个')
@@ -66,13 +69,39 @@ export function FridgePage() {
       purchaseDate: new Date().toISOString(),
       expiryDate: expiryDate || undefined,
     })
-    setShowAdd(false)
+    resetForm()
+    showToast('已添加到冰箱')
+  }
+
+  const handleEdit = async () => {
+    if (!editingItem || !name.trim() || !amount) return
+    await updateItem(editingItem.id, {
+      name: name.trim(),
+      amount: Number(amount),
+      unit,
+      category,
+      expiryDate: expiryDate || undefined,
+    })
+    resetForm()
+    setEditingItem(null)
+    showToast('已更新食材')
+  }
+
+  const openEdit = (item: FridgeItem) => {
+    setEditingItem(item)
+    setName(item.name)
+    setAmount(String(item.amount))
+    setUnit(item.unit)
+    setCategory(item.category)
+    setExpiryDate(item.expiryDate || '')
+  }
+
+  const resetForm = () => {
     setName('')
     setAmount('')
     setUnit('个')
     setCategory('蔬菜')
     setExpiryDate('')
-    showToast('已添加到冰箱')
   }
 
   const handleDelete = async (id: string, itemName: string) => {
@@ -225,28 +254,36 @@ export function FridgePage() {
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleDelete(item.id, item.name)}
-                  className="rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-red-50 hover:text-red-500"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => openEdit(item)}
+                    className="rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-blue-50 hover:text-blue-500"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id, item.name)}
+                    className="rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-red-50 hover:text-red-500"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             )
           })}
         </div>
       )}
 
-      {/* Add dialog */}
-      {showAdd && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowAdd(false)}>
+      {/* Add/Edit dialog */}
+      {(showAdd || editingItem) && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => { setShowAdd(false); setEditingItem(null); resetForm(); }}>
           <div
             className="mx-4 w-full max-w-sm rounded-2xl bg-[var(--color-bg-card)] p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-[var(--color-text)]">添加食材</h3>
-              <button onClick={() => setShowAdd(false)} className="rounded-lg p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]">
+              <h3 className="text-lg font-semibold text-[var(--color-text)]">{editingItem ? '编辑食材' : '添加食材'}</h3>
+              <button onClick={() => { setShowAdd(false); setEditingItem(null); resetForm(); }} className="rounded-lg p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]">
                 <X size={18} />
               </button>
             </div>
@@ -311,17 +348,17 @@ export function FridgePage() {
 
             <div className="mt-4 flex gap-3">
               <button
-                onClick={() => setShowAdd(false)}
+                onClick={() => { setShowAdd(false); setEditingItem(null); resetForm(); }}
                 className="flex-1 rounded-xl border border-[var(--color-border)] py-2.5 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
               >
                 取消
               </button>
               <button
-                onClick={handleAdd}
+                onClick={editingItem ? handleEdit : handleAdd}
                 disabled={!name.trim() || !amount}
                 className="flex-1 rounded-xl bg-[var(--color-primary)] py-2.5 text-sm font-medium text-white shadow-md transition-all active:scale-[0.98] disabled:opacity-40"
               >
-                添加
+                {editingItem ? '保存' : '添加'}
               </button>
             </div>
           </div>

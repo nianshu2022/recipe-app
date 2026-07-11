@@ -111,7 +111,11 @@ export function CookingHistoryPage() {
                 <span className="text-xs">本月烹饪</span>
               </div>
               <p className="mt-1 text-2xl font-bold text-[var(--color-text)]">
-                {monthlyStats[0]?.count ?? 0}
+                {(() => {
+                  const now = new Date()
+                  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+                  return monthlyStats.find((s) => s.month === currentMonth)?.count ?? 0
+                })()}
               </p>
             </div>
           </div>

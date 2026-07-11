@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, ShoppingCart, Plus, Trash2, Check, X, ChevronDown, Eraser, ExternalLink,
+  ArrowLeft, ShoppingCart, Plus, Trash2, Check, X, ChevronDown, Eraser, ExternalLink, Pencil,
 } from 'lucide-react'
 import { useShoppingStore } from '@/stores/shoppingStore'
 import { useUIStore } from '@/stores/uiStore'
@@ -11,13 +11,14 @@ import type { ShoppingItem } from '@/types'
 export function ShoppingListPage() {
   const navigate = useNavigate()
   const {
-    lists, currentListId, loadLists, toggleItem, addItem, removeItem,
+    lists, currentListId, loadLists, toggleItem, addItem, removeItem, updateItem,
     clearChecked, deleteList, setCurrentList,
   } = useShoppingStore()
   const showConfirm = useUIStore((s) => s.showConfirm)
   const showToast = useUIStore((s) => s.showToast)
 
   const [showAdd, setShowAdd] = useState(false)
+  const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null)
   const [newName, setNewName] = useState('')
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set())
 
@@ -32,6 +33,19 @@ export function ShoppingListPage() {
     await addItem(list.id, newName.trim())
     setNewName('')
     setShowAdd(false)
+  }
+
+  const handleEdit = async () => {
+    if (!list || !editingItem || !newName.trim()) return
+    await updateItem(list.id, editingItem.id, { name: newName.trim() })
+    setNewName('')
+    setEditingItem(null)
+  }
+
+  const openEdit = (item: ShoppingItem) => {
+    setEditingItem(item)
+    setNewName(item.name)
+    setShowAdd(true)
   }
 
   const toggleCat = (cat: string) => {
@@ -144,27 +158,27 @@ export function ShoppingListPage() {
         </div>
       </div>
 
-      {/* Add item input */}
+      {/* Add/Edit item input */}
       {showAdd && (
         <div className="flex gap-2">
           <input
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+            onKeyDown={(e) => e.key === 'Enter' && (editingItem ? handleEdit() : handleAdd())}
             placeholder="输入食材名称"
             autoFocus
             className="flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-2.5 text-sm text-[var(--color-text)] shadow-xs outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-300)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
           />
           <button
-            onClick={handleAdd}
+            onClick={editingItem ? handleEdit : handleAdd}
             disabled={!newName.trim()}
             className="rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 active:scale-95 disabled:opacity-40"
           >
-            添加
+            {editingItem ? '保存' : '添加'}
           </button>
           <button
-            onClick={() => { setShowAdd(false); setNewName('') }}
+            onClick={() => { setShowAdd(false); setEditingItem(null); setNewName('') }}
             className="rounded-xl bg-[var(--color-bg-card)] px-3 py-2.5 text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:bg-[var(--color-bg-subtle)] active:scale-95"
           >
             <X size={16} />
@@ -245,6 +259,14 @@ export function ShoppingListPage() {
                           title="去淘宝搜索"
                         >
                           <ExternalLink size={12} />
+                        </button>
+                      )}
+                      {!item.checked && (
+                        <button
+                          onClick={() => openEdit(item)}
+                          className="rounded-lg p-1 text-[var(--color-text-muted)] opacity-0 transition-all duration-200 hover:bg-blue-50 hover:text-blue-500 group-hover:opacity-100"
+                        >
+                          <Pencil size={12} />
                         </button>
                       )}
                       <button
