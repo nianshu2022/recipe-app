@@ -9,6 +9,7 @@ import { useVoiceControl, matchCommand } from '@/hooks/useVoiceControl'
 import { useTimer, formatTime } from '@/hooks/useTimer'
 import { useFullscreen } from '@/hooks/useFullscreen'
 import { useWakeLock } from '@/hooks/useWakeLock'
+import { db } from '@/db'
 import type { Recipe } from '@/types'
 
 export function CookingPage() {
@@ -61,6 +62,21 @@ export function CookingPage() {
     const found = recipes.find((r) => r.id === id)
     if (found) setRecipe(found)
   }, [recipes, id])
+
+  useEffect(() => {
+    if (completed && recipe) {
+      db.putCookingRecord({
+        id: crypto.randomUUID(),
+        userId: 'local',
+        recipeId: recipe.id,
+        date: new Date().toISOString(),
+        servings: recipe.servings,
+        syncStatus: 'pending',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+    }
+  }, [completed, recipe])
 
   if (!recipe) {
     return (

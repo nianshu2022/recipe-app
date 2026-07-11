@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { Collection } from '@/types'
 import { db } from '@/db'
 import { generateId } from '@/utils/id'
+import { on } from '@/utils/events'
 
 interface CollectionState {
   collections: Collection[]
@@ -82,3 +83,14 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
     return get().collections.filter((c) => c.recipeIds.includes(recipeId))
   },
 }))
+
+on('recipe:deleted', (data) => {
+  const { collections, updateCollection } = useCollectionStore.getState()
+  for (const col of collections) {
+    if (col.recipeIds.includes(data.id)) {
+      updateCollection(col.id, {
+        recipeIds: col.recipeIds.filter((id) => id !== data.id),
+      })
+    }
+  }
+})

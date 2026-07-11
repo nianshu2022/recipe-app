@@ -155,21 +155,18 @@ export function MealPlanPage() {
 
   const handleAddSmartToShopping = async () => {
     if (!smartResult || smartResult.needToBuy.length === 0) return
-    const { generateFromRecipes } = useShoppingStore.getState()
-    // Create a temporary recipe-like object for the shopping store
-    const tempRecipe = {
-      id: 'smart-shopping',
-      name: '智能购物清单',
-      ingredients: smartResult.needToBuy.map((item) => ({
-        id: item.id,
-        name: item.name,
-        amount: item.amount,
-        unit: item.unit,
-        type: 'main' as const,
-        scalable: false,
-      })),
-    }
-    await generateFromRecipes([tempRecipe.id])
+    const { generateFromRecipesWithIngredients } = useShoppingStore.getState()
+    await generateFromRecipesWithIngredients(
+      ['smart-shopping'],
+      [{
+        id: 'smart-shopping',
+        ingredients: smartResult.needToBuy.map((item) => ({
+          name: item.name,
+          amount: item.amount,
+          unit: item.unit,
+        })),
+      }],
+    )
     setShowSmartShopping(false)
     navigate('/shopping')
   }
