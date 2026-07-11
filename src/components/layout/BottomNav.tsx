@@ -1,11 +1,12 @@
 import { useRef, useEffect } from 'react'
 import { NavLink, Link } from 'react-router-dom'
-import { UtensilsCrossed, Heart, CalendarRange, User, Sparkles } from 'lucide-react'
+import { UtensilsCrossed, Heart, CalendarRange, User, Sparkles, Refrigerator } from 'lucide-react'
 import { useUIStore } from '@/stores/uiStore'
 
 const leftItems = [
   { to: '/', icon: UtensilsCrossed, label: '寻味' },
   { to: '/meal-plan', icon: CalendarRange, label: '七日味' },
+  { to: '/fridge', icon: Refrigerator, label: '冰箱' },
 ]
 const rightItems = [
   { to: '/collection', icon: Heart, label: '收藏' },

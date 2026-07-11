@@ -20,6 +20,7 @@ const LoginPage = lazy(() => import('@/pages/settings/LoginPage').then(m => ({ d
 const DataManagementPage = lazy(() => import('@/pages/settings/DataManagementPage').then(m => ({ default: m.DataManagementPage })))
 const PricingPage = lazy(() => import('@/pages/settings/PricingPage').then(m => ({ default: m.PricingPage })))
 const FamilyPage = lazy(() => import('@/pages/settings/FamilyPage').then(m => ({ default: m.FamilyPage })))
+const FridgePage = lazy(() => import('@/pages/fridge/FridgePage').then(m => ({ default: m.FridgePage })))
 const BlindBoxPage = lazy(() => import('@/pages/blind-box/BlindBoxPage').then(m => ({ default: m.BlindBoxPage })))
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })))
 
@@ -59,6 +60,7 @@ function AnimatedRoutes() {
           <Route path="/settings/family" element={<PageSuspense><FamilyPage /></PageSuspense>} />
           <Route path="/collection" element={<PageSuspense><CollectionPage /></PageSuspense>} />
           <Route path="/shopping" element={<PageSuspense><ShoppingListPage /></PageSuspense>} />
+          <Route path="/fridge" element={<PageSuspense><FridgePage /></PageSuspense>} />
           <Route path="/blind-box" element={<PageSuspense><BlindBoxPage /></PageSuspense>} />
           <Route path="/privacy" element={<PageSuspense><PrivacyPage /></PageSuspense>} />
 
