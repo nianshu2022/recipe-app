@@ -3,6 +3,9 @@ import type { Recipe, Category, Difficulty } from '@/types'
 import { db } from '@/db'
 import { generateId } from '@/utils/id'
 import { emit } from '@/utils/events'
+import { sampleRecipes } from '@/data/sampleRecipes'
+
+const SAMPLES_KEY = 'recipe-app-samples-seeded'
 
 function filterRecipes(
   recipes: Recipe[],
@@ -59,6 +62,14 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
 
     set({ loading: true })
     try {
+      // Seed sample recipes on first run
+      if (!localStorage.getItem(SAMPLES_KEY)) {
+        for (const recipe of sampleRecipes) {
+          await db.putRecipe(recipe)
+        }
+        localStorage.setItem(SAMPLES_KEY, 'true')
+      }
+
       const recipes = await db.getAllRecipes()
       const activeRecipes = recipes.filter((r) => !r.deletedAt)
       set({
