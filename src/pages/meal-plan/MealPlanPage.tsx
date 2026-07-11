@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, Eraser, ShoppingCart, Plus, Search, Check, Bookmark, ChevronDown, Wand2 } from 'lucide-react'
-import type { Category, Difficulty } from '@/types'
+import type { Category, Difficulty, Recipe } from '@/types'
 import { categoryIcons, categoryLabels } from '@/constants/categories'
 import { useMealPlanStore, type MealSlot } from '@/stores/mealPlanStore'
 import { useRecipeStore } from '@/stores/recipeStore'
@@ -9,8 +9,10 @@ import { useShoppingStore } from '@/stores/shoppingStore'
 import { useTemplateStore } from '@/stores/templateStore'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import { usePreferencesStore } from '@/stores/preferencesStore'
+import { useFridgeStore } from '@/stores/fridgeStore'
 import { generateMealPlan } from '@/utils/mealGenerator'
 import { calculateWeeklyNutrition } from '@/utils/nutrition'
+import { calculateSmartShopping, type SmartShoppingResult } from '@/utils/smartShopping'
 import { useUIStore } from '@/stores/uiStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
 import { NutritionPanel } from '@/components/ui/NutritionPanel'
@@ -31,6 +33,7 @@ export function MealPlanPage() {
   const { templates, loadTemplates, saveTemplate, deleteTemplate, getTemplateDays } = useTemplateStore()
   const { isPro } = useSubscriptionStore()
   const { preferences } = usePreferencesStore()
+  const { items: fridgeItems } = useFridgeStore()
   const navigate = useNavigate()
 
   const [selecting, setSelecting] = useState<{ day: number; slot: MealSlot } | null>(null)
@@ -40,6 +43,8 @@ export function MealPlanPage() {
   const [showTemplateMenu, setShowTemplateMenu] = useState(false)
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [showPreferences, setShowPreferences] = useState(false)
+  const [showSmartShopping, setShowSmartShopping] = useState(false)
+  const [smartResult, setSmartResult] = useState<SmartShoppingResult | null>(null)
   const [templateName, setTemplateName] = useState('')
   const setModalOpen = useUIStore((s) => s.setModalOpen)
 
@@ -134,6 +139,41 @@ export function MealPlanPage() {
     setShowPreferences(false)
   }
 
+  const handleSmartShopping = () => {
+    if (!currentPlan) return
+    const planRecipes = currentPlan.days.flatMap((day) =>
+      slots.flatMap((slot) => {
+        const ids = day[slot] ?? []
+        return ids.map((id) => recipes.find((r) => r.id === id)).filter(Boolean)
+      })
+    ) as Recipe[]
+
+    const result = calculateSmartShopping(planRecipes, fridgeItems, preferences.servings)
+    setSmartResult(result)
+    setShowSmartShopping(true)
+  }
+
+  const handleAddSmartToShopping = async () => {
+    if (!smartResult || smartResult.needToBuy.length === 0) return
+    const { generateFromRecipes } = useShoppingStore.getState()
+    // Create a temporary recipe-like object for the shopping store
+    const tempRecipe = {
+      id: 'smart-shopping',
+      name: '智能购物清单',
+      ingredients: smartResult.needToBuy.map((item) => ({
+        id: item.id,
+        name: item.name,
+        amount: item.amount,
+        unit: item.unit,
+        type: 'main' as const,
+        scalable: false,
+      })),
+    }
+    await generateFromRecipes([tempRecipe.id])
+    setShowSmartShopping(false)
+    navigate('/shopping')
+  }
+
   const hasMeals = currentPlan?.days.some((day) =>
     slots.some((slot) => (day[slot]?.length ?? 0) > 0)
   )
@@ -173,6 +213,15 @@ export function MealPlanPage() {
           >
             <Wand2 size={16} />
           </button>
+          {hasMeals && fridgeItems.length > 0 && (
+            <button
+              onClick={handleSmartShopping}
+              className="flex h-10 items-center gap-1 rounded-xl bg-[var(--color-bg-card)] px-3 text-[var(--color-text-muted)] shadow-xs transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-600 active:scale-95"
+              title="智能购物"
+            >
+              <ShoppingCart size={16} />
+            </button>
+          )}
           <div className="relative">
             <button
               onClick={() => setShowTemplateMenu(!showTemplateMenu)}
@@ -622,6 +671,77 @@ export function MealPlanPage() {
               >
                 生成菜单
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Smart shopping modal */}
+      {showSmartShopping && smartResult && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowSmartShopping(false)}>
+          <div
+            className="mx-4 w-full max-w-sm rounded-2xl bg-[var(--color-bg-card)] p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="mb-4 text-lg font-semibold text-[var(--color-text)]">智能购物清单</h3>
+            
+            {smartResult.needToBuy.length > 0 && (
+              <div className="mb-4">
+                <p className="mb-2 text-xs font-medium text-red-500">需要购买</p>
+                <div className="max-h-40 space-y-1 overflow-y-auto">
+                  {smartResult.needToBuy.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between rounded-lg bg-red-50 px-3 py-2 text-sm dark:bg-red-950/20">
+                      <span className="text-[var(--color-text)]">{item.name}</span>
+                      <span className="text-xs text-red-500">{item.amount}{item.unit}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {smartResult.alreadyHave.length > 0 && (
+              <div className="mb-4">
+                <p className="mb-2 text-xs font-medium text-emerald-500">冰箱已有</p>
+                <div className="max-h-32 space-y-1 overflow-y-auto">
+                  {smartResult.alreadyHave.map((item) => (
+                    <div key={item.name} className="flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-2 text-sm dark:bg-emerald-950/20">
+                      <span className="text-[var(--color-text)]">{item.name}</span>
+                      <span className="text-xs text-emerald-500">{item.amount}{item.unit}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {smartResult.expiringSoon.length > 0 && (
+              <div className="mb-4">
+                <p className="mb-2 text-xs font-medium text-amber-500">即将过期</p>
+                <div className="space-y-1">
+                  {smartResult.expiringSoon.map((item) => (
+                    <div key={item.name} className="flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-sm dark:bg-amber-950/20">
+                      <span className="text-[var(--color-text)]">{item.name}</span>
+                      <span className="text-xs text-amber-500">{item.daysLeft}天后过期</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowSmartShopping(false)}
+                className="flex-1 rounded-xl border border-[var(--color-border)] py-2.5 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
+              >
+                取消
+              </button>
+              {smartResult.needToBuy.length > 0 && (
+                <button
+                  onClick={handleAddSmartToShopping}
+                  className="flex-1 rounded-xl bg-[var(--color-primary)] py-2.5 text-sm font-medium text-white shadow-md transition-all active:scale-[0.98]"
+                >
+                  生成购物清单
+                </button>
+              )}
             </div>
           </div>
         </div>
