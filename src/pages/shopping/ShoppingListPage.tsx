@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, ShoppingCart, Plus, Trash2, Check, X, ChevronDown, Eraser,
+  ArrowLeft, ShoppingCart, Plus, Trash2, Check, X, ChevronDown, Eraser, ExternalLink,
 } from 'lucide-react'
 import { useShoppingStore } from '@/stores/shoppingStore'
 import { useUIStore } from '@/stores/uiStore'
@@ -235,6 +235,18 @@ export function ShoppingListPage() {
                       <span className={`text-xs ${item.checked ? 'text-[var(--color-text-muted)]' : 'text-[var(--color-text-muted)]'}`}>
                         {item.amount > 0 ? `${item.amount}${item.unit}` : ''}
                       </span>
+                      {!item.checked && (
+                        <button
+                          onClick={() => {
+                            const query = encodeURIComponent(item.name)
+                            window.open(`https://s.taobao.com/search?q=${query}`, '_blank')
+                          }}
+                          className="rounded-lg p-1 text-[var(--color-text-muted)] opacity-0 transition-all duration-200 hover:bg-blue-50 hover:text-blue-500 group-hover:opacity-100"
+                          title="去淘宝搜索"
+                        >
+                          <ExternalLink size={12} />
+                        </button>
+                      )}
                       <button
                         onClick={() => removeItem(list.id, item.id)}
                         className="rounded-lg p-1 text-[var(--color-text-muted)] opacity-0 transition-all duration-200 hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
