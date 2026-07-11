@@ -10,8 +10,10 @@ import { useTemplateStore } from '@/stores/templateStore'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import { usePreferencesStore } from '@/stores/preferencesStore'
 import { generateMealPlan } from '@/utils/mealGenerator'
+import { calculateWeeklyNutrition } from '@/utils/nutrition'
 import { useUIStore } from '@/stores/uiStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
+import { NutritionPanel } from '@/components/ui/NutritionPanel'
 
 const slots: MealSlot[] = ['breakfast', 'lunch', 'dinner', 'snack']
 const slotColors: Record<MealSlot, string> = {
@@ -145,6 +147,11 @@ export function MealPlanPage() {
         return sum + slots.reduce((s, slot) => s + (day[slot]?.length ?? 0), 0)
       }, 0)
     : 0
+
+  // Calculate nutrition
+  const nutritionData = currentPlan
+    ? calculateWeeklyNutrition(currentPlan.days, recipes, preferences.servings)
+    : null
 
   return (
     <div className="space-y-6">
@@ -328,6 +335,16 @@ export function MealPlanPage() {
             )
           })}
         </div>
+      )}
+
+      {/* Nutrition panel */}
+      {nutritionData && plannedCount > 0 && (
+        <NutritionPanel
+          dailyData={nutritionData.days}
+          totals={nutritionData.totals}
+          averages={nutritionData.averages}
+          servings={preferences.servings}
+        />
       )}
 
       {/* Recipe picker modal */}
