@@ -1,6 +1,7 @@
 import html2canvas from 'html2canvas-pro'
 import type { Recipe } from '@/types'
 import { formatAmount } from './scaling'
+import { estimateNutrition, getCalorieLevel } from './nutrition'
 
 const difficultyLabels = { easy: '简单', medium: '中等', hard: '困难' }
 
@@ -8,6 +9,39 @@ function escapeHtml(str: string): string {
   const div = document.createElement('div')
   div.textContent = str
   return div.innerHTML
+}
+
+export async function shareRecipe(recipe: Recipe): Promise<boolean> {
+  const nutrition = estimateNutrition(recipe.ingredients)
+  const calorieLevel = getCalorieLevel(nutrition.calories)
+  const shareText = `${recipe.name}\n${difficultyLabels[recipe.difficulty]} · ${recipe.duration}分钟 · ${recipe.servings}人份\n热量：${nutrition.calories}kcal (${calorieLevel.label})\n\n来自「知味」`
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: recipe.name,
+        text: shareText,
+        url: window.location.origin + `/recipe/${recipe.id}`,
+      })
+      return true
+    } catch (e) {
+      if ((e as Error).name !== 'AbortError') {
+        console.error('Share failed:', e)
+      }
+      return false
+    }
+  }
+  return false
+}
+
+export async function copyRecipeLink(recipe: Recipe): Promise<boolean> {
+  const url = window.location.origin + `/recipe/${recipe.id}`
+  try {
+    await navigator.clipboard.writeText(url)
+    return true
+  } catch {
+    return false
+  }
 }
 
 export async function exportRecipeAsImage(recipe: Recipe): Promise<void> {

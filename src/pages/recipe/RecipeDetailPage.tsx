@@ -8,7 +8,7 @@ import { useCollectionStore } from '@/stores/collectionStore'
 import { useShoppingStore } from '@/stores/shoppingStore'
 import { useUIStore } from '@/stores/uiStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
-import { exportRecipeAsImage } from '@/utils/share'
+import { exportRecipeAsImage, shareRecipe, copyRecipeLink } from '@/utils/share'
 import { estimateNutrition, getCalorieLevel, getMacroPercentages } from '@/utils/nutrition'
 import { scaleIngredients, formatAmount } from '@/utils/scaling'
 import { difficultyConfig, categoryIcons } from '@/constants/categories'
@@ -311,13 +311,27 @@ export function RecipeDetailPage() {
           <ShoppingCart size={18} />
           生成购物清单
         </button>
-        <button
-          onClick={() => exportRecipeAsImage(recipe)}
-          className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] py-4 text-sm font-medium text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-[0.98]"
-        >
-          <Share2 size={18} />
-          分享菜谱
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={async () => {
+              const shared = await shareRecipe(recipe)
+              if (!shared) {
+                await copyRecipeLink(recipe)
+                showToast('链接已复制')
+              }
+            }}
+            className="flex flex-1 items-center justify-center gap-2.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] py-4 text-sm font-medium text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-[0.98]"
+          >
+            <Share2 size={18} />
+            分享
+          </button>
+          <button
+            onClick={() => exportRecipeAsImage(recipe)}
+            className="flex flex-1 items-center justify-center gap-2.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] py-4 text-sm font-medium text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-[0.98]"
+          >
+            保存图片
+          </button>
+        </div>
       </div>
     </div>
   )
