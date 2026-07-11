@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Eraser, ShoppingCart, Plus, Search, Check } from 'lucide-react'
+import { X, Eraser, ShoppingCart, Plus, Search, Check, Bookmark, ChevronDown } from 'lucide-react'
 import type { Category } from '@/types'
 import { categoryIcons, categoryLabels } from '@/constants/categories'
 import { useMealPlanStore, type MealSlot } from '@/stores/mealPlanStore'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useShoppingStore } from '@/stores/shoppingStore'
+import { useTemplateStore } from '@/stores/templateStore'
 import { useUIStore } from '@/stores/uiStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
 
@@ -22,12 +23,16 @@ export function MealPlanPage() {
     useMealPlanStore()
   const { recipes } = useRecipeStore()
   const { generateFromRecipes } = useShoppingStore()
+  const { templates, loadTemplates, saveTemplate, deleteTemplate, getTemplateDays } = useTemplateStore()
   const navigate = useNavigate()
 
   const [selecting, setSelecting] = useState<{ day: number; slot: MealSlot } | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [pickerSearch, setPickerSearch] = useState('')
   const [pickerCategory, setPickerCategory] = useState<Category | null>(null)
+  const [showTemplateMenu, setShowTemplateMenu] = useState(false)
+  const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [templateName, setTemplateName] = useState('')
   const setModalOpen = useUIStore((s) => s.setModalOpen)
 
   useEffect(() => {
@@ -42,7 +47,8 @@ export function MealPlanPage() {
 
   useEffect(() => {
     loadCurrentWeek()
-  }, [loadCurrentWeek])
+    loadTemplates()
+  }, [loadCurrentWeek, loadTemplates])
 
   useEffect(() => {
     if (currentPlan && recipes.length > 0) {
@@ -79,6 +85,29 @@ export function MealPlanPage() {
     navigate('/shopping')
   }
 
+  const handleSaveTemplate = async () => {
+    if (!currentPlan || !templateName.trim()) return
+    await saveTemplate(templateName.trim(), currentPlan.days)
+    setShowSaveDialog(false)
+    setTemplateName('')
+    setShowTemplateMenu(false)
+  }
+
+  const handleLoadTemplate = async (templateId: string) => {
+    const days = getTemplateDays(templateId)
+    if (days && currentPlan) {
+      const updatedPlan = { ...currentPlan, days, updatedAt: new Date().toISOString() }
+      const { db } = await import('@/db')
+      await db.putMealPlan(updatedPlan)
+      loadCurrentWeek()
+    }
+    setShowTemplateMenu(false)
+  }
+
+  const hasMeals = currentPlan?.days.some((day) =>
+    slots.some((slot) => (day[slot]?.length ?? 0) > 0)
+  )
+
   const getRecipeName = (recipeId: string) =>
     recipes.find((r) => r.id === recipeId)?.name ?? '未知菜谱'
 
@@ -101,24 +130,66 @@ export function MealPlanPage() {
             {plannedCount > 0 ? `已安排 ${plannedCount} 道菜` : '规划一周的美味'}
           </p>
         </div>
-        {plannedCount > 0 && (
-          <div className="flex gap-2">
+        <div className="flex gap-2">
+          <div className="relative">
             <button
-              onClick={handleGenerateShopping}
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-bg-card)] text-[var(--color-text-muted)] shadow-xs transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-600 active:scale-95"
-              title="生成购物清单"
+              onClick={() => setShowTemplateMenu(!showTemplateMenu)}
+              className="flex h-10 items-center gap-1 rounded-xl bg-[var(--color-bg-card)] px-3 text-[var(--color-text-muted)] shadow-xs transition-all duration-200 hover:bg-amber-50 hover:text-amber-600 active:scale-95"
+              title="模板"
             >
-              <ShoppingCart size={18} />
+              <Bookmark size={16} />
+              <ChevronDown size={14} className={`transition-transform ${showTemplateMenu ? 'rotate-180' : ''}`} />
             </button>
-            <button
-              onClick={clearPlan}
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-bg-card)] text-[var(--color-text-muted)] shadow-xs transition-all duration-200 hover:bg-red-50 hover:text-red-500 active:scale-95"
-              title="清空计划"
-            >
-              <Eraser size={18} />
-            </button>
+            {showTemplateMenu && (
+              <div className="absolute right-0 top-12 z-50 w-48 rounded-xl bg-[var(--color-bg-card)] p-1.5 shadow-lg">
+                {hasMeals && (
+                  <button
+                    onClick={() => { setShowSaveDialog(true); setShowTemplateMenu(false) }}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]"
+                  >
+                    保存为模板
+                  </button>
+                )}
+                {templates.length > 0 && (
+                  <div className="border-t border-[var(--color-border)] my-1" />
+                )}
+                {templates.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => handleLoadTemplate(t.id)}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]"
+                  >
+                    <span className="truncate flex-1">{t.name}</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); deleteTemplate(t.id) }}
+                      className="shrink-0 rounded p-1 text-[var(--color-text-muted)] hover:text-red-500"
+                    >
+                      <X size={12} />
+                    </button>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+          {plannedCount > 0 && (
+            <>
+              <button
+                onClick={handleGenerateShopping}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-bg-card)] text-[var(--color-text-muted)] shadow-xs transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-600 active:scale-95"
+                title="生成购物清单"
+              >
+                <ShoppingCart size={18} />
+              </button>
+              <button
+                onClick={clearPlan}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-bg-card)] text-[var(--color-text-muted)] shadow-xs transition-all duration-200 hover:bg-red-50 hover:text-red-500 active:scale-95"
+                title="清空计划"
+              >
+                <Eraser size={18} />
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Week grid */}
@@ -345,6 +416,42 @@ export function MealPlanPage() {
                 className="w-full rounded-2xl bg-[var(--color-primary)] py-3.5 text-sm font-semibold text-white shadow-md transition-all active:scale-[0.98] disabled:opacity-40"
               >
                 确认添加{selectedIds.size > 0 ? `（${selectedIds.size} 道）` : ''}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save template dialog */}
+      {showSaveDialog && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowSaveDialog(false)}>
+          <div
+            className="mx-4 w-full max-w-sm rounded-2xl bg-[var(--color-bg-card)] p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="mb-4 text-lg font-semibold text-[var(--color-text)]">保存为模板</h3>
+            <input
+              type="text"
+              value={templateName}
+              onChange={(e) => setTemplateName(e.target.value)}
+              placeholder="输入模板名称，如家常一周"
+              className="mb-4 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3 text-sm text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-400)]"
+              autoFocus
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSaveTemplate() }}
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowSaveDialog(false)}
+                className="flex-1 rounded-xl border border-[var(--color-border)] py-2.5 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleSaveTemplate}
+                disabled={!templateName.trim()}
+                className="flex-1 rounded-xl bg-[var(--color-primary)] py-2.5 text-sm font-medium text-white shadow-md transition-all active:scale-[0.98] disabled:opacity-40"
+              >
+                保存
               </button>
             </div>
           </div>

@@ -172,3 +172,14 @@ export interface UserSettings {
   theme: 'light' | 'dark' | 'system'
   updatedAt: string
 }
+
+export interface MealPlanTemplate {
+  id: string
+  userId: string
+  name: string
+  days: DayPlan[]
+  syncStatus: SyncStatus
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}

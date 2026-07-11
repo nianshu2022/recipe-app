@@ -1,8 +1,8 @@
 import { openDB, type IDBPDatabase } from 'idb'
-import type { Recipe, Collection, Menu, MealPlan, ShoppingList, CookingRecord, FridgeItem } from '@/types'
+import type { Recipe, Collection, Menu, MealPlan, ShoppingList, CookingRecord, FridgeItem, MealPlanTemplate } from '@/types'
 
 const DB_NAME = 'recipe-app'
-const DB_VERSION = 2
+const DB_VERSION = 3
 
 interface RecipeAppDB {
   recipes: {
@@ -24,6 +24,11 @@ interface RecipeAppDB {
     key: string
     value: MealPlan
     indexes: { 'by-week': string }
+  }
+  mealPlanTemplates: {
+    key: string
+    value: MealPlanTemplate
+    indexes: { 'by-updated': string }
   }
   shoppingLists: {
     key: string
@@ -109,6 +114,12 @@ function getDB() {
         }
         if (!fridgeStore.indexNames.contains('by-category')) {
           fridgeStore.createIndex('by-category', 'category')
+        }
+
+        // Meal Plan Templates
+        const templateStore = createStore('mealPlanTemplates', { keyPath: 'id' })
+        if (!templateStore.indexNames.contains('by-updated')) {
+          templateStore.createIndex('by-updated', 'updatedAt')
         }
       },
     })
@@ -201,5 +212,19 @@ export const db = {
   },
   async deleteFridgeItem(id: string) {
     return (await getDB()).delete('fridgeItems', id)
+  },
+
+  // Meal Plan Templates
+  async getAllMealPlanTemplates() {
+    return (await getDB()).getAll('mealPlanTemplates')
+  },
+  async getMealPlanTemplate(id: string) {
+    return (await getDB()).get('mealPlanTemplates', id)
+  },
+  async putMealPlanTemplate(template: MealPlanTemplate) {
+    return (await getDB()).put('mealPlanTemplates', template)
+  },
+  async deleteMealPlanTemplate(id: string) {
+    return (await getDB()).delete('mealPlanTemplates', id)
   },
 }
