@@ -49,7 +49,7 @@ function getDB() {
     dbPromise = openDB<RecipeAppDB>(DB_NAME, DB_VERSION, {
       upgrade(db, _oldVersion, _newVersion, transaction) {
         // Helper to create store only if it doesn't exist
-        const createStore = <T extends { keyPath: string }>(
+        const createStore = <_T extends { keyPath: string }>(
           name: string,
           options: IDBObjectStoreParameters
         ) => {

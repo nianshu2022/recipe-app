@@ -6,12 +6,11 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
-import { useUIStore } from '@/stores/uiStore'
+
 
 export function SettingsPage() {
   const { isLoggedIn, user, logout, syncNow } = useAuthStore()
   const { theme, setTheme } = useThemeStore()
-  const showToast = useUIStore((s) => s.showToast)
   const [syncing, setSyncing] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
