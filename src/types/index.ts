@@ -194,3 +194,20 @@ export interface Subscription {
   createdAt: string
   updatedAt: string
 }
+
+export interface FamilyMember {
+  id: string
+  userId: string
+  nickname: string
+  email: string
+  joinedAt: string
+}
+
+export interface FamilyGroup {
+  id: string
+  ownerId: string
+  inviteCode: string
+  members: FamilyMember[]
+  createdAt: string
+  updatedAt: string
+}

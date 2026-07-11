@@ -2,17 +2,19 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ChevronRight, Heart, ShoppingCart, ChefHat, Moon, Sun, Monitor, Database, LogOut, RefreshCw,
-  Settings, ArrowLeft, Crown, Sparkles,
+  Settings, ArrowLeft, Crown, Sparkles, Users,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
+import { useFamilyStore } from '@/stores/familyStore'
 
 
 export function SettingsPage() {
   const { isLoggedIn, user, logout, syncNow } = useAuthStore()
   const { theme, setTheme } = useThemeStore()
   const { getPlan } = useSubscriptionStore()
+  const { group } = useFamilyStore()
   const [syncing, setSyncing] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
@@ -90,6 +92,32 @@ export function SettingsPage() {
                 </span>
                 {currentPlan === 'pro' && (
                   <p className="text-xs text-amber-500">已解锁所有高级功能</p>
+                )}
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+          </Link>
+        </div>
+      </div>
+
+      {/* Family */}
+      <div className="space-y-3">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+          家庭
+        </h2>
+        <div className="overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs">
+          <Link
+            to="/settings/family"
+            className="flex items-center justify-between px-5 py-3.5 transition-colors duration-150 hover:bg-[var(--color-bg-subtle)]"
+          >
+            <div className="flex items-center gap-3">
+              <Users size={18} className="text-[var(--color-text-muted)]" />
+              <div>
+                <span className="text-sm font-medium text-[var(--color-text)]">
+                  {group ? `家庭（${group.members.length}人）` : '家庭协作'}
+                </span>
+                {!group && (
+                  <p className="text-xs text-[var(--color-text-muted)]">与家人共享菜谱和餐计划</p>
                 )}
               </div>
             </div>
