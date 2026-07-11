@@ -7,6 +7,7 @@ import { useMealPlanStore, type MealSlot } from '@/stores/mealPlanStore'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useShoppingStore } from '@/stores/shoppingStore'
 import { useTemplateStore } from '@/stores/templateStore'
+import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import { useUIStore } from '@/stores/uiStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
 
@@ -24,6 +25,7 @@ export function MealPlanPage() {
   const { recipes } = useRecipeStore()
   const { generateFromRecipes } = useShoppingStore()
   const { templates, loadTemplates, saveTemplate, deleteTemplate, getTemplateDays } = useTemplateStore()
+  const { isPro } = useSubscriptionStore()
   const navigate = useNavigate()
 
   const [selecting, setSelecting] = useState<{ day: number; slot: MealSlot } | null>(null)
@@ -71,6 +73,18 @@ export function MealPlanPage() {
 
   const handleConfirm = async () => {
     if (!selecting || selectedIds.size === 0) return
+
+    // Free users can only have 1 plan with meals
+    if (!isPro()) {
+      const hasMeals = currentPlan?.days.some((day) =>
+        slots.some((slot) => (day[slot]?.length ?? 0) > 0)
+      )
+      if (hasMeals) {
+        navigate('/settings/pricing')
+        return
+      }
+    }
+
     await setMeals(selecting.day, selecting.slot, Array.from(selectedIds))
     setSelecting(null)
   }
