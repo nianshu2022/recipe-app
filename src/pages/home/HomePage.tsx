@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  Search, Plus, Dice5, Clock, ChefHat, Heart,
+  Search, Plus, Dice5, Clock, ChefHat, Heart, Sparkles,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useCollectionStore } from '@/stores/collectionStore'
 import { useDebounce } from '@/hooks/useDebounce'
+import { getSceneRecommendations, getTimeScene, scenes } from '@/utils/recommendations'
 import { BrandLoading } from '@/components/ui/BrandLoading'
 import { VirtualList } from '@/components/ui/VirtualList'
 import { categoryIcons, categoryLabels, difficultyConfig } from '@/constants/categories'
@@ -132,6 +133,11 @@ export function HomePage() {
         ))}
       </div>
 
+      {/* Recommendations */}
+      {recipes.length > 0 && !categoryFilter && !difficultyFilter && !inputValue && (
+        <RecommendationSection recipes={recipes} />
+      )}
+
       {/* Recipe list */}
       {loading ? (
         <BrandLoading>
@@ -248,6 +254,52 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
           className={isFavorited ? 'fill-red-500 text-red-500' : 'text-[var(--color-text-muted)]'}
         />
       </button>
+    </div>
+  )
+}
+
+function RecommendationSection({ recipes }: { recipes: Recipe[] }) {
+  const timeScene = getTimeScene()
+  const sceneInfo = scenes.find((s) => s.id === timeScene)
+  const recommendations = getSceneRecommendations(recipes, timeScene, 5)
+
+  if (recommendations.length === 0) return null
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Sparkles size={16} className="text-amber-500" />
+        <h2 className="text-sm font-semibold text-[var(--color-text)]">
+          {sceneInfo?.emoji} 为你推荐
+        </h2>
+        <span className="text-xs text-[var(--color-text-muted)]">
+          {sceneInfo?.label}时段
+        </span>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
+        {recommendations.map((recipe) => (
+          <Link
+            key={recipe.id}
+            to={`/recipe/${recipe.id}`}
+            className="shrink-0 w-32 rounded-2xl bg-[var(--color-bg-card)] p-3 shadow-xs transition-all duration-200 hover:shadow-md active:scale-95"
+          >
+            <div className="mb-2 flex h-16 items-center justify-center rounded-xl bg-[var(--color-bg-subtle)] text-xl">
+              {categoryIcons[recipe.category]
+                ? (() => {
+                    const Icon = categoryIcons[recipe.category]
+                    return <Icon size={24} className="text-[var(--color-text-muted)]" />
+                  })()
+                : recipe.name.charAt(0)}
+            </div>
+            <p className="truncate text-xs font-medium text-[var(--color-text)]">
+              {recipe.name}
+            </p>
+            <p className="mt-1 text-[10px] text-[var(--color-text-muted)]">
+              {recipe.duration}分钟
+            </p>
+          </Link>
+        ))}
+      </div>
     </div>
   )
 }
