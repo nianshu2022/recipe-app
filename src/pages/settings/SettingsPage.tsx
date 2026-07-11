@@ -152,6 +152,16 @@ export function SettingsPage() {
             </div>
             <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
           </Link>
+          <Link
+            to="/settings/history"
+            className="flex items-center justify-between px-5 py-3.5 border-t border-[var(--color-border-subtle)] transition-colors duration-150 hover:bg-[var(--color-bg-subtle)]"
+          >
+            <div className="flex items-center gap-3">
+              <ChefHat size={18} className="text-[var(--color-text-muted)]" />
+              <span className="text-sm font-medium text-[var(--color-text)]">烹饪历史</span>
+            </div>
+            <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+          </Link>
         </div>
       </div>
 
