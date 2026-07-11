@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Package, Clock, Users, RotateCcw, ArrowRight, Sparkles,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
+import { usePreferencesStore } from '@/stores/preferencesStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
 import { categoryIcons, categoryLabels, difficultyConfig } from '@/constants/categories'
 import type { Recipe } from '@/types'
@@ -13,16 +14,27 @@ type Phase = 'idle' | 'shaking' | 'revealed'
 export function BlindBoxPage() {
   const navigate = useNavigate()
   const { recipes, loading } = useRecipeStore()
+  const { preferences } = usePreferencesStore()
   const [phase, setPhase] = useState<Phase>('idle')
   const [result, setResult] = useState<Recipe | null>(null)
 
+  const filteredRecipes = useMemo(() => {
+    return recipes.filter((r) => {
+      if (preferences.excludeCategories.includes(r.category)) return false
+      const diffOrder = { easy: 0, medium: 1, hard: 2 }
+      if (diffOrder[r.difficulty] > diffOrder[preferences.maxDifficulty]) return false
+      if (r.duration > preferences.maxDuration) return false
+      return true
+    })
+  }, [recipes, preferences])
+
   const draw = () => {
-    if (recipes.length === 0) return
+    if (filteredRecipes.length === 0) return
     setPhase('shaking')
     setResult(null)
 
     setTimeout(() => {
-      const picked = recipes[Math.floor(Math.random() * recipes.length)]
+      const picked = filteredRecipes[Math.floor(Math.random() * filteredRecipes.length)]
       setResult(picked)
       setPhase('revealed')
     }, 850)
@@ -36,19 +48,21 @@ export function BlindBoxPage() {
     return <BrandLoading />
   }
 
-  if (recipes.length === 0 && phase === 'idle') {
+  if (filteredRecipes.length === 0 && phase === 'idle') {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--color-bg-subtle)]">
           <Package size={36} className="text-[var(--color-text-muted)]" />
         </div>
-        <h3 className="mb-2 text-lg font-medium text-[var(--color-text)]">还没有菜谱</h3>
-        <p className="mb-4 text-sm text-[var(--color-text-muted)]">先去添加几道菜谱再来抽取</p>
+        <h3 className="mb-2 text-lg font-medium text-[var(--color-text)]">没有匹配的菜谱</h3>
+        <p className="mb-4 text-sm text-[var(--color-text-muted)]">
+          {recipes.length === 0 ? '先去添加几道菜谱再来抽取' : '当前过滤条件下没有菜谱'}
+        </p>
         <button
-          onClick={() => navigate('/recipe/new')}
+          onClick={() => navigate(recipes.length === 0 ? '/recipe/new' : '/meal-plan')}
           className="rounded-2xl bg-[var(--color-primary)] px-8 py-3 text-sm font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
         >
-          创建菜谱
+          {recipes.length === 0 ? '创建菜谱' : '调整偏好'}
         </button>
       </div>
     )
@@ -87,7 +101,12 @@ export function BlindBoxPage() {
                 {phase === 'shaking' ? '摇一摇...' : '点击下方按钮抽取'}
               </p>
               <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                共 {recipes.length} 道菜谱等待被抽中
+                共 {filteredRecipes.length} 道菜谱等待被抽中
+                {filteredRecipes.length < recipes.length && (
+                  <span className="ml-1 text-[var(--color-text-muted)]">
+                    （已过滤 {recipes.length - filteredRecipes.length} 道）
+                  </span>
+                )}
               </p>
             </div>
           </div>

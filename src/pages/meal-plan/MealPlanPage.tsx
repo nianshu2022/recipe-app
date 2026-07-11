@@ -461,7 +461,13 @@ export function MealPlanPage() {
                 const existing = currentPlan?.days[selecting.day]?.[selecting.slot] ?? []
                 const filtered = recipes.filter((r) => {
                   if (pickerCategory && r.category !== pickerCategory) return false
-                  if (pickerSearch && !r.name.includes(pickerSearch) && !r.tags.some((t) => t.includes(pickerSearch))) return false
+                  if (pickerSearch) {
+                    const query = pickerSearch.toLowerCase()
+                    const matchName = r.name.toLowerCase().includes(query)
+                    const matchTags = r.tags.some((t) => t.toLowerCase().includes(query))
+                    const matchIngredients = r.ingredients.some((i) => i.name.toLowerCase().includes(query))
+                    if (!matchName && !matchTags && !matchIngredients) return false
+                  }
                   return true
                 })
                 if (filtered.length === 0) {

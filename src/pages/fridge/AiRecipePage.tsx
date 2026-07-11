@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Wand2, Loader2, Check } from 'lucide-react'
 import { useFridgeStore } from '@/stores/fridgeStore'
+import { useUIStore } from '@/stores/uiStore'
 import { generateRecipeWithAI, generateFallbackRecipe } from '@/utils/aiRecipe'
 import type { Recipe } from '@/types'
 import { AiRecipePreview } from '@/pages/recipe/AiRecipePreview'
@@ -9,6 +10,7 @@ import { AiRecipePreview } from '@/pages/recipe/AiRecipePreview'
 export function AiRecipePage() {
   const navigate = useNavigate()
   const { items: fridgeItems } = useFridgeStore()
+  const showToast = useUIStore((s) => s.showToast)
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
   const [servings, setServings] = useState(2)
   const [generating, setGenerating] = useState(false)
@@ -39,15 +41,21 @@ export function AiRecipePage() {
           servings,
         },
       )
-      setGeneratedRecipe(recipe ?? generateFallbackRecipe(
-        selected.map((i) => ({
-          name: i.name,
-          amount: i.amount,
-          unit: i.unit,
-        })),
-        servings,
-      ))
+      if (recipe) {
+        setGeneratedRecipe(recipe)
+      } else {
+        showToast('AI 生成失败，已使用默认模板')
+        setGeneratedRecipe(generateFallbackRecipe(
+          selected.map((i) => ({
+            name: i.name,
+            amount: i.amount,
+            unit: i.unit,
+          })),
+          servings,
+        ))
+      }
     } catch (e) {
+      showToast('AI 生成失败，已使用默认模板')
       setGeneratedRecipe(generateFallbackRecipe(
         selected.map((i) => ({
           name: i.name,

@@ -358,6 +358,13 @@ export function RecipeFormPage() {
                 rows={2}
                 className="w-full resize-none rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3.5 py-2.5 text-sm text-[var(--color-text)] outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-300)] focus:bg-[var(--color-bg-card)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
               />
+              <input
+                type="text"
+                value={step.tip || ''}
+                onChange={(e) => updateStep(index, 'tip', e.target.value || undefined)}
+                placeholder="小贴士（可选）"
+                className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3.5 py-2 text-sm text-[var(--color-text)] outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-stone-300)] focus:bg-[var(--color-bg-card)] focus:ring-2 focus:ring-[var(--color-border-subtle)]"
+              />
               <div className="mt-2.5 flex items-center gap-2">
                 <label className="text-xs text-[var(--color-text-muted)]">计时（分钟）</label>
                 <input
