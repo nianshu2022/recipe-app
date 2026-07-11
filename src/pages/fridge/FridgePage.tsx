@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Plus, Trash2, AlertTriangle, Clock, X, Search, ChevronDown } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, Trash2, AlertTriangle, Clock, X, Search, ChevronDown, Wand2 } from 'lucide-react'
 import { useFridgeStore } from '@/stores/fridgeStore'
 import { useUIStore } from '@/stores/uiStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
@@ -29,6 +30,7 @@ function getDaysUntilExpiry(expiryDate: string): number {
 export function FridgePage() {
   const { items, loading, loadItems, addItem, deleteItem, getExpiringSoon, getExpired } = useFridgeStore()
   const showToast = useUIStore((s) => s.showToast)
+  const navigate = useNavigate()
 
   const [showAdd, setShowAdd] = useState(false)
   const [filterCategory, setFilterCategory] = useState<string | null>(null)
@@ -90,12 +92,24 @@ export function FridgePage() {
             {items.length > 0 ? `共 ${items.length} 种食材` : '管理你的食材'}
           </p>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white shadow-md transition-all duration-200 hover:shadow-lg active:scale-95"
-        >
-          <Plus size={20} />
-        </button>
+        <div className="flex gap-2">
+          {items.length > 0 && (
+            <button
+              onClick={() => navigate('/fridge/ai-recipe')}
+              className="flex h-10 items-center gap-1 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 px-3 text-white shadow-md transition-all duration-200 hover:shadow-lg active:scale-95"
+              title="AI 生成食谱"
+            >
+              <Wand2 size={16} />
+              <span className="text-xs font-medium">AI</span>
+            </button>
+          )}
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white shadow-md transition-all duration-200 hover:shadow-lg active:scale-95"
+          >
+            <Plus size={20} />
+          </button>
+        </div>
       </div>
 
       {/* Alerts */}

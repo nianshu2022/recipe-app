@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  Search, Plus, Dice5, Clock, ChefHat, Heart, Sparkles,
+  Search, Plus, Dice5, Clock, ChefHat, Heart, Sparkles, Download,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useCollectionStore } from '@/stores/collectionStore'
@@ -62,6 +62,13 @@ export function HomePage() {
             className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
           >
             <Dice5 size={20} />
+          </Link>
+          <Link
+            to="/recipe/import"
+            aria-label="导入菜谱"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
+          >
+            <Download size={20} />
           </Link>
           <Link
             to="/recipe/new"

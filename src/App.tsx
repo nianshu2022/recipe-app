@@ -24,6 +24,8 @@ const FridgePage = lazy(() => import('@/pages/fridge/FridgePage').then(m => ({ d
 const CookingHistoryPage = lazy(() => import('@/pages/settings/CookingHistoryPage').then(m => ({ default: m.CookingHistoryPage })))
 const BlindBoxPage = lazy(() => import('@/pages/blind-box/BlindBoxPage').then(m => ({ default: m.BlindBoxPage })))
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })))
+const ImportRecipePage = lazy(() => import('@/pages/recipe/ImportRecipePage').then(m => ({ default: m.ImportRecipePage })))
+const AiRecipePage = lazy(() => import('@/pages/fridge/AiRecipePage').then(m => ({ default: m.AiRecipePage })))
 
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
@@ -51,6 +53,7 @@ function AnimatedRoutes() {
           <Route path="/" element={<PageSuspense><HomePage /></PageSuspense>} />
           <Route path="/recipe/:id" element={<PageSuspense><RecipeDetailPage /></PageSuspense>} />
           <Route path="/recipe/new" element={<PageSuspense><RecipeFormPage /></PageSuspense>} />
+          <Route path="/recipe/import" element={<PageSuspense><ImportRecipePage /></PageSuspense>} />
           <Route path="/recipe/:id/edit" element={<PageSuspense><RecipeFormPage /></PageSuspense>} />
 
           <Route path="/meal-plan" element={<PageSuspense><MealPlanPage /></PageSuspense>} />
@@ -63,6 +66,7 @@ function AnimatedRoutes() {
           <Route path="/collection" element={<PageSuspense><CollectionPage /></PageSuspense>} />
           <Route path="/shopping" element={<PageSuspense><ShoppingListPage /></PageSuspense>} />
           <Route path="/fridge" element={<PageSuspense><FridgePage /></PageSuspense>} />
+          <Route path="/fridge/ai-recipe" element={<PageSuspense><AiRecipePage /></PageSuspense>} />
           <Route path="/blind-box" element={<PageSuspense><BlindBoxPage /></PageSuspense>} />
           <Route path="/privacy" element={<PageSuspense><PrivacyPage /></PageSuspense>} />
 
