@@ -1,4 +1,4 @@
-const { getFavoriteRecipeIds, getRecipes, toggleFavoriteRecipe } = require('../../utils/storage')
+const { getFavoriteRecipeIds, getRecipes, toggleFavoriteRecipe, addRecipesToShoppingList } = require('../../utils/storage')
 const { formatDuration } = require('../../utils/format')
 const { getNavMetrics } = require('../../utils/nav')
 
@@ -40,6 +40,9 @@ Page({
     statusBarHeight: 24,
     headerTopInset: 32,
     menuButtonReserve: 104,
+    selectMode: false,
+    selectedIds: {},
+    selectedCount: 0,
   },
 
   onLoad(options = {}) {
@@ -126,5 +129,42 @@ Page({
       title: favoriteIds.has(id) ? '已收藏' : '已取消收藏',
       icon: 'none',
     })
+  },
+
+  enterSelectMode() {
+    this.setData({ selectMode: true, selectedIds: {}, selectedCount: 0 })
+  },
+
+  exitSelectMode() {
+    this.setData({ selectMode: false, selectedIds: {}, selectedCount: 0 })
+  },
+
+  toggleSelectRecipe(event) {
+    const id = event.currentTarget.dataset.id
+    const selectedIds = { ...this.data.selectedIds }
+    if (selectedIds[id]) {
+      delete selectedIds[id]
+    } else {
+      selectedIds[id] = true
+    }
+    this.setData({
+      selectedIds,
+      selectedCount: Object.keys(selectedIds).length,
+    })
+  },
+
+  confirmGenerateShopping() {
+    const selectedIds = this.data.selectedIds
+    const ids = Object.keys(selectedIds).filter((id) => selectedIds[id])
+    if (ids.length === 0) {
+      wx.showToast({ title: '请先选择菜谱', icon: 'none' })
+      return
+    }
+    const recipesById = new Map(this.data.recipes.map((r) => [r.id, r]))
+    const selectedRecipes = ids.map((id) => recipesById.get(id)).filter(Boolean)
+    addRecipesToShoppingList(selectedRecipes)
+    this.setData({ selectMode: false, selectedIds: {}, selectedCount: 0 })
+    wx.showToast({ title: `已生成 ${selectedRecipes.length} 道菜的清单`, icon: 'success' })
+    setTimeout(() => wx.navigateTo({ url: '/pages/shopping/shopping' }), 300)
   },
 })

@@ -84,17 +84,21 @@ export function RecipeFormPage() {
     setSteps(steps.map((s, i) => (i === index ? { ...s, [field]: value } : s)))
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) return
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('图片大小不能超过 5MB', 'error')
+    if (!file.type.startsWith('image/')) {
+      showToast('请上传图片文件', 'error')
       return
     }
-    const reader = new FileReader()
-    reader.onload = () => setCoverImage(reader.result as string)
-    reader.readAsDataURL(file)
+    try {
+      const { compressImage } = await import('@/utils/image')
+      const compressed = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.85 })
+      setCoverImage(compressed)
+      showToast('图片已添加', 'success')
+    } catch {
+      showToast('图片处理失败，请重试', 'error')
+    }
   }
 
   const handleSubmit = async () => {

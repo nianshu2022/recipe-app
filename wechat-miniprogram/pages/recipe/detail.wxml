@@ -13,6 +13,9 @@
     <view class="icon-button" bindtap="toggleFavorite">
       <image class="topbar-icon" src="{{isFavorited ? '/assets/lucide/heart-active.svg' : '/assets/lucide/heart.svg'}}" mode="aspectFit" />
     </view>
+    <view class="icon-button" bindtap="showCollectionPicker">
+      <image class="topbar-icon" src="/assets/lucide/package.svg" mode="aspectFit" />
+    </view>
   </view>
 
   <view class="cover-card" style="background: {{recipe.coverColor}};">
@@ -124,5 +127,34 @@
       <text>分享菜谱</text>
     </button>
   </view>
-</view>
+
+  <!-- Collection picker -->
+  <view wx:if="{{showCollectionPicker}}" class="edit-overlay" bindtap="hideCollectionPicker">
+    <view class="collection-picker" catchtap="noop">
+      <view class="picker-header">
+        <text class="picker-title">添加到收藏夹</text>
+        <view class="picker-close" bindtap="hideCollectionPicker">
+          <image class="close-icon" src="/assets/lucide/x.svg" mode="aspectFit" />
+        </view>
+      </view>
+      <view class="picker-list">
+        <view
+          wx:for="{{collections}}"
+          wx:key="id"
+          class="picker-item"
+          data-id="{{item.id}}"
+          bindtap="toggleCollection"
+        >
+          <view class="picker-item-name">{{item.name}}</view>
+          <view class="picker-item-count">{{item.recipeIds.length}} 道</view>
+          <view class="picker-check {{collectionStatus[item.id] ? 'is-checked' : ''}}">
+            <image wx:if="{{collectionStatus[item.id]}}" class="picker-check-icon" src="/assets/lucide/check-white.svg" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{collections.length === 0}}" class="picker-empty">
+        <text>还没有收藏夹，去创建一个吧</text>
+      </view>
+    </view>
+  </view>
 <app-tabbar active="" />

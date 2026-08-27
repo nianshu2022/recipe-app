@@ -1,15 +1,14 @@
 import { useRef, useEffect } from 'react'
 import { NavLink, Link } from 'react-router-dom'
-import { UtensilsCrossed, Heart, CalendarRange, User, Sparkles, Refrigerator } from 'lucide-react'
+import { UtensilsCrossed, CalendarRange, User, Sparkles, Refrigerator } from 'lucide-react'
 import { useUIStore } from '@/stores/uiStore'
 
 const leftItems = [
   { to: '/', icon: UtensilsCrossed, label: '寻味' },
   { to: '/meal-plan', icon: CalendarRange, label: '七日味' },
-  { to: '/fridge', icon: Refrigerator, label: '冰箱' },
 ]
 const rightItems = [
-  { to: '/collection', icon: Heart, label: '收藏' },
+  { to: '/fridge', icon: Refrigerator, label: '冰箱' },
   { to: '/settings', icon: User, label: '小窝' },
 ]
 
@@ -19,9 +18,9 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: typeof UtensilsC
       to={to}
       end={to === '/'}
       className={({ isActive }) =>
-        `group relative flex flex-col items-center gap-1 rounded-2xl px-4 py-1.5 transition-all duration-200 ${
+        `group relative flex flex-col items-center gap-1 rounded-2xl px-2 sm:px-4 py-1.5 min-w-[48px] transition-all duration-200 ${
           isActive
-            ? 'text-primary'
+            ? 'text-[var(--color-primary)]'
             : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'
         }`
       }
@@ -31,11 +30,11 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: typeof UtensilsC
           <div className={`transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`}>
             <Icon size={20} strokeWidth={isActive ? 2.2 : 1.6} />
           </div>
-          <span className={`text-[10px] font-medium tracking-wide ${isActive ? 'text-primary' : ''}`}>
+          <span className={`text-[10px] font-medium tracking-wide ${isActive ? 'text-[var(--color-primary)] font-semibold' : ''}`}>
             {label}
           </span>
           {isActive && (
-            <span className="absolute -bottom-0.5 left-1/2 h-[3px] w-5 -translate-x-1/2 rounded-full bg-primary" />
+            <span className="absolute -bottom-0.5 left-1/2 h-[3px] w-4 -translate-x-1/2 rounded-full bg-[var(--color-primary)] shadow-2xs" />
           )}
         </>
       )}

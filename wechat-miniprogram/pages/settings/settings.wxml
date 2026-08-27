@@ -24,6 +24,13 @@
       </view>
       <image class="chevron" src="/assets/lucide/chevron-right.svg" mode="aspectFit" />
     </view>
+    <view class="action-row" bindtap="openMenu">
+      <view class="row-left">
+        <image class="row-icon" src="/assets/lucide/utensils-crossed.svg" mode="aspectFit" />
+        <text>我的菜单</text>
+      </view>
+      <image class="chevron" src="/assets/lucide/chevron-right.svg" mode="aspectFit" />
+    </view>
     <view class="action-row" bindtap="openShopping">
       <view class="row-left">
         <image class="row-icon" src="/assets/lucide/shopping-cart.svg" mode="aspectFit" />

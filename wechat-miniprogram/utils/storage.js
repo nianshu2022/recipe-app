@@ -316,6 +316,25 @@ function removeShoppingItem(id) {
   return saveShoppingItems(getShoppingItems().filter((item) => item.id !== id))
 }
 
+function updateShoppingItemAmount(id, amount) {
+  const items = getShoppingItems().map((item) =>
+    item.id === id ? { ...item, amount: Number(amount) || 0 } : item,
+  )
+  return saveShoppingItems(items)
+}
+
+function renameShoppingList(id, name) {
+  const now = new Date().toISOString()
+  const lists = getAllShoppingLists()
+  const nextLists = lists.map((list) =>
+    list.id === id
+      ? { ...list, name: name || list.name, updatedAt: now, syncStatus: 'pending' }
+      : list,
+  )
+  saveShoppingLists(nextLists)
+  return nextLists
+}
+
 function clearCheckedShoppingItems() {
   return saveShoppingItems(getShoppingItems().filter((item) => !item.checked))
 }
@@ -586,6 +605,72 @@ function getCollections() {
   return getAllCollections().filter((collection) => !collection.deletedAt)
 }
 
+function createCollection(name) {
+  const now = new Date().toISOString()
+  const collections = getAllCollections()
+  const collection = normalizeCollection({
+    name: name || '新建收藏夹',
+    recipeIds: [],
+    syncStatus: 'pending',
+    createdAt: now,
+    updatedAt: now,
+  })
+  saveCollections([collection, ...collections])
+  return collection
+}
+
+function renameCollection(id, name) {
+  const now = new Date().toISOString()
+  const collections = getAllCollections()
+  const nextCollections = collections.map((c) =>
+    c.id === id ? { ...c, name, updatedAt: now, syncStatus: 'pending' } : c,
+  )
+  saveCollections(nextCollections)
+}
+
+function deleteCollection(id) {
+  const now = new Date().toISOString()
+  const collections = getAllCollections()
+  const nextCollections = collections.map((c) =>
+    c.id === id ? { ...c, deletedAt: now, updatedAt: now, syncStatus: 'pending' } : c,
+  )
+  saveCollections(nextCollections)
+}
+
+function addRecipeToCollection(collectionId, recipeId) {
+  const now = new Date().toISOString()
+  const collections = getAllCollections()
+  const nextCollections = collections.map((c) => {
+    if (c.id !== collectionId) return c
+    if (c.recipeIds.includes(recipeId)) return c
+    return { ...c, recipeIds: [...c.recipeIds, recipeId], updatedAt: now, syncStatus: 'pending' }
+  })
+  saveCollections(nextCollections)
+}
+
+function removeRecipeFromCollection(collectionId, recipeId) {
+  const now = new Date().toISOString()
+  const collections = getAllCollections()
+  const nextCollections = collections.map((c) => {
+    if (c.id !== collectionId) return c
+    return { ...c, recipeIds: c.recipeIds.filter((id) => id !== recipeId), updatedAt: now, syncStatus: 'pending' }
+  })
+  saveCollections(nextCollections)
+}
+
+function getCollectionRecipes(collectionId) {
+  const collection = getAllCollections().find((c) => c.id === collectionId)
+  if (!collection) return []
+  const recipesById = new Map(getRecipes().map((r) => [r.id, r]))
+  return collection.recipeIds.map((id) => recipesById.get(id)).filter(Boolean)
+}
+
+function getCollectionsContainingRecipe(recipeId) {
+  return getAllCollections()
+    .filter((c) => !c.deletedAt && c.recipeIds.includes(recipeId))
+    .map((c) => c.id)
+}
+
 function getFavoriteRecipeIdsFrom(collections) {
   return Array.from(new Set(
     collections
@@ -755,6 +840,60 @@ function saveMenus(menus) {
   wx.setStorageSync(MENUS_KEY, menus)
 }
 
+function createMenu(name, recipeIds) {
+  const now = new Date().toISOString()
+  const menu = {
+    id: generateId('menu'),
+    userId: 'local',
+    name: name || '新建菜单',
+    recipeIds: Array.isArray(recipeIds) ? recipeIds : [],
+    syncStatus: 'pending',
+    createdAt: now,
+    updatedAt: now,
+  }
+  saveMenus([menu, ...getMenus()])
+  return menu
+}
+
+function renameMenu(id, name) {
+  const now = new Date().toISOString()
+  const menus = getMenus()
+  saveMenus(menus.map((m) =>
+    m.id === id ? { ...m, name, updatedAt: now, syncStatus: 'pending' } : m,
+  ))
+}
+
+function deleteMenu(id) {
+  const menus = getMenus()
+  saveMenus(menus.filter((m) => m.id !== id))
+}
+
+function addRecipeToMenu(menuId, recipeId) {
+  const now = new Date().toISOString()
+  const menus = getMenus()
+  saveMenus(menus.map((m) => {
+    if (m.id !== menuId) return m
+    if (m.recipeIds.includes(recipeId)) return m
+    return { ...m, recipeIds: [...m.recipeIds, recipeId], updatedAt: now, syncStatus: 'pending' }
+  }))
+}
+
+function removeRecipeFromMenu(menuId, recipeId) {
+  const now = new Date().toISOString()
+  const menus = getMenus()
+  saveMenus(menus.map((m) => {
+    if (m.id !== menuId) return m
+    return { ...m, recipeIds: m.recipeIds.filter((id) => id !== recipeId), updatedAt: now, syncStatus: 'pending' }
+  }))
+}
+
+function getMenuRecipes(menuId) {
+  const menu = getMenus().find((m) => m.id === menuId)
+  if (!menu) return []
+  const recipesById = new Map(getRecipes().map((r) => [r.id, r]))
+  return menu.recipeIds.map((id) => recipesById.get(id)).filter(Boolean)
+}
+
 function getAllFridgeItems() {
   const stored = wx.getStorageSync(FRIDGE_ITEMS_KEY)
   return Array.isArray(stored) ? stored : []
@@ -896,6 +1035,8 @@ module.exports = {
   addShoppingItem,
   toggleShoppingItem,
   removeShoppingItem,
+  updateShoppingItemAmount,
+  renameShoppingList,
   clearCheckedShoppingItems,
   deleteShoppingList,
   getMealPlan,
@@ -909,6 +1050,13 @@ module.exports = {
   mealSlots,
   getAllCollections,
   getCollections,
+  createCollection,
+  renameCollection,
+  deleteCollection,
+  addRecipeToCollection,
+  removeRecipeFromCollection,
+  getCollectionRecipes,
+  getCollectionsContainingRecipe,
   saveCollections,
   getFavoriteRecipeIds,
   saveFavoriteRecipeIds,
@@ -923,6 +1071,12 @@ module.exports = {
   addCookingRecord,
   getMenus,
   saveMenus,
+  createMenu,
+  renameMenu,
+  deleteMenu,
+  addRecipeToMenu,
+  removeRecipeFromMenu,
+  getMenuRecipes,
   getAllFridgeItems,
   saveFridgeItems,
   getDataStats,

@@ -1,0 +1,175 @@
+<view class="page page-safe menu-page {{themeClass}}" style="padding-top: {{contentTopInset}}px;">
+  <view class="page-heading">
+    <view class="back-button" bindtap="back">
+      <image class="back-icon" src="/assets/lucide/arrow-left.svg" mode="aspectFit" />
+    </view>
+    <view class="heading-copy">
+      <view class="title">{{viewMode === 'detail' ? currentMenu.name : '我的菜单'}}</view>
+      <view class="subtitle">{{viewMode === 'detail' ? recipes.length + ' 道菜谱' : (menus.length > 0 ? menus.length + ' 个菜单' : '组合菜谱为菜单')}}</view>
+    </view>
+    <view wx:if="{{viewMode === 'list'}}" class="add-button" bindtap="showCreate">
+      <image class="add-icon" src="/assets/lucide/plus-white.svg" mode="aspectFit" />
+    </view>
+  </view>
+
+  <!-- Menus list view -->
+  <view wx:if="{{viewMode === 'list'}}">
+    <view wx:if="{{menus.length > 0}}" class="menu-list">
+      <view wx:for="{{menus}}" wx:key="id" class="menu-card card" data-id="{{item.id}}" bindtap="openMenu">
+        <view class="menu-cover" style="background: {{item.coverColor}};">
+          <image wx:if="{{item.coverImage}}" class="menu-cover-image" src="{{item.coverImage}}" mode="aspectFill" />
+          <view wx:else class="menu-cover-placeholder">
+            <image class="menu-cover-icon" src="{{item.categoryIcon}}" mode="aspectFit" />
+          </view>
+        </view>
+        <view class="menu-body">
+          <view class="menu-name">{{item.name}}</view>
+          <view class="menu-count">{{item.recipeCount}} 道菜谱</view>
+        </view>
+        <view class="menu-actions" catchtap="noop">
+          <view class="menu-action-btn" data-id="{{item.id}}" data-name="{{item.name}}" catchtap="startRename">
+            <image class="action-icon" src="/assets/lucide/pencil.svg" mode="aspectFit" />
+          </view>
+          <view class="menu-action-btn delete" data-id="{{item.id}}" catchtap="deleteMenu">
+            <image class="action-icon" src="/assets/lucide/trash-2.svg" mode="aspectFit" />
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="card empty">
+      <image class="empty-icon" src="/assets/lucide/utensils-crossed.svg" mode="aspectFit" />
+      <view class="empty-title">还没有菜单</view>
+      <view class="empty-text">创建菜单来组合多道菜谱</view>
+      <button class="primary-button empty-action" bindtap="showCreate">创建菜单</button>
+    </view>
+  </view>
+
+  <!-- Menu detail view -->
+  <view wx:if="{{viewMode === 'detail'}}">
+    <view wx:if="{{recipes.length > 0}}" class="recipe-list">
+      <view wx:for="{{recipes}}" wx:key="id" class="recipe-card card">
+        <view class="recipe-main" data-id="{{item.id}}" bindtap="openRecipe">
+          <view class="recipe-cover" style="background: {{item.coverColor}};">
+            <image wx:if="{{item.coverImage}}" class="recipe-cover-image" src="{{item.coverImage}}" mode="aspectFill" />
+            <view wx:else class="recipe-cover-placeholder">
+              <image class="recipe-cover-icon" src="{{item.categoryIcon}}" mode="aspectFit" />
+            </view>
+          </view>
+          <view class="recipe-body">
+            <view class="recipe-name">{{item.name}}</view>
+            <view class="tag-line">
+              <text class="mini-pill">{{item.difficultyName}}</text>
+              <text wx:for="{{item.displayTags}}" wx:for-item="tag" wx:key="*this" class="mini-pill">{{tag}}</text>
+            </view>
+            <view class="recipe-meta">
+              <image class="meta-icon" src="/assets/lucide/clock.svg" mode="aspectFit" />
+              <text>{{item.durationText}}</text>
+              <text>{{item.servings}} 人份</text>
+            </view>
+          </view>
+        </view>
+        <view class="remove-button" data-id="{{item.id}}" bindtap="removeRecipeFromMenu">
+          <image class="remove-icon" src="/assets/lucide/x.svg" mode="aspectFit" />
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="card empty">
+      <image class="empty-icon" src="/assets/lucide/utensils-crossed.svg" mode="aspectFit" />
+      <view class="empty-title">菜单是空的</view>
+      <view class="empty-text">添加菜谱到菜单中</view>
+    </view>
+
+    <view class="detail-actions">
+      <view class="detail-action-btn" bindtap="showAddRecipe">
+        <image class="detail-action-icon" src="/assets/lucide/plus.svg" mode="aspectFit" />
+        <text>添加菜谱</text>
+      </view>
+      <view class="detail-action-btn" bindtap="generateShopping">
+        <image class="detail-action-icon" src="/assets/lucide/shopping-cart.svg" mode="aspectFit" />
+        <text>生成购物清单</text>
+      </view>
+      <view class="detail-action-btn" bindtap="addToMealPlan">
+        <image class="detail-action-icon" src="/assets/lucide/calendar-range.svg" mode="aspectFit" />
+        <text>加入周餐计划</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Create popup -->
+  <view wx:if="{{showCreatePopup}}" class="edit-overlay" bindtap="hideCreate">
+    <view class="edit-popup" catchtap="noop">
+      <view class="edit-title">新建菜单</view>
+      <input
+        class="edit-input"
+        value="{{newMenuName}}"
+        bindinput="onNewNameInput"
+        placeholder="如：四菜一汤家宴"
+        placeholder-class="placeholder"
+        confirm-type="done"
+        bindconfirm="confirmCreate"
+        focus
+      />
+      <view class="edit-actions">
+        <view class="edit-cancel" bindtap="hideCreate">取消</view>
+        <view class="edit-confirm" bindtap="confirmCreate">创建</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Rename popup -->
+  <view wx:if="{{showRenamePopup}}" class="edit-overlay" bindtap="hideRename">
+    <view class="edit-popup" catchtap="noop">
+      <view class="edit-title">重命名菜单</view>
+      <input
+        class="edit-input"
+        value="{{renamingName}}"
+        bindinput="onRenamingNameInput"
+        placeholder="输入菜单名称"
+        placeholder-class="placeholder"
+        confirm-type="done"
+        bindconfirm="confirmRename"
+        focus
+      />
+      <view class="edit-actions">
+        <view class="edit-cancel" bindtap="hideRename">取消</view>
+        <view class="edit-confirm" bindtap="confirmRename">确定</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Add recipe popup -->
+  <view wx:if="{{showAddRecipePopup}}" class="edit-overlay" bindtap="hideAddRecipe">
+    <view class="recipe-picker" catchtap="noop">
+      <view class="picker-header">
+        <text class="picker-title">添加菜谱</text>
+        <view class="picker-close" bindtap="hideAddRecipe">
+          <image class="close-icon" src="/assets/lucide/x.svg" mode="aspectFit" />
+        </view>
+      </view>
+      <view class="picker-list">
+        <view
+          wx:for="{{addableRecipes}}"
+          wx:key="id"
+          class="picker-item"
+          data-id="{{item.id}}"
+          bindtap="addRecipe"
+        >
+          <view class="picker-item-cover" style="background: {{item.coverColor}};">
+            <image wx:if="{{item.coverImage}}" class="picker-item-image" src="{{item.coverImage}}" mode="aspectFill" />
+            <image wx:else class="picker-item-icon" src="{{item.categoryIcon}}" mode="aspectFit" />
+          </view>
+          <view class="picker-item-info">
+            <view class="picker-item-name">{{item.name}}</view>
+            <view class="picker-item-meta">{{item.difficultyName}} · {{item.duration}}分钟</view>
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{addableRecipes.length === 0}}" class="picker-empty">
+        <text>所有菜谱都已在菜单中</text>
+      </view>
+    </view>
+  </view>
+</view>
+<app-tabbar active="" />

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  Search, Plus, Dice5, Clock, ChefHat, Heart, Sparkles, Download,
+  Search, Plus, Clock, ChefHat, Heart, Sparkles, Download,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useCollectionStore } from '@/stores/collectionStore'
@@ -56,13 +56,6 @@ export function HomePage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link
-            to="/blind-box"
-            aria-label="菜谱盲盒"
-            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
-          >
-            <Dice5 size={20} />
-          </Link>
           <Link
             to="/recipe/import"
             aria-label="导入菜谱"
@@ -123,8 +116,8 @@ export function HomePage() {
         })}
       </div>
 
-      {/* Difficulty filters */}
-      <div className="flex gap-2">
+      {/* Difficulty & Tag filters (Horizontal sleek scroll) */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none items-center">
         {Object.entries(difficultyConfig).map(([value, config]) => (
           <button
             key={value}
@@ -138,6 +131,25 @@ export function HomePage() {
             {config.label}
           </button>
         ))}
+
+        <span className="shrink-0 text-[var(--color-border)]">|</span>
+
+        {/* Dynamic popular tags */}
+        {Array.from(new Set(recipes.flatMap((r) => r.tags || [])))
+          .slice(0, 8)
+          .map((tag) => (
+            <button
+              key={tag}
+              onClick={() => setInputValue(inputValue === tag ? '' : tag)}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+                inputValue === tag
+                  ? 'bg-amber-500 text-white shadow-xs'
+                  : 'border border-[var(--color-border)] bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+              }`}
+            >
+              #{tag}
+            </button>
+          ))}
       </div>
 
       {/* Recommendations */}
@@ -185,9 +197,9 @@ export function HomePage() {
           renderItem={(recipe) => <RecipeCard recipe={recipe} />}
         />
       ) : (
-        <div className="space-y-3">
-          {recipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          {recipes.map((recipe, index) => (
+            <RecipeCard key={recipe.id} recipe={recipe} index={index} />
           ))}
         </div>
       )}
@@ -195,15 +207,18 @@ export function HomePage() {
   )
 }
 
-function RecipeCard({ recipe }: { recipe: Recipe }) {
+function RecipeCard({ recipe, index = 0 }: { recipe: Recipe; index?: number }) {
   const CategoryIcon = categoryIcons[recipe.category]
   const diff = difficultyConfig[recipe.difficulty]
   const { collections, toggleRecipeInCollection } = useCollectionStore()
   const isFavorited = collections.some((c) => c.recipeIds.includes(recipe.id))
+  const [animating, setAnimating] = useState(false)
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    setAnimating(true)
+    setTimeout(() => setAnimating(false), 500)
     if (collections.length === 0) {
       const { addCollection } = useCollectionStore.getState()
       const col = await addCollection('我的收藏')
@@ -213,52 +228,62 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
     }
   }
 
+  const staggerClass = `stagger-${Math.min((index % 8) + 1, 8)}`
+
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]">
-      <Link to={`/recipe/${recipe.id}`} className="flex gap-4 p-4">
+    <div className={`group relative overflow-hidden rounded-3xl bg-[var(--color-bg-card)] border border-[var(--color-border)]/60 shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-[var(--color-primary)]/30 active:scale-[0.98] animate-card-in ${staggerClass}`}>
+      <Link to={`/recipe/${recipe.id}`} className="flex gap-3.5 p-3.5">
         {recipe.coverImage ? (
-          <img src={recipe.coverImage} alt={recipe.name} loading="lazy" className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+          <img
+            src={recipe.coverImage}
+            alt={recipe.name}
+            loading="lazy"
+            className="h-22 w-22 shrink-0 rounded-2xl object-cover shadow-2xs transition-transform duration-300 group-hover:scale-105"
+          />
         ) : (
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-bg-subtle)] to-[var(--color-bg)]">
-            <CategoryIcon size={28} className="text-[var(--color-text-muted)]" />
+          <div className="flex h-22 w-22 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/10 via-[var(--color-bg-subtle)] to-orange-500/10 shadow-2xs transition-transform duration-300 group-hover:scale-105">
+            <CategoryIcon size={32} className="text-amber-600/70 dark:text-amber-400/70" />
           </div>
         )}
         <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
           <div>
-            <h3 className="truncate text-base font-semibold text-[var(--color-text)] transition-colors duration-200 group-hover:text-[var(--color-primary)]">
+            <h3 className="truncate text-base font-bold text-[var(--color-text)] transition-colors duration-200 group-hover:text-[var(--color-primary)]">
               {recipe.name}
             </h3>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
-              <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${diff.color}`}>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${diff.color}`}>
                 {diff.label}
               </span>
               {recipe.tags.slice(0, 2).map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-[var(--color-bg-subtle)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text-secondary)]"
+                  className="rounded-full bg-[var(--color-bg-subtle)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-secondary)]"
                 >
-                  {tag}
+                  #{tag}
                 </span>
               ))}
             </div>
           </div>
-          <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
-            <span className="flex items-center gap-1">
-              <Clock size={12} />
+          <div className="flex items-center gap-2.5 text-xs text-[var(--color-text-muted)]">
+            <span className="flex items-center gap-1 font-medium">
+              <Clock size={12} className="text-amber-500" />
               {recipe.duration}分钟
             </span>
-            <span>{recipe.servings}人份</span>
+            <span>·</span>
+            <span className="font-medium">{recipe.servings}人份</span>
           </div>
         </div>
       </Link>
       <button
         onClick={handleToggleFavorite}
         aria-label={isFavorited ? '取消收藏' : '收藏'}
-        className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-bg)]/80 backdrop-blur-sm transition-all duration-200 hover:scale-110 active:scale-90"
+        className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-bg-card)]/80 backdrop-blur-md shadow-2xs transition-all duration-200 hover:scale-110 active:scale-90"
       >
         <Heart
           size={16}
-          className={isFavorited ? 'fill-red-500 text-red-500' : 'text-[var(--color-text-muted)]'}
+          className={`transition-colors ${animating ? 'animate-heart-bounce' : ''} ${
+            isFavorited ? 'fill-red-500 text-red-500' : 'text-[var(--color-text-muted)] hover:text-red-400'
+          }`}
         />
       </button>
     </div>

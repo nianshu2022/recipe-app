@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Download, Upload, Trash2, CheckCircle } from 'lucide-react'
-import { exportData, downloadBackup, importData } from '@/utils/backup'
+import { ArrowLeft, Download, Upload, Trash2, CheckCircle, BookOpen } from 'lucide-react'
+import { exportData, downloadBackup, importData, exportCookbookAsMarkdown, downloadCookbook } from '@/utils/backup'
 import { db } from '@/db'
 import { useUIStore } from '@/stores/uiStore'
 
@@ -12,6 +12,7 @@ export function DataManagementPage() {
   const [stats, setStats] = useState<{
     recipes: number
     collections: number
+    fridgeItems: number
     cookingRecords: number
   } | null>(null)
   const showConfirm = useUIStore((s) => s.showConfirm)
@@ -23,10 +24,12 @@ export function DataManagementPage() {
   async function loadStats() {
     const recipes = await db.getAllRecipes()
     const collections = await db.getAllCollections()
+    const fridgeItems = await db.getAllFridgeItems()
     const records = await db.getAllCookingRecords()
     setStats({
       recipes: recipes.length,
       collections: collections.length,
+      fridgeItems: fridgeItems.length,
       cookingRecords: records.length,
     })
   }
@@ -41,6 +44,16 @@ export function DataManagementPage() {
     }
   }
 
+  const handleExportMarkdownCookbook = async () => {
+    try {
+      const md = await exportCookbookAsMarkdown()
+      downloadCookbook(md)
+      setMessage({ type: 'success', text: '📖 Markdown 美食菜谱书已下载' })
+    } catch {
+      setMessage({ type: 'error', text: '菜谱书导出失败' })
+    }
+  }
+
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -50,10 +63,40 @@ export function DataManagementPage() {
 
     try {
       const text = await file.text()
-      const result = await importData(text)
-      setMessage({ type: result.success ? 'success' : 'error', text: result.message })
-      if (result.success) {
-        await loadStats()
+
+      // 如果是 Markdown 格式或 .md 文件
+      if (file.name.endsWith('.md') || (!text.trim().startsWith('{') && text.includes('#'))) {
+        const { parseRecipesFromMarkdown } = await import('@/utils/recipeImport')
+        const parsed = parseRecipesFromMarkdown(text)
+        if (parsed.length === 0) {
+          setMessage({ type: 'error', text: '未能从 Markdown 文件中解析出有效菜谱' })
+        } else {
+          for (const item of parsed) {
+            await db.putRecipe({
+              id: crypto.randomUUID(),
+              userId: 'local',
+              name: item.name,
+              category: item.category,
+              difficulty: item.difficulty,
+              duration: item.duration,
+              servings: item.servings,
+              tags: item.tags,
+              ingredients: item.ingredients,
+              steps: item.steps,
+              syncStatus: 'pending',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            })
+          }
+          await loadStats()
+          setMessage({ type: 'success', text: `🎉 成功从 Markdown 导入 ${parsed.length} 道菜谱！` })
+        }
+      } else {
+        const result = await importData(text)
+        setMessage({ type: result.success ? 'success' : 'error', text: result.message })
+        if (result.success) {
+          await loadStats()
+        }
       }
     } catch {
       setMessage({ type: 'error', text: '读取文件失败' })
@@ -95,18 +138,22 @@ export function DataManagementPage() {
 
       {/* Stats */}
       {stats && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="rounded-2xl bg-[var(--color-bg-card)] p-4 text-center shadow-xs">
-            <p className="text-2xl font-semibold text-[var(--color-text)]">{stats.recipes}</p>
-            <p className="text-xs text-[var(--color-text-muted)]">菜谱</p>
+            <p className="text-2xl font-bold text-[var(--color-text)]">{stats.recipes}</p>
+            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">菜谱库</p>
           </div>
           <div className="rounded-2xl bg-[var(--color-bg-card)] p-4 text-center shadow-xs">
-            <p className="text-2xl font-semibold text-[var(--color-text)]">{stats.collections}</p>
-            <p className="text-xs text-[var(--color-text-muted)]">收藏夹</p>
+            <p className="text-2xl font-bold text-[var(--color-text)]">{stats.collections}</p>
+            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">收藏夹</p>
           </div>
           <div className="rounded-2xl bg-[var(--color-bg-card)] p-4 text-center shadow-xs">
-            <p className="text-2xl font-semibold text-[var(--color-text)]">{stats.cookingRecords}</p>
-            <p className="text-xs text-[var(--color-text-muted)]">做菜记录</p>
+            <p className="text-2xl font-bold text-[var(--color-text)]">{stats.fridgeItems}</p>
+            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">冰箱食材</p>
+          </div>
+          <div className="rounded-2xl bg-[var(--color-bg-card)] p-4 text-center shadow-xs">
+            <p className="text-2xl font-bold text-[var(--color-text)]">{stats.cookingRecords}</p>
+            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">做菜记录</p>
           </div>
         </div>
       )}
@@ -123,10 +170,22 @@ export function DataManagementPage() {
           >
             <Download size={20} className="text-[var(--color-primary)]" />
             <div className="flex-1 text-left">
-              <p className="text-sm font-medium text-[var(--color-text)]">导出全部数据</p>
-              <p className="text-xs text-[var(--color-text-muted)]">下载 JSON 备份文件</p>
+              <p className="text-sm font-medium text-[var(--color-text)]">导出全量数据 (JSON)</p>
+              <p className="text-xs text-[var(--color-text-muted)]">备份所有菜谱、收藏夹、周餐与做菜记录</p>
             </div>
           </button>
+          <div className="border-t border-[var(--color-border-subtle)]">
+            <button
+              onClick={handleExportMarkdownCookbook}
+              className="flex w-full items-center gap-3 px-5 py-4 transition-colors hover:bg-[var(--color-bg-subtle)]"
+            >
+              <BookOpen size={20} className="text-amber-500" />
+              <div className="flex-1 text-left">
+                <p className="text-sm font-medium text-[var(--color-text)]">导出 Markdown 美食菜谱书</p>
+                <p className="text-xs text-[var(--color-text-muted)]">生成带目录与清单的电子书，支持 Obsidian/Notion</p>
+              </div>
+            </button>
+          </div>
           <div className="border-t border-[var(--color-border-subtle)]">
             <button
               onClick={() => fileInputRef.current?.click()}
@@ -136,15 +195,15 @@ export function DataManagementPage() {
               <Upload size={20} className="text-[var(--color-success)]" />
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium text-[var(--color-text)]">
-                  {importing ? '导入中...' : '导入数据'}
+                  {importing ? '导入中...' : '导入数据 (JSON / Markdown)'}
                 </p>
-                <p className="text-xs text-[var(--color-text-muted)]">从备份文件恢复数据</p>
+                <p className="text-xs text-[var(--color-text-muted)]">从 JSON 备份或 Markdown 菜谱书恢复导入</p>
               </div>
             </button>
             <input
               ref={fileInputRef}
               type="file"
-              accept=".json"
+              accept=".json,.md,text/markdown,text/plain"
               onChange={handleImport}
               className="hidden"
             />

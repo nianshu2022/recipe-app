@@ -184,17 +184,6 @@ export interface MealPlanTemplate {
   deletedAt?: string
 }
 
-export type SubscriptionPlan = 'free' | 'pro'
-
-export interface Subscription {
-  id: string
-  userId: string
-  plan: SubscriptionPlan
-  expiresAt: string | null
-  createdAt: string
-  updatedAt: string
-}
-
 export interface FamilyMember {
   id: string
   userId: string

@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import {
   ArrowLeft, ChevronLeft, ChevronRight, Check, Lightbulb, PartyPopper,
   ChefHat, Mic, MicOff, Maximize, Minimize, Play, Pause, RotateCcw,
@@ -19,12 +19,34 @@ export function CookingPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [completed, setCompleted] = useState(false)
   const [voiceEnabled, setVoiceEnabled] = useState(false)
+  const touchStartX = useRef<number | null>(null)
+  const touchStartY = useRef<number | null>(null)
 
   const timer = useTimer()
   const { isFullscreen, toggle: toggleFullscreen } = useFullscreen()
   useWakeLock()
 
   const { prepareForStep } = timer
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null || !recipe) return
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current
+    if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX < 0 && currentStep < recipe.steps.length - 1) {
+        setCurrentStep((s) => Math.min(s + 1, recipe.steps.length - 1))
+      } else if (deltaX > 0 && currentStep > 0) {
+        setCurrentStep((s) => Math.max(0, s - 1))
+      }
+    }
+    touchStartX.current = null
+    touchStartY.current = null
+  }
 
   const handleVoiceCommand = useCallback((transcript: string) => {
     if (!recipe) return
@@ -179,7 +201,11 @@ export function CookingPage() {
         </p>
       </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center px-8">
+      <div
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="flex flex-1 flex-col items-center justify-center px-8 select-none"
+      >
         <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--color-text)] text-2xl font-bold text-[var(--color-bg)] shadow-lg">
           {step.order}
         </div>

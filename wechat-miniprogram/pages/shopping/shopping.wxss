@@ -76,6 +76,24 @@
   height: 28rpx;
 }
 
+.rename-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 20rpx;
+  padding: 0 24rpx;
+}
+
+.rename-icon {
+  width: 24rpx;
+  height: 24rpx;
+}
+
+.rename-text {
+  color: #a8a08e;
+  font-size: 24rpx;
+}
+
 .add-row {
   display: flex;
   align-items: center;
@@ -256,6 +274,18 @@
   font-size: 25rpx;
 }
 
+.item-amount-wrap {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  border-radius: 12rpx;
+  background: #f9f8f6;
+}
+
+.item-amount-wrap:active {
+  background: #f0eeea;
+}
+
 .remove-button {
   display: flex;
   align-items: center;
@@ -312,4 +342,74 @@
   margin: 42rpx auto 0;
   padding: 0;
   line-height: 82rpx;
+}
+
+/* Edit amount popup */
+.edit-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.edit-popup {
+  width: 560rpx;
+  padding: 48rpx 40rpx 36rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  box-shadow: 0 24rpx 60rpx rgba(37, 34, 32, 0.18);
+}
+
+.edit-title {
+  margin-bottom: 28rpx;
+  color: #252220;
+  font-size: 32rpx;
+  font-weight: 800;
+  text-align: center;
+}
+
+.edit-input {
+  height: 88rpx;
+  padding: 0 24rpx;
+  border: 2rpx solid #e8e4de;
+  border-radius: 20rpx;
+  background: #faf9f7;
+  color: #252220;
+  font-size: 30rpx;
+  text-align: center;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 32rpx;
+}
+
+.edit-cancel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 82rpx;
+  border-radius: 20rpx;
+  background: #f5f3ef;
+  color: #6b6355;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.edit-confirm {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 82rpx;
+  border-radius: 20rpx;
+  background: #c9583a;
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 800;
 }

@@ -2,23 +2,19 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ChevronRight, Heart, ShoppingCart, ChefHat, Moon, Sun, Monitor, Database, LogOut, RefreshCw,
-  Settings, ArrowLeft, Crown, Sparkles, Users,
+  Settings, ArrowLeft, Users, Sparkles,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
-import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import { useFamilyStore } from '@/stores/familyStore'
 
 
 export function SettingsPage() {
   const { isLoggedIn, user, logout, syncNow } = useAuthStore()
   const { theme, setTheme } = useThemeStore()
-  const { getPlan } = useSubscriptionStore()
   const { group } = useFamilyStore()
   const [syncing, setSyncing] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
-
-  const currentPlan = getPlan()
 
   const handleSync = async () => {
     setSyncing(true)
@@ -69,36 +65,6 @@ export function SettingsPage() {
           <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
         )}
       </Link>
-
-      {/* Subscription */}
-      <div className="space-y-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
-          会员
-        </h2>
-        <div className="overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs">
-          <Link
-            to="/settings/pricing"
-            className="flex items-center justify-between px-5 py-3.5 transition-colors duration-150 hover:bg-[var(--color-bg-subtle)]"
-          >
-            <div className="flex items-center gap-3">
-              {currentPlan === 'pro' ? (
-                <Crown size={18} className="text-amber-500" />
-              ) : (
-                <Sparkles size={18} className="text-[var(--color-text-muted)]" />
-              )}
-              <div>
-                <span className="text-sm font-medium text-[var(--color-text)]">
-                  {currentPlan === 'pro' ? 'Pro 会员' : '升级会员'}
-                </span>
-                {currentPlan === 'pro' && (
-                  <p className="text-xs text-amber-500">已解锁所有高级功能</p>
-                )}
-              </div>
-            </div>
-            <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
-          </Link>
-        </div>
-      </div>
 
       {/* Family */}
       <div className="space-y-3">
@@ -159,6 +125,28 @@ export function SettingsPage() {
             <div className="flex items-center gap-3">
               <ChefHat size={18} className="text-[var(--color-text-muted)]" />
               <span className="text-sm font-medium text-[var(--color-text)]">烹饪历史</span>
+            </div>
+            <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
+          </Link>
+        </div>
+      </div>
+
+      {/* AI Expansion */}
+      <div className="space-y-3">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+          智能拓展
+        </h2>
+        <div className="overflow-hidden rounded-2xl bg-[var(--color-bg-card)] shadow-xs">
+          <Link
+            to="/settings/ai"
+            className="flex items-center justify-between px-5 py-3.5 transition-colors duration-150 hover:bg-[var(--color-bg-subtle)]"
+          >
+            <div className="flex items-center gap-3">
+              <Sparkles size={18} className="text-purple-500" />
+              <div>
+                <span className="text-sm font-medium text-[var(--color-text)]">AI 大模型配置</span>
+                <p className="text-xs text-[var(--color-text-muted)]">直连 DeepSeek / OpenAI 生成创意菜谱</p>
+              </div>
             </div>
             <ChevronRight size={16} className="text-[var(--color-text-muted)]" />
           </Link>

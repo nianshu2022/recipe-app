@@ -1,5 +1,5 @@
 import { db } from '@/db'
-import type { Recipe, Collection, Menu, MealPlan, ShoppingList, CookingRecord } from '@/types'
+import type { Recipe, Collection, Menu, MealPlan, ShoppingList, CookingRecord, FridgeItem, MealPlanTemplate } from '@/types'
 
 interface BackupData {
   version: 1
@@ -8,8 +8,10 @@ interface BackupData {
   collections: Collection[]
   menus: Menu[]
   mealPlans: MealPlan[]
+  mealPlanTemplates?: MealPlanTemplate[]
   shoppingLists: ShoppingList[]
   cookingRecords: CookingRecord[]
+  fridgeItems?: FridgeItem[]
 }
 
 export async function exportData(): Promise<string> {
@@ -20,8 +22,10 @@ export async function exportData(): Promise<string> {
     collections: await db.getAllCollections(),
     menus: await db.getAllMenus(),
     mealPlans: await db.getAllMealPlans(),
+    mealPlanTemplates: await db.getAllMealPlanTemplates(),
     shoppingLists: await db.getAllShoppingLists(),
     cookingRecords: await db.getAllCookingRecords(),
+    fridgeItems: await db.getAllFridgeItems(),
   }
   return JSON.stringify(data, null, 2)
 }
@@ -32,6 +36,91 @@ export function downloadBackup(json: string) {
   const a = document.createElement('a')
   a.href = url
   a.download = `知味备份_${new Date().toISOString().slice(0, 10)}.json`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+const CATEGORY_NAMES: Record<string, string> = {
+  'hot-dish': '热菜',
+  'cold-dish': '凉菜',
+  'soup': '汤羹',
+  'staple': '主食',
+  'dessert': '甜品',
+  'drink': '饮品',
+}
+
+const DIFFICULTY_NAMES: Record<string, string> = {
+  easy: '简单',
+  medium: '中等',
+  hard: '困难',
+}
+
+export async function exportCookbookAsMarkdown(): Promise<string> {
+  const recipes = await db.getAllRecipes()
+  if (recipes.length === 0) {
+    return '# 📖 知味 · 私人美食菜谱书\n\n暂无已保存的菜谱。'
+  }
+
+  const dateStr = new Date().toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+
+  const lines: string[] = [
+    `# 📖 知味 · 私人美食菜谱书`,
+    `> 导出日期：${dateStr} · 菜谱总数：${recipes.length} 道`,
+    ``,
+    `## 📑 目录`,
+    ...recipes.map((r, i) => `${i + 1}. [${r.name}](#${r.name.toLowerCase().replace(/\s+/g, '-')}) · *${CATEGORY_NAMES[r.category] || r.category}*`),
+    ``,
+    `---`,
+    ``,
+  ]
+
+  for (const r of recipes) {
+    lines.push(`## ${r.name}`)
+    lines.push(`- **分类**：${CATEGORY_NAMES[r.category] || r.category}`)
+    lines.push(`- **难度**：${DIFFICULTY_NAMES[r.difficulty] || r.difficulty}`)
+    lines.push(`- **耗时**：${r.duration} 分钟`)
+    lines.push(`- **分量**：${r.servings} 人份`)
+    if (r.tags && r.tags.length > 0) {
+      lines.push(`- **标签**：${r.tags.map((t: string) => `#${t}`).join(' ')}`)
+    }
+    if (r.description) {
+      lines.push(`\n> ${r.description}`)
+    }
+
+    lines.push(`\n### 🥦 食材清单`)
+    for (const ing of r.ingredients) {
+      const amountStr = ing.amount > 0 ? ` ${ing.amount}${ing.unit || ''}` : ''
+      lines.push(`- [ ] **${ing.name}**${amountStr}`)
+    }
+
+    lines.push(`\n### 🍳 烹饪步骤`)
+    for (const step of r.steps) {
+      const timerStr = step.timer ? ` ⏱️ *(${step.timer}分钟)*` : ''
+      lines.push(`${step.order}. ${step.description}${timerStr}`)
+      if (step.tip) {
+        lines.push(`   > 💡 小贴士：${step.tip}`)
+      }
+    }
+
+    lines.push(`\n---\n`)
+  }
+
+  lines.push(`\n*由「知味」私人美食管家自动生成*\n`)
+  return lines.join('\n')
+}
+
+export function downloadCookbook(markdown: string) {
+  const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `知味美食菜谱书_${new Date().toISOString().slice(0, 10)}.md`
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
@@ -95,6 +184,16 @@ export async function importData(json: string): Promise<{ success: boolean; mess
     for (const record of data.cookingRecords ?? []) {
       if (!isValidRecord(record) || !validateId(record)) continue
       await db.putCookingRecord(sanitizeRecord(record) as unknown as CookingRecord)
+      totalImported++
+    }
+    for (const template of data.mealPlanTemplates ?? []) {
+      if (!isValidRecord(template) || !validateId(template)) continue
+      await db.putMealPlanTemplate(sanitizeRecord(template) as unknown as MealPlanTemplate)
+      totalImported++
+    }
+    for (const item of data.fridgeItems ?? []) {
+      if (!isValidRecord(item) || !validateId(item)) continue
+      await db.putFridgeItem(sanitizeRecord(item) as unknown as FridgeItem)
       totalImported++
     }
 

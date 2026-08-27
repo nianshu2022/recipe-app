@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, ShoppingCart, Plus, Trash2, Check, X, ChevronDown, Eraser, ExternalLink, Pencil,
+  ArrowLeft, ShoppingCart, Plus, Trash2, Check, X, ChevronDown, Eraser, ExternalLink, Pencil, Share2,
 } from 'lucide-react'
 import { useShoppingStore } from '@/stores/shoppingStore'
 import { useUIStore } from '@/stores/uiStore'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { ShoppingShareModal } from '@/components/shopping/ShoppingShareModal'
 import type { ShoppingItem } from '@/types'
 
 export function ShoppingListPage() {
@@ -18,6 +19,7 @@ export function ShoppingListPage() {
   const showToast = useUIStore((s) => s.showToast)
 
   const [showAdd, setShowAdd] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null)
   const [newName, setNewName] = useState('')
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set())
@@ -140,6 +142,16 @@ export function ShoppingListPage() {
           </select>
         )}
         <div className="flex gap-2">
+          {list?.items && list.items.length > 0 && (
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="flex h-9 items-center gap-1 rounded-xl border border-amber-500/30 bg-amber-500/10 px-2.5 text-xs font-semibold text-amber-700 dark:text-amber-300 shadow-2xs transition-all hover:bg-amber-500/20 active:scale-95"
+              title="分享与导出清单"
+            >
+              <Share2 size={14} />
+              <span>导出</span>
+            </button>
+          )}
           {checkedCount > 0 && (
             <button
               onClick={() => clearChecked(list.id)}
@@ -291,6 +303,15 @@ export function ShoppingListPage() {
       >
         删除清单
       </button>
+
+      {/* Share & Export Modal */}
+      {list && (
+        <ShoppingShareModal
+          list={list}
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </div>
   )
 }

@@ -54,7 +54,7 @@ export function AiRecipePage() {
           servings,
         ))
       }
-    } catch (e) {
+    } catch {
       showToast('AI 生成失败，已使用默认模板')
       setGeneratedRecipe(generateFallbackRecipe(
         selected.map((i) => ({

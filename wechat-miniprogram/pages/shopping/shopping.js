@@ -5,8 +5,10 @@ const {
   getCurrentShoppingList,
   getShoppingLists,
   removeShoppingItem,
+  renameShoppingList,
   setCurrentShoppingList,
   toggleShoppingItem,
+  updateShoppingItemAmount,
 } = require('../../utils/storage')
 const { getNavMetrics } = require('../../utils/nav')
 
@@ -54,6 +56,11 @@ Page({
     statusBarHeight: 24,
     navBarHeight: 88,
     menuButtonReserve: 104,
+    editingItemId: '',
+    editingAmount: '',
+    showRename: false,
+    renamingListId: '',
+    renamingName: '',
   },
 
   onShow() {
@@ -69,10 +76,16 @@ Page({
     const items = currentList.items || []
     const checkedCount = items.filter((item) => item.checked).length
     const totalCount = items.length
+
+    const formatListLabel = (list, index) => {
+      const name = list.name || `清单 ${index + 1}`
+      return `${name}（${list.items.length}项）`
+    }
+
     this.setData({
       lists,
-      listOptions: lists.map((list, index) => `清单 ${index + 1}（${list.items.length}项）`),
-      currentListLabel: lists[currentListIndex] ? `清单 ${currentListIndex + 1}（${lists[currentListIndex].items.length}项）` : '',
+      listOptions: lists.map((list, index) => formatListLabel(list, index)),
+      currentListLabel: lists[currentListIndex] ? formatListLabel(lists[currentListIndex], currentListIndex) : '',
       currentListId,
       currentListIndex,
       groupedItems: groupItems(items, this.data.expandedCategories),
@@ -157,4 +170,55 @@ Page({
   goHome() {
     wx.reLaunch({ url: '/pages/home/home' })
   },
+
+  startEditAmount(event) {
+    const { id, amount } = event.currentTarget.dataset
+    this.setData({
+      editingItemId: id,
+      editingAmount: amount !== undefined && amount !== '' ? String(amount) : '',
+    })
+  },
+
+  onEditingAmountInput(event) {
+    this.setData({ editingAmount: event.detail.value })
+  },
+
+  confirmEditAmount() {
+    const { editingItemId, editingAmount } = this.data
+    if (!editingItemId) return
+    updateShoppingItemAmount(editingItemId, editingAmount)
+    this.setData({ editingItemId: '', editingAmount: '' })
+    this.loadItems()
+  },
+
+  cancelEditAmount() {
+    this.setData({ editingItemId: '', editingAmount: '' })
+  },
+
+  startRename() {
+    const list = this.data.lists.find((l) => l.id === this.data.currentListId)
+    this.setData({
+      showRename: true,
+      renamingListId: this.data.currentListId,
+      renamingName: list ? (list.name || '') : '',
+    })
+  },
+
+  onRenamingNameInput(event) {
+    this.setData({ renamingName: event.detail.value })
+  },
+
+  confirmRename() {
+    const { renamingListId, renamingName } = this.data
+    if (!renamingListId) return
+    renameShoppingList(renamingListId, renamingName.trim() || undefined)
+    this.setData({ showRename: false, renamingListId: '', renamingName: '' })
+    this.loadItems()
+  },
+
+  cancelRename() {
+    this.setData({ showRename: false, renamingListId: '', renamingName: '' })
+  },
+
+  noop() {},
 })

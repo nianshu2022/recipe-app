@@ -35,7 +35,7 @@ export function AiRecipePreview({ recipe, onSave, onDiscard }: AiRecipePreviewPr
       showToast('食谱已保存')
       onSave()
       navigate('/')
-    } catch (e) {
+    } catch {
       showToast('保存失败，请重试')
     } finally {
       setSaving(false)

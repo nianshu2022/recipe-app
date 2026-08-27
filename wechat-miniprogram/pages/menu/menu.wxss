@@ -1,4 +1,4 @@
-.collection-page {
+.menu-page {
   padding: 36rpx 44rpx 180rpx;
 }
 
@@ -61,20 +61,20 @@
   height: 34rpx;
 }
 
-/* Collection list */
-.collection-list {
+/* Menu list */
+.menu-list {
   display: flex;
   flex-direction: column;
   gap: 18rpx;
 }
 
-.collection-card {
+.menu-card {
   display: flex;
   align-items: center;
   padding: 16rpx;
 }
 
-.collection-cover {
+.menu-cover {
   position: relative;
   overflow: hidden;
   display: flex;
@@ -87,14 +87,14 @@
   color: #ffffff;
 }
 
-.collection-cover-image {
+.menu-cover-image {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
 
-.collection-cover-placeholder {
+.menu-cover-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -104,21 +104,21 @@
   background: rgba(255, 255, 255, 0.24);
 }
 
-.collection-cover-icon {
+.menu-cover-icon {
   width: 46rpx;
   height: 46rpx;
   opacity: 0.72;
   filter: brightness(0) invert(1);
 }
 
-.collection-body {
+.menu-body {
   flex: 1;
   min-width: 0;
   padding: 0 20rpx;
   text-align: left;
 }
 
-.collection-name {
+.menu-name {
   overflow: hidden;
   color: #252220;
   font-size: 31rpx;
@@ -127,18 +127,18 @@
   white-space: nowrap;
 }
 
-.collection-count {
+.menu-count {
   margin-top: 8rpx;
   color: #8a8270;
   font-size: 24rpx;
 }
 
-.collection-actions {
+.menu-actions {
   display: flex;
   gap: 12rpx;
 }
 
-.collection-action-btn {
+.menu-action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -148,7 +148,7 @@
   background: #f5f3ef;
 }
 
-.collection-action-btn.delete {
+.menu-action-btn.delete {
   background: #fff7f5;
 }
 
@@ -275,6 +275,33 @@
   height: 26rpx;
 }
 
+/* Detail actions */
+.detail-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 32rpx;
+}
+
+.detail-action-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  height: 120rpx;
+  border-radius: 22rpx;
+  background: #f9f8f6;
+  color: #524c40;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.detail-action-icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+
 /* Empty state */
 .empty-icon {
   width: 74rpx;
@@ -379,6 +406,117 @@
   color: #ffffff;
   font-size: 28rpx;
   font-weight: 800;
+}
+
+/* Recipe picker */
+.recipe-picker {
+  width: 100%;
+  max-height: 70vh;
+  padding: 36rpx 44rpx;
+  padding-bottom: calc(36rpx + env(safe-area-inset-bottom));
+  border-radius: 36rpx 36rpx 0 0;
+  background: #ffffff;
+  box-shadow: 0 -8rpx 40rpx rgba(37, 34, 32, 0.12);
+  align-self: flex-end;
+}
+
+.picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28rpx;
+}
+
+.picker-title {
+  color: #252220;
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.picker-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: #f5f3ef;
+}
+
+.close-icon {
+  width: 28rpx;
+  height: 28rpx;
+}
+
+.picker-list {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.picker-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f5f3ef;
+}
+
+.picker-item:last-child {
+  border-bottom: 0;
+}
+
+.picker-item-cover {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88rpx;
+  height: 88rpx;
+  flex: 0 0 88rpx;
+  border-radius: 16rpx;
+  color: #ffffff;
+}
+
+.picker-item-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.picker-item-icon {
+  width: 36rpx;
+  height: 36rpx;
+  opacity: 0.72;
+  filter: brightness(0) invert(1);
+}
+
+.picker-item-info {
+  flex: 1;
+  min-width: 0;
+  padding-left: 20rpx;
+}
+
+.picker-item-name {
+  overflow: hidden;
+  color: #252220;
+  font-size: 28rpx;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker-item-meta {
+  margin-top: 6rpx;
+  color: #a8a08e;
+  font-size: 22rpx;
+}
+
+.picker-empty {
+  padding: 48rpx 0;
+  color: #a8a08e;
+  font-size: 26rpx;
+  text-align: center;
 }
 
 .primary-button {

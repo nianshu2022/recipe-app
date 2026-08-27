@@ -7,7 +7,9 @@ function getStoredPreferences(): MealPreferences {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) return JSON.parse(raw)
-  } catch {}
+  } catch {
+    // Ignore error and return default preferences
+  }
   return {
     servings: 2,
     excludeCategories: [],

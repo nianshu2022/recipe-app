@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Trash2, AlertTriangle, Clock, X, Search, ChevronDown, Wand2, Pencil } from 'lucide-react'
+import { Plus, Trash2, AlertTriangle, Clock, X, Search, ChevronDown, Wand2, Pencil, Sparkles, Refrigerator } from 'lucide-react'
 import { useFridgeStore } from '@/stores/fridgeStore'
 import { useUIStore } from '@/stores/uiStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
+import { BatchFridgeModal } from '@/components/fridge/BatchFridgeModal'
 
 const CATEGORIES = [
   { id: '蔬菜', label: '蔬菜', color: 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400' },
@@ -11,7 +12,7 @@ const CATEGORIES = [
   { id: '海鲜', label: '海鲜', color: 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400' },
   { id: '蛋奶', label: '蛋奶', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400' },
   { id: '调料', label: '调料', color: 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400' },
-  { id: '主食', label: '主食', color: 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400' },
+  { id: '主食', label: '主食', color: 'bg-amber-100 text-amber-700 dark:amber-950/30 dark:text-amber-400' },
   { id: '豆制品', label: '豆制品', color: 'bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400' },
   { id: '干货', label: '干货', color: 'bg-stone-100 text-stone-700 dark:bg-stone-950/30 dark:text-stone-400' },
   { id: '其他', label: '其他', color: 'bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400' },
@@ -35,6 +36,7 @@ export function FridgePage() {
   const navigate = useNavigate()
 
   const [showAdd, setShowAdd] = useState(false)
+  const [showBatchAdd, setShowBatchAdd] = useState(false)
   const [editingItem, setEditingItem] = useState<FridgeItem | null>(null)
   const [filterCategory, setFilterCategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -102,11 +104,16 @@ export function FridgePage() {
     setUnit('个')
     setCategory('蔬菜')
     setExpiryDate('')
+    setShowAdd(false)
   }
 
   const handleDelete = async (id: string, itemName: string) => {
     await deleteItem(id)
     showToast(`已删除 ${itemName}`)
+  }
+
+  if (loading && items.length === 0) {
+    return <BrandLoading />
   }
 
   return (
@@ -122,6 +129,14 @@ export function FridgePage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => setShowBatchAdd(true)}
+            className="flex h-10 items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 text-amber-700 dark:text-amber-300 shadow-2xs transition-all hover:bg-amber-500/20 active:scale-95"
+            title="批量智能录入"
+          >
+            <Sparkles size={16} />
+            <span className="text-xs font-semibold">批量录入</span>
+          </button>
           {items.length > 0 && (
             <button
               onClick={() => navigate('/fridge/ai-recipe')}
@@ -215,22 +230,47 @@ export function FridgePage() {
           </div>
         </BrandLoading>
       ) : filteredItems.length === 0 ? (
-        <div className="rounded-2xl bg-[var(--color-bg-card)] p-8 text-center shadow-xs">
-          <p className="text-sm text-[var(--color-text-muted)]">
-            {items.length === 0 ? '冰箱空空如也，点击 + 添加食材' : '没有匹配的食材'}
+        <div className="flex flex-col items-center justify-center rounded-3xl bg-[var(--color-bg-card)] border border-[var(--color-border)]/60 p-8 text-center shadow-xs">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+            <Refrigerator size={32} />
+          </div>
+          <h3 className="text-base font-bold text-[var(--color-text)]">
+            {items.length === 0 ? '冰箱还是空空的' : '没有找到匹配食材'}
+          </h3>
+          <p className="mt-1 text-xs text-[var(--color-text-muted)] max-w-xs">
+            {items.length === 0 ? '录入食材后可获得临期预警，还能一键生成清冰箱菜谱' : '换个关键词或分类试试吧'}
           </p>
+          {items.length === 0 && (
+            <div className="mt-5 flex flex-wrap gap-2.5 justify-center">
+              <button
+                onClick={() => setShowBatchAdd(true)}
+                className="flex items-center gap-1.5 rounded-2xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-semibold text-white shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                <Sparkles size={14} />
+                批量智能录入
+              </button>
+              <button
+                onClick={() => setShowAdd(true)}
+                className="flex items-center gap-1.5 rounded-2xl bg-[var(--color-bg-subtle)] px-4 py-2.5 text-xs font-medium text-[var(--color-text-secondary)] border border-[var(--color-border)] transition-all duration-200 hover:bg-[var(--color-border-subtle)] active:scale-95"
+              >
+                <Plus size={14} />
+                手动添加
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
-          {filteredItems.map((item) => {
+          {filteredItems.map((item, index) => {
             const daysLeft = item.expiryDate ? getDaysUntilExpiry(item.expiryDate) : null
             const isExpired = daysLeft !== null && daysLeft < 0
             const isExpiringSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 3
+            const staggerClass = `stagger-${Math.min((index % 8) + 1, 8)}`
 
             return (
               <div
                 key={item.id}
-                className={`flex items-center justify-between rounded-2xl bg-[var(--color-bg-card)] p-4 shadow-xs ${
+                className={`flex items-center justify-between rounded-2xl bg-[var(--color-bg-card)] p-4 shadow-xs transition-all duration-300 hover:shadow-md active:scale-[0.99] animate-card-in ${staggerClass} ${
                   isExpired ? 'ring-2 ring-red-200 dark:ring-red-800' : ''
                 } ${isExpiringSoon ? 'ring-2 ring-amber-200 dark:ring-amber-800' : ''}`}
               >
@@ -364,6 +404,12 @@ export function FridgePage() {
           </div>
         </div>
       )}
+
+      {/* Batch Ingestion Modal */}
+      <BatchFridgeModal
+        isOpen={showBatchAdd}
+        onClose={() => setShowBatchAdd(false)}
+      />
     </div>
   )
 }

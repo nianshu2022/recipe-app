@@ -27,3 +27,7 @@ dist-ssr
 
 # Android signing key
 android/app/release-key.jks
+
+# Tool caches
+.mimocode
+.agents

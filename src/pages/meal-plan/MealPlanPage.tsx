@@ -7,10 +7,9 @@ import { useMealPlanStore, type MealSlot } from '@/stores/mealPlanStore'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useShoppingStore } from '@/stores/shoppingStore'
 import { useTemplateStore } from '@/stores/templateStore'
-import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import { usePreferencesStore } from '@/stores/preferencesStore'
 import { useFridgeStore } from '@/stores/fridgeStore'
-import { generateMealPlan } from '@/utils/mealGenerator'
+import { generateMealPlan, type PlanStrategy } from '@/utils/mealGenerator'
 import { calculateWeeklyNutrition } from '@/utils/nutrition'
 import { calculateSmartShopping, type SmartShoppingResult } from '@/utils/smartShopping'
 import { useUIStore } from '@/stores/uiStore'
@@ -31,10 +30,10 @@ export function MealPlanPage() {
   const { recipes } = useRecipeStore()
   const { generateFromRecipes } = useShoppingStore()
   const { templates, loadTemplates, saveTemplate, deleteTemplate, getTemplateDays } = useTemplateStore()
-  const { isPro } = useSubscriptionStore()
   const { preferences } = usePreferencesStore()
   const { items: fridgeItems } = useFridgeStore()
   const navigate = useNavigate()
+  const showToast = useUIStore((s) => s.showToast)
 
   const [selecting, setSelecting] = useState<{ day: number; slot: MealSlot } | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -43,6 +42,7 @@ export function MealPlanPage() {
   const [showTemplateMenu, setShowTemplateMenu] = useState(false)
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [showPreferences, setShowPreferences] = useState(false)
+  const [smartStrategy, setSmartStrategy] = useState<PlanStrategy>('balanced')
   const [showSmartShopping, setShowSmartShopping] = useState(false)
   const [smartResult, setSmartResult] = useState<SmartShoppingResult | null>(null)
   const [templateName, setTemplateName] = useState('')
@@ -84,18 +84,6 @@ export function MealPlanPage() {
 
   const handleConfirm = async () => {
     if (!selecting || selectedIds.size === 0) return
-
-    // Free users can only have 1 plan with meals
-    if (!isPro()) {
-      const hasMeals = currentPlan?.days.some((day) =>
-        slots.some((slot) => (day[slot]?.length ?? 0) > 0)
-      )
-      if (hasMeals) {
-        navigate('/settings/pricing')
-        return
-      }
-    }
-
     await setMeals(selecting.day, selecting.slot, Array.from(selectedIds))
     setSelecting(null)
   }
@@ -131,12 +119,18 @@ export function MealPlanPage() {
 
   const handleAutoGenerate = async () => {
     if (!currentPlan || recipes.length === 0) return
-    const days = generateMealPlan(recipes, preferences)
+    const days = generateMealPlan(recipes, preferences, {
+      strategy: smartStrategy,
+      fridgeItems,
+      maxDuration: preferences.maxDuration,
+    })
     const updatedPlan = { ...currentPlan, days, updatedAt: new Date().toISOString() }
     const { db } = await import('@/db')
     await db.putMealPlan(updatedPlan)
     loadCurrentWeek()
     setShowPreferences(false)
+    const strategyNames = { balanced: '营养均衡', quick: '工作日快手', fridge: '清空冰箱优先' }
+    showToast(`✨ 已基于「${strategyNames[smartStrategy]}」策略为您排出一周餐单`, 'success')
   }
 
   const handleSmartShopping = () => {
@@ -205,10 +199,11 @@ export function MealPlanPage() {
         <div className="flex gap-2">
           <button
             onClick={() => setShowPreferences(true)}
-            className="flex h-10 items-center gap-1 rounded-xl bg-[var(--color-bg-card)] px-3 text-[var(--color-text-muted)] shadow-xs transition-all duration-200 hover:bg-purple-50 hover:text-purple-600 active:scale-95"
-            title="智能排菜"
+            className="flex h-10 items-center gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 text-purple-700 dark:text-purple-300 font-semibold shadow-2xs transition-all hover:bg-purple-500/20 active:scale-95"
+            title="一键智能排餐"
           >
             <Wand2 size={16} />
+            <span className="text-xs">智能排餐</span>
           </button>
           {hasMeals && fridgeItems.length > 0 && (
             <button
@@ -302,10 +297,11 @@ export function MealPlanPage() {
             const isToday = date.getTime() === today.getTime()
             const dayPlan = currentPlan?.days[dayIndex]
 
+            const staggerClass = `stagger-${Math.min(dayIndex + 1, 8)}`
             return (
               <div
                 key={dayIndex}
-                className={`rounded-2xl bg-[var(--color-bg-card)] p-4 shadow-xs transition-all duration-200 ${
+                className={`rounded-2xl bg-[var(--color-bg-card)] p-4 shadow-xs transition-all duration-200 animate-card-in ${staggerClass} ${
                   isToday ? 'ring-2 ring-[var(--color-primary)]/20' : ''
                 }`}
               >
@@ -564,35 +560,82 @@ export function MealPlanPage() {
 
       {/* Auto-generate preferences dialog */}
       {showPreferences && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowPreferences(false)}>
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-xs" onClick={() => setShowPreferences(false)}>
           <div
-            className="mx-4 w-full max-w-sm rounded-2xl bg-[var(--color-bg-card)] p-6 shadow-xl"
+            className="mx-4 w-full max-w-sm rounded-3xl bg-[var(--color-bg-card)] p-6 shadow-2xl border border-[var(--color-border)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-4 flex items-center gap-2">
-              <Wand2 size={20} className="text-purple-500" />
-              <h3 className="text-lg font-semibold text-[var(--color-text)]">智能排菜</h3>
+            <div className="mb-2 flex items-center gap-2">
+              <Wand2 size={20} className="text-amber-500" />
+              <h3 className="text-lg font-bold text-[var(--color-text)]">智能一键排餐</h3>
             </div>
-            <p className="mb-4 text-sm text-[var(--color-text-muted)]">
-              根据你的偏好自动生成一周菜单
+            <p className="mb-4 text-xs text-[var(--color-text-muted)]">
+              AI 将根据你的偏好与策略，智能规划周一至周日三餐
             </p>
 
             <div className="space-y-4">
+              {/* Strategy Cards */}
+              <div>
+                <label className="mb-2 block text-xs font-semibold text-[var(--color-text)]">
+                  选择排餐策略
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => setSmartStrategy('balanced')}
+                    className={`flex flex-col items-center justify-center rounded-2xl p-2.5 text-center transition-all ${
+                      smartStrategy === 'balanced'
+                        ? 'bg-amber-500/10 border-2 border-amber-500 text-amber-700 dark:text-amber-300 shadow-xs'
+                        : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
+                    }`}
+                  >
+                    <span className="text-lg mb-0.5">🥗</span>
+                    <span className="text-xs font-bold">营养均衡</span>
+                    <span className="text-[10px] opacity-75 mt-0.5 scale-90">荤素搭配</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSmartStrategy('quick')}
+                    className={`flex flex-col items-center justify-center rounded-2xl p-2.5 text-center transition-all ${
+                      smartStrategy === 'quick'
+                        ? 'bg-amber-500/10 border-2 border-amber-500 text-amber-700 dark:text-amber-300 shadow-xs'
+                        : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
+                    }`}
+                  >
+                    <span className="text-lg mb-0.5">⚡</span>
+                    <span className="text-xs font-bold">工作日快手</span>
+                    <span className="text-[10px] opacity-75 mt-0.5 scale-90">≤25分钟</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSmartStrategy('fridge')}
+                    className={`flex flex-col items-center justify-center rounded-2xl p-2.5 text-center transition-all ${
+                      smartStrategy === 'fridge'
+                        ? 'bg-amber-500/10 border-2 border-amber-500 text-amber-700 dark:text-amber-300 shadow-xs'
+                        : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
+                    }`}
+                  >
+                    <span className="text-lg mb-0.5">🧊</span>
+                    <span className="text-xs font-bold">清空冰箱</span>
+                    <span className="text-[10px] opacity-75 mt-0.5 scale-90">消耗库存</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Servings */}
               <div>
-                <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">用餐人数</label>
-                <div className="flex gap-2">
+                <label className="mb-1.5 block text-xs font-semibold text-[var(--color-text)]">用餐人数</label>
+                <div className="flex gap-1.5">
                   {[1, 2, 3, 4, 5, 6].map((n) => (
                     <button
                       key={n}
                       onClick={() => usePreferencesStore.getState().updateServings(n)}
-                      className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
+                      className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${
                         preferences.servings === n
-                          ? 'bg-[var(--color-primary)] text-white'
-                          : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)]'
+                          ? 'bg-[var(--color-primary)] text-white shadow-xs'
+                          : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
                       }`}
                     >
-                      {n}
+                      {n}人
                     </button>
                   ))}
                 </div>
@@ -600,16 +643,16 @@ export function MealPlanPage() {
 
               {/* Max difficulty */}
               <div>
-                <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">最大难度</label>
+                <label className="mb-1.5 block text-xs font-semibold text-[var(--color-text)]">允许最大难度</label>
                 <div className="flex gap-2">
                   {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
                     <button
                       key={d}
                       onClick={() => usePreferencesStore.getState().setMaxDifficulty(d)}
-                      className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
+                      className={`flex-1 rounded-xl py-2 text-xs font-semibold transition-all ${
                         preferences.maxDifficulty === d
-                          ? 'bg-[var(--color-primary)] text-white'
-                          : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)]'
+                          ? 'bg-[var(--color-primary)] text-white shadow-xs'
+                          : 'bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
                       }`}
                     >
                       {d === 'easy' ? '简单' : d === 'medium' ? '中等' : '困难'}

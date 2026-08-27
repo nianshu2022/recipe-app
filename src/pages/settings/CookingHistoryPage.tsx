@@ -19,22 +19,6 @@ export function CookingHistoryPage() {
   const [loading, setLoading] = useState(true)
   const [monthlyStats, setMonthlyStats] = useState<MonthlyStats[]>([])
 
-  useEffect(() => {
-    loadRecords()
-  }, [])
-
-  const loadRecords = async () => {
-    try {
-      const allRecords = await db.getAllCookingRecords()
-      setRecords(allRecords)
-      calculateStats(allRecords)
-    } catch (e) {
-      console.error('Failed to load cooking records:', e)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const calculateStats = (allRecords: CookingRecord[]) => {
     const monthMap = new Map<string, Map<string, number>>()
 
@@ -69,6 +53,23 @@ export function CookingHistoryPage() {
     stats.sort((a, b) => b.month.localeCompare(a.month))
     setMonthlyStats(stats)
   }
+
+  const loadRecords = async () => {
+    try {
+      const allRecords = await db.getAllCookingRecords()
+      setRecords(allRecords)
+      calculateStats(allRecords)
+    } catch (e) {
+      console.error('Failed to load cooking records:', e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadRecords()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="space-y-6">

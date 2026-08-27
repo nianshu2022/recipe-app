@@ -37,6 +37,10 @@ Page({
     wx.reLaunch({ url: '/pages/collection/collection' })
   },
 
+  openMenu() {
+    wx.navigateTo({ url: '/pages/menu/menu' })
+  },
+
   openShopping() {
     wx.navigateTo({ url: '/pages/shopping/shopping' })
   },

@@ -62,8 +62,18 @@ export function useTimer() {
   const startAlarm = useCallback(() => {
     setState((s) => ({ ...s, alarmActive: true }))
     playBeepPattern()
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate([400, 200, 400])
+      } catch { /* ignore */ }
+    }
     alarmRef.current = setInterval(() => {
       playBeepPattern()
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try {
+          navigator.vibrate([400, 200, 400])
+        } catch { /* ignore */ }
+      }
     }, 1500)
   }, [playBeepPattern])
 

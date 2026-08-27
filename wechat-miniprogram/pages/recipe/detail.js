@@ -4,6 +4,9 @@ const {
   getRecipe,
   isRecipeFavorited,
   toggleFavoriteRecipe,
+  getCollections,
+  addRecipeToCollection,
+  getCollectionsContainingRecipe,
 } = require('../../utils/storage')
 const { formatDuration, formatDifficulty } = require('../../utils/format')
 const { getNavMetrics } = require('../../utils/nav')
@@ -62,6 +65,9 @@ Page({
     navBarHeight: 88,
     menuButtonReserve: 104,
     themeClass: 'theme-light',
+    showCollectionPicker: false,
+    collections: [],
+    collectionStatus: {},
   },
 
   onLoad(options) {
@@ -152,6 +158,36 @@ Page({
     wx.showToast({ title: isFavorited ? '已收藏' : '已取消收藏', icon: 'none' })
   },
 
+  showCollectionPicker() {
+    const collections = getCollections()
+    const collectionStatus = {}
+    if (this.data.id) {
+      const containedIds = getCollectionsContainingRecipe(this.data.id)
+      containedIds.forEach((id) => { collectionStatus[id] = true })
+    }
+    this.setData({ showCollectionPicker: true, collections, collectionStatus })
+  },
+
+  hideCollectionPicker() {
+    this.setData({ showCollectionPicker: false })
+  },
+
+  toggleCollection(event) {
+    const id = event.currentTarget.dataset.id
+    if (!id || !this.data.id) return
+    const contained = this.data.collectionStatus[id]
+    if (contained) {
+      const { removeRecipeFromCollection } = require('../../utils/storage')
+      removeRecipeFromCollection(id, this.data.id)
+      this.setData({ [`collectionStatus.${id}`]: false })
+      wx.showToast({ title: '已移出收藏夹', icon: 'none' })
+    } else {
+      addRecipeToCollection(id, this.data.id)
+      this.setData({ [`collectionStatus.${id}`]: true })
+      wx.showToast({ title: '已添加到收藏夹', icon: 'none' })
+    }
+  },
+
   removeRecipe() {
     wx.showModal({
       title: '删除菜谱',
@@ -165,4 +201,6 @@ Page({
       },
     })
   },
+
+  noop() {},
 })

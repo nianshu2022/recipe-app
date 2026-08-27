@@ -1,14 +1,14 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import {
-  ArrowLeft, Clock, Users, ChefHat, Play, Minus, Plus, Lightbulb, Heart, ShoppingCart, Share2, Pencil, Trash2,
+  ArrowLeft, Clock, Users, ChefHat, Play, Minus, Plus, Lightbulb, Heart, ShoppingCart, Share2, Pencil, Trash2, Sparkles, MoreVertical,
 } from 'lucide-react'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { useCollectionStore } from '@/stores/collectionStore'
 import { useShoppingStore } from '@/stores/shoppingStore'
 import { useUIStore } from '@/stores/uiStore'
 import { BrandLoading } from '@/components/ui/BrandLoading'
-import { exportRecipeAsImage, shareRecipe, copyRecipeLink } from '@/utils/share'
+import { ShareCardModal } from '@/components/recipe/ShareCardModal'
 import { estimateNutrition, getCalorieLevel, getMacroPercentages } from '@/utils/nutrition'
 import { scaleIngredients, formatAmount } from '@/utils/scaling'
 import { difficultyConfig, categoryIcons } from '@/constants/categories'
@@ -24,44 +24,17 @@ export function RecipeDetailPage() {
   const showToast = useUIStore((s) => s.showToast)
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [servings, setServings] = useState(2)
-
-  const isFavorited = recipe
-    ? collections.some((c) => c.recipeIds.includes(recipe.id))
-    : false
-
-  const handleToggleFavorite = async () => {
-    if (!recipe) return
-    if (collections.length === 0) {
-      const { addCollection } = useCollectionStore.getState()
-      const col = await addCollection('我的收藏')
-      await toggleRecipeInCollection(col.id, recipe.id)
-    } else {
-      await toggleRecipeInCollection(collections[0].id, recipe.id)
-    }
-  }
-
-  const handleDelete = async () => {
-    if (!recipe) return
-    await showConfirm({
-      title: '确认删除',
-      message: `确定要删除「${recipe.name}」吗？此操作无法撤销。`,
-      confirmText: '删除',
-      variant: 'danger',
-      onConfirm: async () => {
-        await deleteRecipe(recipe.id)
-        navigate('/', { replace: true })
-        showToast('菜谱已删除', 'info')
-      },
-    })
-  }
+  const [shareModalOpen, setShareModalOpen] = useState(false)
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false)
+  const [heartAnimating, setHeartAnimating] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadCollections()
   }, [loadCollections])
 
-  const [loading, setLoading] = useState(true)
-
   useEffect(() => {
+    if (!id) return
     const found = recipes.find((r) => r.id === id)
     if (found) {
       setRecipe(found)
@@ -105,44 +78,117 @@ export function RecipeDetailPage() {
 
   const scaledIngredients = scaleIngredients(recipe.ingredients, recipe.servings, servings)
 
+  const isFavorited = recipe
+    ? collections.some((c) => c.recipeIds.includes(recipe.id))
+    : false
+
+  const handleToggleFavorite = async () => {
+    if (!recipe) return
+    if (collections.length === 0) {
+      const { addCollection } = useCollectionStore.getState()
+      const col = await addCollection('我的收藏')
+      await toggleRecipeInCollection(col.id, recipe.id)
+    } else {
+      await toggleRecipeInCollection(collections[0].id, recipe.id)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!recipe) return
+    await showConfirm({
+      title: '删除菜谱',
+      message: `确定要删除「${recipe.name}」吗？删除后无法恢复。`,
+      confirmText: '删除',
+      cancelText: '取消',
+      variant: 'danger',
+      onConfirm: async () => {
+        await deleteRecipe(recipe.id)
+        showToast('菜谱已删除')
+        navigate('/', { replace: true })
+      },
+    })
+  }
+
+  const onToggleFavorite = async () => {
+    setHeartAnimating(true)
+    setTimeout(() => setHeartAnimating(false), 500)
+    await handleToggleFavorite()
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" onClick={() => moreMenuOpen && setMoreMenuOpen(false)}>
       {/* Header - sticky */}
-      <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-center gap-3 bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
+      <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-center gap-2.5 bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
         <button
           onClick={() => navigate(-1)}
           aria-label="返回"
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-95"
         >
           <ArrowLeft size={18} className="text-[var(--color-text-secondary)]" />
         </button>
-        <h1 className="flex-1 truncate font-display text-lg font-semibold tracking-tight text-[var(--color-text)]">
+        <h1 className="flex-1 truncate font-display text-lg font-bold tracking-tight text-[var(--color-text)]">
           {recipe.name}
         </h1>
-        <button
-          onClick={() => navigate(`/recipe/${id}/edit`)}
-          aria-label="编辑菜谱"
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-90"
-        >
-          <Pencil size={18} className="text-[var(--color-text-secondary)]" />
-        </button>
-        <button
-          onClick={handleDelete}
-          aria-label="删除菜谱"
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-90"
-        >
-          <Trash2 size={18} className="text-red-500" />
-        </button>
-        <button
-          onClick={handleToggleFavorite}
-          aria-label={isFavorited ? '取消收藏' : '收藏'}
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-90"
-        >
-          <Heart
-            size={18}
-            className={isFavorited ? 'fill-red-500 text-red-500' : 'text-[var(--color-text-muted)]'}
-          />
-        </button>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={() => setShareModalOpen(true)}
+            aria-label="分享海报"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-90"
+          >
+            <Share2 size={18} className="text-[var(--color-text-secondary)]" />
+          </button>
+          <button
+            onClick={onToggleFavorite}
+            aria-label={isFavorited ? '取消收藏' : '收藏'}
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-90"
+          >
+            <Heart
+              size={18}
+              className={`transition-colors ${heartAnimating ? 'animate-heart-bounce' : ''} ${
+                isFavorited ? 'fill-red-500 text-red-500' : 'text-[var(--color-text-secondary)]'
+              }`}
+            />
+          </button>
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setMoreMenuOpen(!moreMenuOpen)
+              }}
+              aria-label="更多操作"
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-bg-card)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-90"
+            >
+              <MoreVertical size={18} className="text-[var(--color-text-secondary)]" />
+            </button>
+            {moreMenuOpen && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="absolute right-0 top-11 z-50 min-w-[130px] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-1.5 shadow-lg animate-in fade-in zoom-in-95"
+              >
+                <button
+                  onClick={() => {
+                    setMoreMenuOpen(false)
+                    navigate(`/recipe/${id}/edit`)
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]"
+                >
+                  <Pencil size={15} className="text-[var(--color-text-muted)]" />
+                  编辑菜谱
+                </button>
+                <button
+                  onClick={() => {
+                    setMoreMenuOpen(false)
+                    handleDelete()
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                >
+                  <Trash2 size={15} />
+                  删除菜谱
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Cover image */}
@@ -313,26 +359,21 @@ export function RecipeDetailPage() {
         </button>
         <div className="flex gap-3">
           <button
-            onClick={async () => {
-              const shared = await shareRecipe(recipe)
-              if (!shared) {
-                await copyRecipeLink(recipe)
-                showToast('链接已复制')
-              }
-            }}
-            className="flex flex-1 items-center justify-center gap-2.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] py-4 text-sm font-medium text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-[0.98]"
+            onClick={() => setShareModalOpen(true)}
+            className="flex flex-1 items-center justify-center gap-2.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 py-4 text-sm font-semibold text-amber-700 dark:text-amber-300 shadow-xs transition-all duration-200 hover:bg-amber-500/20 active:scale-[0.98]"
           >
-            <Share2 size={18} />
-            分享
-          </button>
-          <button
-            onClick={() => exportRecipeAsImage(recipe)}
-            className="flex flex-1 items-center justify-center gap-2.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] py-4 text-sm font-medium text-[var(--color-text-secondary)] shadow-xs transition-all duration-200 hover:shadow-sm active:scale-[0.98]"
-          >
-            保存图片
+            <Sparkles size={18} />
+            生成海报
           </button>
         </div>
       </div>
+
+      {/* Share Card Modal */}
+      <ShareCardModal
+        recipe={recipe}
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+      />
     </div>
   )
 }

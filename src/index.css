@@ -246,19 +246,52 @@
   animation: glow-pulse 2.5s ease-in-out infinite;
 }
 
-/* Page transition */
-@keyframes page-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* Page transition - smooth iOS-like slide & fade */
+@keyframes page-enter-smooth {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.992);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.page-enter {
-  animation: page-in 0.25s var(--ease-out) both;
+.page-enter-smooth {
+  animation: page-enter-smooth 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
 }
+
+/* Card staggered entrance */
+@keyframes card-fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-in {
+  animation: card-fade-in-up 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.stagger-1 { animation-delay: 40ms; }
+.stagger-2 { animation-delay: 80ms; }
+.stagger-3 { animation-delay: 120ms; }
+.stagger-4 { animation-delay: 160ms; }
+.stagger-5 { animation-delay: 200ms; }
+.stagger-6 { animation-delay: 240ms; }
+.stagger-7 { animation-delay: 280ms; }
+.stagger-8 { animation-delay: 320ms; }
 
 /* Toast slide-in */
 @keyframes slide-in-from-top-2 {
-  from { opacity: 0; transform: translateY(-8px); }
+  from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -268,6 +301,18 @@
 
 .slide-in-from-top-2 {
   animation-name: slide-in-from-top-2;
-  animation-duration: 0.2s;
+  animation-duration: 0.22s;
   animation-timing-function: var(--ease-out);
+}
+
+/* Heart bounce on favorite */
+@keyframes heart-bounce {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.35) rotate(-6deg); }
+  65% { transform: scale(0.88) rotate(4deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+.animate-heart-bounce {
+  animation: heart-bounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }

@@ -83,55 +83,62 @@ export function CollectionPage() {
           action={{ label: '去逛逛', to: '/' }}
         />
       ) : (
-        <div className="space-y-3">
-          {favoritedRecipes.map((recipe) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          {favoritedRecipes.map((recipe, index) => {
             const CategoryIcon = categoryIcons[recipe.category]
             const diff = difficultyConfig[recipe.difficulty]
+            const staggerClass = `stagger-${Math.min((index % 8) + 1, 8)}`
             return (
               <div
                 key={recipe.id}
-                className="group flex items-center gap-3 overflow-hidden rounded-2xl bg-[var(--color-bg-card)] p-4 shadow-xs transition-all duration-300 hover:shadow-md"
+                className={`group relative overflow-hidden rounded-3xl bg-[var(--color-bg-card)] border border-[var(--color-border)]/60 p-3.5 shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-[var(--color-primary)]/30 active:scale-[0.98] animate-card-in ${staggerClass}`}
               >
                 <Link
                   to={`/recipe/${recipe.id}`}
-                  className="flex min-w-0 flex-1 items-center gap-4"
+                  className="flex items-center gap-3.5"
                 >
                   {recipe.coverImage ? (
-                    <img src={recipe.coverImage} alt={recipe.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+                    <img
+                      src={recipe.coverImage}
+                      alt={recipe.name}
+                      loading="lazy"
+                      className="h-22 w-22 shrink-0 rounded-2xl object-cover shadow-2xs transition-transform duration-300 group-hover:scale-105"
+                    />
                   ) : (
-                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-bg-subtle)] to-[var(--color-bg)]">
-                      <CategoryIcon size={28} className="text-[var(--color-text-muted)]" />
+                    <div className="flex h-22 w-22 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/10 via-[var(--color-bg-subtle)] to-orange-500/10 shadow-2xs transition-transform duration-300 group-hover:scale-105">
+                      <CategoryIcon size={32} className="text-amber-600/70 dark:text-amber-400/70" />
                     </div>
                   )}
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-base font-semibold text-[var(--color-text)]">
+                  <div className="min-w-0 flex-1 py-0.5">
+                    <h3 className="truncate text-base font-bold text-[var(--color-text)] transition-colors duration-200 group-hover:text-[var(--color-primary)]">
                       {recipe.name}
                     </h3>
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${diff.color}`}>
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${diff.color}`}>
                         {diff.label}
                       </span>
                       {recipe.tags.slice(0, 2).map((tag) => (
-                        <span key={tag} className="rounded-full bg-[var(--color-bg-subtle)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text-secondary)]">
-                          {tag}
+                        <span key={tag} className="rounded-full bg-[var(--color-bg-subtle)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-secondary)]">
+                          #{tag}
                         </span>
                       ))}
                     </div>
-                    <div className="mt-1.5 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} />
+                    <div className="mt-2 flex items-center gap-2.5 text-xs text-[var(--color-text-muted)]">
+                      <span className="flex items-center gap-1 font-medium">
+                        <Clock size={12} className="text-amber-500" />
                         {recipe.duration}分钟
                       </span>
-                      <span>{recipe.servings}人份</span>
+                      <span>·</span>
+                      <span className="font-medium">{recipe.servings}人份</span>
                     </div>
                   </div>
                 </Link>
                 <button
                   onClick={() => handleRemoveFavorite(recipe)}
                   aria-label="取消收藏"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-red-500 opacity-0 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-950/20 group-hover:opacity-100 active:scale-90"
+                  className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-bg-card)]/80 backdrop-blur-md shadow-2xs text-red-500 transition-all duration-200 hover:scale-110 active:scale-90"
                 >
-                  <Heart size={18} className="fill-current" />
+                  <Heart size={16} className="fill-current" />
                 </button>
               </div>
             )

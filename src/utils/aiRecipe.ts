@@ -62,30 +62,76 @@ export async function generateRecipeWithAI(
   try {
     const prompt = buildPrompt(request)
 
-    const response = await fetch(`${WORKER_API}/api/ai/generate-recipe`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt }),
-    })
+    // 优先检查用户是否在设置中配置了自定义 AI Key (方案 A)
+    const { useAiSettingsStore } = await import('@/stores/aiSettingsStore')
+    const aiConfig = useAiSettingsStore.getState()
 
-    if (!response.ok) {
-      console.error('AI generation failed:', response.statusText)
-      return null
+    let jsonContent = ''
+
+    if (aiConfig.enabled && aiConfig.apiKey && aiConfig.baseUrl) {
+      const normalizedBaseUrl = aiConfig.baseUrl.replace(/\/+$/, '')
+      const endpoint = normalizedBaseUrl.endsWith('/chat/completions')
+        ? normalizedBaseUrl
+        : `${normalizedBaseUrl}/chat/completions`
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${aiConfig.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: aiConfig.model || 'deepseek-chat',
+          messages: [
+            {
+              role: 'system',
+              content: '你是一位精通家常菜与营养学的中餐大厨，请只输出纯 JSON 数据，严禁包含任何前缀、后缀或 Markdown 代码块标记。',
+            },
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          temperature: 0.7,
+        }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        jsonContent = data?.choices?.[0]?.message?.content || ''
+      }
     }
 
-    const data = await response.json()
-    const recipeData: AiRecipeResponse = JSON.parse(data.content)
+    // 若未配置自定义 Key 或请求失败，尝试通过 Worker 服务
+    if (!jsonContent) {
+      const response = await fetch(`${WORKER_API}/api/ai/generate-recipe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        jsonContent = data.content
+      }
+    }
+
+    if (!jsonContent) return null
+
+    // 清洗 JSON 中的 markdown 标记（如 ```json ... ```）
+    const cleanJson = jsonContent.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim()
+    const recipeData: AiRecipeResponse = JSON.parse(cleanJson)
 
     const recipe: Recipe = {
       id: `ai-${Date.now()}`,
       userId: 'local',
-      name: recipeData.name,
-      category: recipeData.category,
+      name: recipeData.name || 'AI 创意家常菜',
+      category: recipeData.category || 'hot-dish',
       tags: ['AI生成', recipeData.category === 'hot-dish' ? '热菜' : recipeData.category === 'cold-dish' ? '凉菜' : '汤类'],
-      difficulty: recipeData.difficulty,
-      duration: recipeData.duration,
+      difficulty: recipeData.difficulty || 'easy',
+      duration: recipeData.duration || 25,
       servings: request.servings,
-      ingredients: recipeData.ingredients.map((ing, i) => ({
+      ingredients: (recipeData.ingredients || []).map((ing, i) => ({
         id: `ing-${i}`,
         name: ing.name,
         amount: ing.amount,
@@ -93,8 +139,8 @@ export async function generateRecipeWithAI(
         type: 'main' as const,
         scalable: true,
       })),
-      steps: recipeData.steps.map((step) => ({
-        order: step.order,
+      steps: (recipeData.steps || []).map((step, idx) => ({
+        order: step.order || idx + 1,
         description: step.description,
       })),
       nutrition: undefined,

@@ -21,6 +21,10 @@
       <image class="picker-icon" src="/assets/lucide/chevron-right.svg" mode="aspectFit" />
     </view>
   </picker>
+  <view wx:if="{{currentListId}}" class="rename-row" bindtap="startRename">
+    <image class="rename-icon" src="/assets/lucide/pencil.svg" mode="aspectFit" />
+    <text class="rename-text">重命名清单</text>
+  </view>
 
   <view wx:if="{{showAdd}}" class="add-row">
     <input
@@ -67,7 +71,9 @@
             <text class="item-name">{{food.name}}</text>
             <text wx:if="{{food.sourceRecipeName}}" class="item-source">{{food.sourceRecipeName}}</text>
           </view>
-          <text class="item-amount">{{food.amountText}}</text>
+          <view class="item-amount-wrap" data-id="{{food.id}}" data-amount="{{food.amount}}" bindtap="startEditAmount">
+            <text class="item-amount">{{food.amountText || '点击设置'}}</text>
+          </view>
           <view class="remove-button" data-id="{{food.id}}" bindtap="removeItem">
             <image class="remove-icon" src="/assets/lucide/trash-2.svg" mode="aspectFit" />
           </view>
@@ -83,6 +89,49 @@
     <view class="empty-title">清单是空的</view>
     <view class="empty-text">从菜谱生成一份购物清单吧</view>
     <button class="primary-button empty-action" bindtap="goHome">去选菜谱</button>
+  </view>
+
+  <!-- Edit amount popup -->
+  <view wx:if="{{editingItemId}}" class="edit-overlay" bindtap="cancelEditAmount">
+    <view class="edit-popup" catchtap="noop">
+      <view class="edit-title">设置数量</view>
+      <input
+        class="edit-input"
+        type="digit"
+        value="{{editingAmount}}"
+        bindinput="onEditingAmountInput"
+        placeholder="如 300、1.5"
+        placeholder-class="placeholder"
+        confirm-type="done"
+        bindconfirm="confirmEditAmount"
+        focus
+      />
+      <view class="edit-actions">
+        <view class="edit-cancel" bindtap="cancelEditAmount">取消</view>
+        <view class="edit-confirm" bindtap="confirmEditAmount">确定</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Rename popup -->
+  <view wx:if="{{showRename}}" class="edit-overlay" bindtap="cancelRename">
+    <view class="edit-popup" catchtap="noop">
+      <view class="edit-title">重命名清单</view>
+      <input
+        class="edit-input"
+        value="{{renamingName}}"
+        bindinput="onRenamingNameInput"
+        placeholder="输入清单名称"
+        placeholder-class="placeholder"
+        confirm-type="done"
+        bindconfirm="confirmRename"
+        focus
+      />
+      <view class="edit-actions">
+        <view class="edit-cancel" bindtap="cancelRename">取消</view>
+        <view class="edit-confirm" bindtap="confirmRename">确定</view>
+      </view>
+    </view>
   </view>
 </view>
 <app-tabbar active="" />

@@ -5,8 +5,14 @@
       <view class="hero-subtitle">{{filteredRecipes.length > 0 ? filteredRecipes.length + ' 道拿手菜' : '记录你的拿手好菜'}}</view>
     </view>
     <view class="hero-actions">
-      <view class="round-button dice-button" bindtap="openBlindBox">
+      <view wx:if="{{!selectMode}}" class="round-button dice-button" bindtap="openBlindBox">
         <image class="round-icon" src="/assets/lucide/dice-5.svg" mode="aspectFit" />
+      </view>
+      <view wx:if="{{!selectMode && filteredRecipes.length > 0}}" class="round-button select-button" bindtap="enterSelectMode">
+        <image class="round-icon" src="/assets/lucide/list-checks.svg" mode="aspectFit" />
+      </view>
+      <view wx:if="{{selectMode}}" class="round-button cancel-button" bindtap="exitSelectMode">
+        <image class="round-icon" src="/assets/lucide/x.svg" mode="aspectFit" />
       </view>
       <view class="round-button add-button" bindtap="createRecipe">
         <image class="round-icon" src="/assets/lucide/plus-white.svg" mode="aspectFit" />
@@ -60,13 +66,16 @@
     <view
       wx:for="{{filteredRecipes}}"
       wx:key="id"
-      class="recipe-card card"
+      class="recipe-card card {{selectMode ? 'in-select' : ''}}"
       data-id="{{item.id}}"
-      bindtap="openRecipe"
+      bindtap="{{selectMode ? 'toggleSelectRecipe' : 'openRecipe'}}"
     >
       <view class="recipe-cover" style="background: {{item.coverColor}};">
         <image wx:if="{{item.coverImage}}" class="recipe-cover-image" src="{{item.coverImage}}" mode="aspectFill" />
         <image wx:else class="recipe-cover-icon" src="{{item.categoryIcon}}" mode="aspectFit" />
+        <view wx:if="{{selectMode}}" class="select-check {{selectedIds[item.id] ? 'is-selected' : ''}}">
+          <image wx:if="{{selectedIds[item.id]}}" class="select-check-icon" src="/assets/lucide/check-white.svg" mode="aspectFit" />
+        </view>
       </view>
       <view class="favorite-button" data-id="{{item.id}}" catchtap="toggleFavorite">
         <image class="favorite-icon" src="{{item.isFavorited ? '/assets/lucide/heart-active.svg' : '/assets/lucide/heart.svg'}}" mode="aspectFit" />
@@ -95,6 +104,16 @@
     <view class="empty-title">还没有菜谱</view>
     <view class="empty-text">快来创建你的第一道拿手菜吧</view>
     <button class="empty-button" bindtap="createRecipe">创建菜谱</button>
+  </view>
+
+  <view wx:if="{{selectMode && selectedCount > 0}}" class="select-bar">
+    <view class="select-bar-info">
+      <text class="select-bar-count">已选 {{selectedCount}} 道菜</text>
+    </view>
+    <view class="select-bar-action" bindtap="confirmGenerateShopping">
+      <image class="select-bar-icon" src="/assets/lucide/shopping-cart-white.svg" mode="aspectFit" />
+      <text>生成购物清单</text>
+    </view>
   </view>
 </view>
 <app-tabbar active="home" />

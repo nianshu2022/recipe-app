@@ -18,7 +18,6 @@ const CollectionPage = lazy(() => import('@/pages/collection/CollectionPage').th
 const ShoppingListPage = lazy(() => import('@/pages/shopping/ShoppingListPage').then(m => ({ default: m.ShoppingListPage })))
 const LoginPage = lazy(() => import('@/pages/settings/LoginPage').then(m => ({ default: m.LoginPage })))
 const DataManagementPage = lazy(() => import('@/pages/settings/DataManagementPage').then(m => ({ default: m.DataManagementPage })))
-const PricingPage = lazy(() => import('@/pages/settings/PricingPage').then(m => ({ default: m.PricingPage })))
 const FamilyPage = lazy(() => import('@/pages/settings/FamilyPage').then(m => ({ default: m.FamilyPage })))
 const FridgePage = lazy(() => import('@/pages/fridge/FridgePage').then(m => ({ default: m.FridgePage })))
 const CookingHistoryPage = lazy(() => import('@/pages/settings/CookingHistoryPage').then(m => ({ default: m.CookingHistoryPage })))
@@ -26,6 +25,7 @@ const BlindBoxPage = lazy(() => import('@/pages/blind-box/BlindBoxPage').then(m 
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })))
 const ImportRecipePage = lazy(() => import('@/pages/recipe/ImportRecipePage').then(m => ({ default: m.ImportRecipePage })))
 const AiRecipePage = lazy(() => import('@/pages/fridge/AiRecipePage').then(m => ({ default: m.AiRecipePage })))
+const AiSettingsPage = lazy(() => import('@/pages/settings/AiSettingsPage').then(m => ({ default: m.AiSettingsPage })))
 
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
@@ -47,34 +47,32 @@ function AnimatedRoutes() {
   const location = useLocation()
 
   return (
-    <div key={location.pathname} className="page-enter">
-      <Routes location={location}>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<PageSuspense><HomePage /></PageSuspense>} />
-          <Route path="/recipe/:id" element={<PageSuspense><RecipeDetailPage /></PageSuspense>} />
-          <Route path="/recipe/new" element={<PageSuspense><RecipeFormPage /></PageSuspense>} />
-          <Route path="/recipe/import" element={<PageSuspense><ImportRecipePage /></PageSuspense>} />
-          <Route path="/recipe/:id/edit" element={<PageSuspense><RecipeFormPage /></PageSuspense>} />
+    <Routes location={location}>
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<PageSuspense><HomePage /></PageSuspense>} />
+        <Route path="/recipe/:id" element={<PageSuspense><RecipeDetailPage /></PageSuspense>} />
+        <Route path="/recipe/new" element={<PageSuspense><RecipeFormPage /></PageSuspense>} />
+        <Route path="/recipe/import" element={<PageSuspense><ImportRecipePage /></PageSuspense>} />
+        <Route path="/recipe/:id/edit" element={<PageSuspense><RecipeFormPage /></PageSuspense>} />
 
-          <Route path="/meal-plan" element={<PageSuspense><MealPlanPage /></PageSuspense>} />
-          <Route path="/settings" element={<PageSuspense><SettingsPage /></PageSuspense>} />
-          <Route path="/login" element={<PageSuspense><LoginPage /></PageSuspense>} />
-          <Route path="/settings/data" element={<PageSuspense><DataManagementPage /></PageSuspense>} />
-          <Route path="/settings/pricing" element={<PageSuspense><PricingPage /></PageSuspense>} />
-          <Route path="/settings/family" element={<PageSuspense><FamilyPage /></PageSuspense>} />
-          <Route path="/settings/history" element={<PageSuspense><CookingHistoryPage /></PageSuspense>} />
-          <Route path="/collection" element={<PageSuspense><CollectionPage /></PageSuspense>} />
-          <Route path="/shopping" element={<PageSuspense><ShoppingListPage /></PageSuspense>} />
-          <Route path="/fridge" element={<PageSuspense><FridgePage /></PageSuspense>} />
-          <Route path="/fridge/ai-recipe" element={<PageSuspense><AiRecipePage /></PageSuspense>} />
-          <Route path="/blind-box" element={<PageSuspense><BlindBoxPage /></PageSuspense>} />
-          <Route path="/privacy" element={<PageSuspense><PrivacyPage /></PageSuspense>} />
+        <Route path="/meal-plan" element={<PageSuspense><MealPlanPage /></PageSuspense>} />
+        <Route path="/settings" element={<PageSuspense><SettingsPage /></PageSuspense>} />
+        <Route path="/settings/ai" element={<PageSuspense><AiSettingsPage /></PageSuspense>} />
+        <Route path="/login" element={<PageSuspense><LoginPage /></PageSuspense>} />
+        <Route path="/settings/data" element={<PageSuspense><DataManagementPage /></PageSuspense>} />
+        <Route path="/settings/family" element={<PageSuspense><FamilyPage /></PageSuspense>} />
+        <Route path="/settings/history" element={<PageSuspense><CookingHistoryPage /></PageSuspense>} />
+        <Route path="/collection" element={<PageSuspense><CollectionPage /></PageSuspense>} />
+        <Route path="/shopping" element={<PageSuspense><ShoppingListPage /></PageSuspense>} />
+        <Route path="/fridge" element={<PageSuspense><FridgePage /></PageSuspense>} />
+        <Route path="/fridge/ai-recipe" element={<PageSuspense><AiRecipePage /></PageSuspense>} />
+        <Route path="/blind-box" element={<PageSuspense><BlindBoxPage /></PageSuspense>} />
+        <Route path="/privacy" element={<PageSuspense><PrivacyPage /></PageSuspense>} />
 
-          <Route path="*" element={<PageSuspense><NotFoundPage /></PageSuspense>} />
-        </Route>
-        <Route path="/cooking/:id" element={<PageSuspense><CookingPage /></PageSuspense>} />
-      </Routes>
-    </div>
+        <Route path="*" element={<PageSuspense><NotFoundPage /></PageSuspense>} />
+      </Route>
+      <Route path="/cooking/:id" element={<PageSuspense><CookingPage /></PageSuspense>} />
+    </Routes>
   )
 }
 
