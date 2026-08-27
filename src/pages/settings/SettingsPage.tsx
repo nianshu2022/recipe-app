@@ -30,7 +30,7 @@ export function SettingsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="sticky top-0 z-40 -mx-5 -mt-6 bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
+      <div className="ios-blur-header sticky top-0 z-40 -mx-5 -mt-6 px-5 py-3">
         <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--color-text)]">
           小窝
         </h1>
@@ -39,7 +39,7 @@ export function SettingsPage() {
       {/* Profile card */}
       <Link
         to={isLoggedIn ? '#' : '/login'}
-        className="flex items-center gap-4 rounded-2xl bg-[var(--color-bg-card)] p-5 shadow-xs transition-colors hover:bg-[var(--color-bg-subtle)]"
+        className="ios-card-spring flex items-center gap-4 rounded-2xl bg-[var(--color-bg-card)] p-5 shadow-xs transition-colors hover:bg-[var(--color-bg-subtle)]"
       >
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-bg-subtle)] to-[var(--color-bg)]">
           <ChefHat size={24} className="text-[var(--color-text-muted)]" />
@@ -192,7 +192,7 @@ export function SettingsPage() {
       {/* Settings Panel */}
       {showSettings && (
         <div className="fixed inset-0 z-50 bg-[var(--color-bg)]">
-          <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-center gap-3 bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
+          <div className="ios-blur-header sticky top-0 z-40 -mx-5 -mt-6 flex items-center gap-3 px-5 py-3">
             <button
               onClick={() => setShowSettings(false)}
               aria-label="返回"

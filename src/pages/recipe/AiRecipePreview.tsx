@@ -45,7 +45,7 @@ export function AiRecipePreview({ recipe, onSave, onDiscard }: AiRecipePreviewPr
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-center gap-3 bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
+      <div className="ios-blur-header sticky top-0 z-40 -mx-5 -mt-6 flex items-center gap-3 px-5 py-3">
         <button
           onClick={onDiscard}
           className="flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]"

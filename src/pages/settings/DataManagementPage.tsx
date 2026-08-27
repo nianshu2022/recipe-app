@@ -123,7 +123,7 @@ export function DataManagementPage() {
 
   return (
     <div className="space-y-8">
-      <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-center gap-3 bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
+      <div className="ios-blur-header sticky top-0 z-40 -mx-5 -mt-6 flex items-center gap-3 px-5 py-3">
         <Link
           to="/settings"
           replace

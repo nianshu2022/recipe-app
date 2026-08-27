@@ -119,7 +119,7 @@ export function FridgePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-end justify-between bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
+      <div className="ios-blur-header sticky top-0 z-40 -mx-5 -mt-6 flex items-end justify-between px-5 py-3">
         <div>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--color-text)]">
             冰箱

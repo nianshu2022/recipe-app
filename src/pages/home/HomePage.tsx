@@ -46,7 +46,7 @@ export function HomePage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="sticky top-0 z-40 -mx-5 -mt-6 flex items-end justify-between bg-[var(--color-bg)]/95 px-5 py-3 backdrop-blur-sm">
+      <div className="ios-blur-header sticky top-0 z-40 -mx-5 -mt-6 flex items-end justify-between px-5 py-3">
         <div>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--color-text)]">
             寻味
@@ -231,7 +231,7 @@ function RecipeCard({ recipe, index = 0 }: { recipe: Recipe; index?: number }) {
   const staggerClass = `stagger-${Math.min((index % 8) + 1, 8)}`
 
   return (
-    <div className={`group relative overflow-hidden rounded-3xl bg-[var(--color-bg-card)] border border-[var(--color-border)]/60 shadow-xs transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-[var(--color-primary)]/30 active:scale-[0.98] animate-card-in ${staggerClass}`}>
+    <div className={`group relative overflow-hidden rounded-3xl bg-[var(--color-bg-card)] border border-[var(--color-border)]/60 shadow-xs ios-card-spring hover:shadow-md hover:-translate-y-0.5 hover:border-[var(--color-primary)]/30 animate-card-in ${staggerClass}`}>
       <Link to={`/recipe/${recipe.id}`} className="flex gap-3.5 p-3.5">
         {recipe.coverImage ? (
           <img

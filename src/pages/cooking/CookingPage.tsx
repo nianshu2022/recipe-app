@@ -264,7 +264,7 @@ export function CookingPage() {
         )}
       </div>
 
-      <div className="border-t border-[var(--color-border)]/60 bg-[var(--color-bg-card)]/80 px-5 py-4 backdrop-blur-xl">
+      <div className="ios-blur-nav px-5 py-4">
         <div className="flex items-center justify-between">
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}

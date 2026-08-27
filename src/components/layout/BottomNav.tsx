@@ -50,16 +50,18 @@ export function BottomNav() {
     if (navRef.current) {
       if (modalOpen) {
         navRef.current.style.backdropFilter = 'none'
+        navRef.current.style.setProperty('-webkit-backdrop-filter', 'none')
         navRef.current.style.backgroundColor = 'var(--color-bg-card)'
       } else {
         navRef.current.style.backdropFilter = ''
+        navRef.current.style.removeProperty('-webkit-backdrop-filter')
         navRef.current.style.backgroundColor = ''
       }
     }
   }, [modalOpen])
 
   return (
-    <nav ref={navRef} className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)]/60 bg-[var(--color-bg-card)]/80 backdrop-blur-xl transition-colors duration-300">
+    <nav ref={navRef} className="ios-blur-nav fixed bottom-0 left-0 right-0 z-50 transition-colors duration-300">
       <div className="relative mx-auto flex max-w-2xl items-center justify-around px-2 py-2">
         {leftItems.map((item) => (
           <NavItem key={item.to} {...item} />

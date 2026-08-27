@@ -3,8 +3,10 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { initStatusBar } from './utils/statusbar'
+import { initGlobalHaptics } from './utils/haptics'
 
 initStatusBar()
+initGlobalHaptics()
 
 // 检查 Service Worker 更新
 if ('serviceWorker' in navigator) {
